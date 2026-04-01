@@ -438,9 +438,12 @@ function renderPanel(dayKey) {
 
     if (exHist.length > 0) {
       html += `<div class="history-block"><div class="hist-title">последние тренировки</div>`;
-      exHist.slice(-3).reverse().forEach(h => {
+      exHist.slice().reverse().forEach(h => {
         const setsStr = h.sets.map((s,i) => `${i+1}:${fmtSet(s,ex.unit)}`).join(" ");
-        html += `<div class="hist-entry"><span class="hist-date">${h.date}</span>  ${setsStr}</div>`;
+        html += `<div class="hist-entry" style="display:flex;justify-content:space-between;align-items:center;gap:8px;">
+          <div><span class="hist-date">${h.date}</span>  ${setsStr}</div>
+          <button onclick="delHistEntry('${dayKey}','${ex.id}','${h.date}')" style="background:transparent;border:none;cursor:pointer;color:var(--text3);font-size:14px;padding:0 2px;flex-shrink:0;" title="Удалить">×</button>
+        </div>`;
       });
       html += `</div>`;
     } else {
@@ -506,7 +509,20 @@ function calcPR(hist, unit) {
   return max > 0 ? max + " " + unit : null;
 }
 
-async function saveDay() {
+async function delHistEntry(dayKey, exId, date) {
+  if (!localData[dayKey + "_hist"]) return;
+  const hist = localData[dayKey + "_hist"][exId];
+  if (!hist) return;
+  const idx = hist.findIndex(h => h.date === date);
+  if (idx < 0) return;
+  hist.splice(idx, 1);
+  saveLocal();
+  await gsSet("hist_" + dayKey, localData[dayKey + "_hist"]);
+  showToast("запись удалена");
+  renderPanel(dayKey);
+}
+
+
   const dayKey = currentDay;
   if (!localData[dayKey]) localData[dayKey] = { date: todayStr(), exercises: {} };
   const date = localData[dayKey].date || todayStr();
