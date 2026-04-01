@@ -7,35 +7,22 @@
 <link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500&family=IBM+Plex+Sans:wght@400;500&display=swap" rel="stylesheet">
 <style>
 :root {
-  --bg: #0f0f0f;
-  --bg2: #1a1a1a;
-  --bg3: #222;
-  --border: #2e2e2e;
-  --border2: #3a3a3a;
-  --text: #e8e8e8;
-  --text2: #888;
-  --text3: #555;
-  --accent: #c8f060;
-  --accent2: #a0d040;
-  --danger: #ff5a5a;
-  --success: #4caf7d;
-  --r: 10px;
-  --rs: 6px;
+  --bg: #0f0f0f; --bg2: #1a1a1a; --bg3: #222;
+  --border: #2e2e2e; --border2: #3a3a3a;
+  --text: #e8e8e8; --text2: #888; --text3: #555;
+  --accent: #c8f060; --accent2: #a0d040;
+  --danger: #ff5a5a; --success: #4caf7d;
+  --up: #4caf7d; --down: #ff5a5a; --same: #888;
+  --r: 10px; --rs: 6px;
 }
 * { box-sizing: border-box; margin: 0; padding: 0; }
 html { background: var(--bg); color: var(--text); font-family: 'IBM Plex Sans', sans-serif; }
 body { max-width: 480px; margin: 0 auto; padding-bottom: 80px; }
 
 header {
-  padding: 18px 16px 12px;
-  border-bottom: 1px solid var(--border);
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  position: sticky;
-  top: 0;
-  background: var(--bg);
-  z-index: 10;
+  padding: 18px 16px 12px; border-bottom: 1px solid var(--border);
+  display: flex; align-items: center; justify-content: space-between;
+  position: sticky; top: 0; background: var(--bg); z-index: 10;
 }
 .logo { font-family: 'IBM Plex Mono', monospace; font-size: 15px; font-weight: 500; color: var(--accent); }
 .sync-wrap { display: flex; align-items: center; gap: 5px; }
@@ -46,25 +33,13 @@ header {
 @keyframes blink { 0%,100%{opacity:1} 50%{opacity:.3} }
 .sync-txt { font-size: 11px; color: var(--text3); font-family: 'IBM Plex Mono', monospace; }
 
-.tabs {
-  display: flex;
-  padding: 12px 16px 0;
-  border-bottom: 1px solid var(--border);
-  overflow-x: auto;
-}
+.tabs { display: flex; padding: 12px 16px 0; border-bottom: 1px solid var(--border); overflow-x: auto; }
 .tabs::-webkit-scrollbar { display: none; }
 .tab {
-  flex-shrink: 0;
-  padding: 8px 14px 10px;
-  font-size: 12px;
-  font-family: 'IBM Plex Mono', monospace;
-  cursor: pointer;
-  border: none;
-  background: transparent;
-  color: var(--text2);
-  border-bottom: 2px solid transparent;
-  margin-bottom: -1px;
-  white-space: nowrap;
+  flex-shrink: 0; padding: 8px 14px 10px; font-size: 12px;
+  font-family: 'IBM Plex Mono', monospace; cursor: pointer;
+  border: none; background: transparent; color: var(--text2);
+  border-bottom: 2px solid transparent; margin-bottom: -1px; white-space: nowrap;
 }
 .tab.active { color: var(--accent); border-bottom-color: var(--accent); }
 
@@ -79,16 +54,10 @@ header {
   border-radius: var(--rs); background: var(--bg2); color: var(--text);
 }
 
-.ex-card {
-  background: var(--bg2);
-  border: 1px solid var(--border);
-  border-radius: var(--r);
-  padding: 12px;
-  margin-bottom: 10px;
-}
+.ex-card { background: var(--bg2); border: 1px solid var(--border); border-radius: var(--r); padding: 12px; margin-bottom: 10px; }
+
 .ex-head { display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 10px; gap: 8px; }
 .ex-name { font-size: 13px; font-weight: 500; }
-.ex-ref { font-size: 11px; color: var(--text3); font-family: 'IBM Plex Mono', monospace; margin-top: 2px; }
 .ex-actions { display: flex; gap: 6px; align-items: center; flex-shrink: 0; }
 .pr-badge {
   font-size: 10px; font-family: 'IBM Plex Mono', monospace;
@@ -96,13 +65,12 @@ header {
   background: rgba(200,240,96,.1); color: var(--accent);
   border: 1px solid rgba(200,240,96,.2); white-space: nowrap;
 }
-.btn-add-set {
+.btn-sm {
   font-size: 11px; font-family: 'IBM Plex Mono', monospace;
-  padding: 3px 10px; border-radius: var(--rs);
-  cursor: pointer; border: 1px solid var(--border2);
-  background: transparent; color: var(--text2); white-space: nowrap;
+  padding: 3px 10px; border-radius: var(--rs); cursor: pointer;
+  border: 1px solid var(--border2); background: transparent; color: var(--text2); white-space: nowrap;
 }
-.btn-add-set:active { background: var(--bg3); }
+.btn-sm:active { background: var(--bg3); }
 
 .sets-head { display: grid; grid-template-columns: 28px 1fr 1fr 24px; gap: 4px; margin-bottom: 4px; }
 .sets-head span { font-size: 10px; color: var(--text3); font-family: 'IBM Plex Mono', monospace; text-align: center; }
@@ -115,20 +83,54 @@ header {
   text-align: center; -webkit-appearance: none;
 }
 .set-inp:focus { outline: none; border-color: var(--border2); }
-.btn-del-set { background: transparent; border: none; cursor: pointer; color: var(--text3); font-size: 16px; line-height: 1; text-align: center; padding: 0; }
+.btn-del-set { background: transparent; border: none; cursor: pointer; color: var(--text3); font-size: 16px; line-height: 1; padding: 0; }
 .btn-del-set:active { color: var(--danger); }
 
-.hist-block { margin-top: 10px; border-top: 1px solid var(--border); padding-top: 8px; }
-.hist-lbl { font-size: 10px; color: var(--text3); font-family: 'IBM Plex Mono', monospace; margin-bottom: 6px; }
-.hist-row {
-  display: flex; justify-content: space-between; align-items: center;
-  gap: 8px; margin-bottom: 4px;
+.vol-row {
+  display: flex; align-items: center; gap: 8px;
+  margin-top: 8px; padding-top: 8px; border-top: 1px solid var(--border);
 }
-.hist-txt { font-size: 11px; font-family: 'IBM Plex Mono', monospace; color: var(--text2); line-height: 1.5; }
-.hist-date { color: var(--text3); }
-.btn-del-hist { background: transparent; border: none; cursor: pointer; color: var(--text3); font-size: 15px; padding: 0 2px; flex-shrink: 0; line-height: 1; }
+.vol-label { font-size: 11px; color: var(--text3); font-family: 'IBM Plex Mono', monospace; }
+.vol-val { font-size: 12px; font-family: 'IBM Plex Mono', monospace; color: var(--text2); }
+.vol-delta { font-size: 11px; font-family: 'IBM Plex Mono', monospace; }
+.vol-delta.up { color: var(--up); }
+.vol-delta.down { color: var(--down); }
+.vol-delta.same { color: var(--same); }
+
+.hist-block { margin-top: 8px; }
+.hist-toggle {
+  display: flex; align-items: center; gap: 6px;
+  cursor: pointer; background: none; border: none;
+  padding: 4px 0; color: var(--text3);
+  font-size: 11px; font-family: 'IBM Plex Mono', monospace;
+}
+.hist-toggle:active { color: var(--text2); }
+.hist-arrow { font-size: 9px; transition: transform .2s; }
+.hist-arrow.open { transform: rotate(90deg); }
+
+.hist-list { margin-top: 6px; display: none; }
+.hist-list.open { display: block; }
+
+.hist-entry {
+  background: var(--bg3); border-radius: var(--rs);
+  padding: 7px 10px; margin-bottom: 5px;
+}
+.hist-entry-top { display: flex; justify-content: space-between; align-items: center; margin-bottom: 3px; }
+.hist-date { font-size: 11px; color: var(--text3); font-family: 'IBM Plex Mono', monospace; }
+.hist-vol { font-size: 11px; font-family: 'IBM Plex Mono', monospace; color: var(--text2); }
+.hist-sets { font-size: 11px; font-family: 'IBM Plex Mono', monospace; color: var(--text2); line-height: 1.6; }
+.hist-skipped { color: var(--text3); font-style: italic; }
+.btn-del-hist {
+  background: transparent; border: none; cursor: pointer;
+  color: var(--text3); font-size: 15px; padding: 0 2px; line-height: 1; flex-shrink: 0;
+}
 .btn-del-hist:active { color: var(--danger); }
-.hist-empty { font-size: 11px; color: var(--text3); font-style: italic; }
+
+.show-more {
+  font-size: 11px; font-family: 'IBM Plex Mono', monospace;
+  color: var(--text3); cursor: pointer; background: none; border: none;
+  padding: 2px 0; text-decoration: underline; text-underline-offset: 2px;
+}
 
 .bottom-bar {
   position: fixed; bottom: 0; left: 0; right: 0;
@@ -138,9 +140,8 @@ header {
 }
 .btn-main {
   flex: 1; padding: 11px; font-size: 13px;
-  font-family: 'IBM Plex Mono', monospace;
-  border-radius: var(--r); cursor: pointer;
-  border: 1px solid var(--border2);
+  font-family: 'IBM Plex Mono', monospace; border-radius: var(--r);
+  cursor: pointer; border: 1px solid var(--border2);
   background: transparent; color: var(--text2);
 }
 .btn-main:active { background: var(--bg3); }
@@ -151,8 +152,7 @@ header {
   position: fixed; bottom: 72px; left: 50%;
   transform: translateX(-50%) translateY(20px);
   background: var(--bg2); border: 1px solid var(--border2);
-  color: var(--text); font-size: 12px;
-  font-family: 'IBM Plex Mono', monospace;
+  color: var(--text); font-size: 12px; font-family: 'IBM Plex Mono', monospace;
   padding: 8px 16px; border-radius: 20px;
   opacity: 0; transition: opacity .2s, transform .2s;
   pointer-events: none; white-space: nowrap; z-index: 100;
@@ -192,37 +192,39 @@ const GS = "https://script.google.com/macros/s/AKfycbzBrKu5a8Ipuuix4UAi6zau51NCR
 
 const DAYS = {
   mon: { exercises: [
-    { id:"hyper_mon", name:"Гиперэкстензия", unit:"кг", ref:"" },
-    { id:"chest_press", name:"Жим грудь", unit:"кг", ref:"ориент: 5 кг" },
-    { id:"db_press", name:"Жим гантелей", unit:"кг", ref:"ориент: 12–14 кг" },
-    { id:"butterfly", name:"Бабочка", unit:"кг", ref:"ориент: 25–30 кг" },
-    { id:"front_raise", name:"Перед собой блин", unit:"кг", ref:"ориент: 5–6 кг" },
-    { id:"bicep_ez", name:"Подъём на бицепс EZ", unit:"кг", ref:"" },
+    { id:"hyper_mon", name:"Гиперэкстензия", unit:"кг" },
+    { id:"chest_press", name:"Жим грудь", unit:"кг" },
+    { id:"db_press", name:"Жим гантелей", unit:"кг" },
+    { id:"butterfly", name:"Бабочка", unit:"кг" },
+    { id:"front_raise", name:"Перед собой блин", unit:"кг" },
+    { id:"bicep_ez", name:"Подъём на бицепс EZ", unit:"кг" },
   ]},
   thu: { exercises: [
-    { id:"hyper_thu", name:"Гиперэкстензия", unit:"кг", ref:"ориент: 5–10 кг" },
-    { id:"ohp", name:"Жим стоя/сидя", unit:"кг", ref:"ориент: 9 ган / 12,5 Смит" },
-    { id:"laterals", name:"Махи + перед собой", unit:"кг", ref:"ориент: 5–6 кг" },
-    { id:"lunges", name:"Выпады", unit:"кг", ref:"ориент: 7,5 кг" },
-    { id:"hack", name:"Гак-присед", unit:"кг", ref:"ориент: 35 кг" },
-    { id:"leg_ext", name:"Разгибание ног", unit:"кг", ref:"ориент: 25–35 кг" },
+    { id:"hyper_thu", name:"Гиперэкстензия", unit:"кг" },
+    { id:"ohp", name:"Жим стоя/сидя", unit:"кг" },
+    { id:"laterals", name:"Махи + перед собой", unit:"кг" },
+    { id:"lunges", name:"Выпады", unit:"кг" },
+    { id:"hack", name:"Гак-присед", unit:"кг" },
+    { id:"leg_ext", name:"Разгибание ног", unit:"кг" },
   ]},
   sat: { exercises: [
-    { id:"hyper_sat", name:"Гиперэкстензия", unit:"кг", ref:"ориент: 5–10 кг" },
-    { id:"pullups", name:"Подтягивания (резинка)", unit:"повт", ref:"ориент: 4×10-8" },
-    { id:"tbar", name:"Тяга Т-грифа", unit:"кг", ref:"ориент: 10 кг · 3×12" },
-    { id:"horiz_row", name:"Горизонтальная тяга", unit:"ф", ref:"ориент: 60 ф · 3×12" },
-    { id:"tri_db", name:"Трицепс гантель сидя", unit:"кг", ref:"ориент: 12 кг · 4×12" },
-    { id:"tri_rope", name:"Трицепс канат", unit:"ф", ref:"ориент: 50–60 ф · 3×14" },
-    { id:"plank", name:"Планка на локтях", unit:"сек", ref:"ориент: 3×60 сек" },
+    { id:"hyper_sat", name:"Гиперэкстензия", unit:"кг" },
+    { id:"pullups", name:"Подтягивания (резинка)", unit:"повт" },
+    { id:"tbar", name:"Тяга Т-грифа", unit:"кг" },
+    { id:"horiz_row", name:"Горизонтальная тяга", unit:"ф" },
+    { id:"tri_db", name:"Трицепс гантель сидя", unit:"кг" },
+    { id:"tri_rope", name:"Трицепс канат", unit:"ф" },
+    { id:"plank", name:"Планка на локтях", unit:"сек" },
   ]}
 };
 
 let cur = "mon";
 let D = {};
-try { D = JSON.parse(localStorage.getItem("gym_v4") || "{}"); } catch(e) { D = {}; }
+try { D = JSON.parse(localStorage.getItem("gym_v5") || "{}"); } catch(e) { D = {}; }
+const histOpen = {};
+const histExpanded = {};
 
-function saveLocal() { try { localStorage.setItem("gym_v4", JSON.stringify(D)); } catch(e) {} }
+function saveLocal() { try { localStorage.setItem("gym_v5", JSON.stringify(D)); } catch(e) {} }
 
 function setSync(state, txt) {
   document.getElementById("sdot").className = "sync-dot " + state;
@@ -245,8 +247,7 @@ async function gsSet(key, value) {
     const enc = encodeURIComponent(JSON.stringify(value));
     const r = await fetch(GS + "?action=set&key=" + encodeURIComponent(key) + "&value=" + enc);
     const j = await r.json();
-    if (j.ok) setSync("ok", "сохранено");
-    else setSync("err", "ошибка");
+    if (j.ok) setSync("ok", "сохранено"); else setSync("err", "ошибка");
   } catch(e) { setSync("err", "нет связи"); }
 }
 
@@ -259,10 +260,27 @@ function exData(day, id) {
   return D[day].exercises[id];
 }
 
+function calcVolume(sets, unit) {
+  if (unit === "сек") return sets.reduce((s,x) => s + (parseFloat(x.reps)||0), 0);
+  if (unit === "повт") return sets.reduce((s,x) => s + (parseFloat(x.reps)||0), 0);
+  return sets.reduce((s,x) => s + (parseFloat(x.weight)||0) * (parseFloat(x.reps)||0), 0);
+}
+
+function fmtVol(vol, unit) {
+  if (unit === "сек") return Math.round(vol) + " сек";
+  if (unit === "повт") return Math.round(vol) + " повт";
+  return Math.round(vol) + " кг·повт";
+}
+
 function fmtSet(s, unit) {
-  if (unit === "сек") return (s.reps||"?") + "с";
-  if (unit === "повт") return (s.reps||"?") + "п";
-  return (s.weight||"?") + unit + "×" + (s.reps||"?");
+  const w = parseFloat(s.weight);
+  const r = parseFloat(s.reps);
+  if (unit === "сек") return isNaN(r) ? "пропущено" : r + "с";
+  if (unit === "повт") return isNaN(r) ? "пропущено" : r + "п";
+  if (isNaN(w) && isNaN(r)) return "пропущено";
+  if (isNaN(w)) return "?×" + r;
+  if (isNaN(r)) return w + unit + "×?";
+  return w + unit + "×" + r;
 }
 
 function calcPR(hist, unit) {
@@ -279,13 +297,12 @@ function setRowHTML(day, id, i, s, unit) {
   const simple = unit === "сек" || unit === "повт";
   const ph1 = simple ? (unit === "сек" ? "сек" : "повт") : "кг";
   const v1 = simple ? (s.reps||"") : (s.weight||"");
-  const field1 = simple ? "reps" : "weight";
-  const col2 = simple
-    ? `<div></div>`
+  const f1 = simple ? "reps" : "weight";
+  const col2 = simple ? `<div></div>`
     : `<input class="set-inp" type="number" min="0" step="1" placeholder="повт" value="${s.reps||''}" oninput="upd('${day}','${id}',${i},'reps',this.value)">`;
   return `<div class="set-row">
     <div class="set-num">${i+1}</div>
-    <input class="set-inp" type="number" min="0" step="0.5" placeholder="${ph1}" value="${v1}" oninput="upd('${day}','${id}',${i},'${field1}',this.value)">
+    <input class="set-inp" type="number" min="0" step="0.5" placeholder="${ph1}" value="${v1}" oninput="upd('${day}','${id}',${i},'${f1}',this.value)">
     ${col2}
     <button class="btn-del-set" onclick="delSet('${day}','${id}',${i})">×</button>
   </div>`;
@@ -295,9 +312,11 @@ function renderPanel(day) {
   const panel = document.getElementById("panel-" + day);
   const savedDate = (D[day] || {}).date || today();
   const hist = D[day + "_hist"] || {};
+
   let html = `<div class="date-row">
     <span class="date-lbl">дата:</span>
-    <input type="date" class="date-inp" value="${savedDate}" onchange="if(!D['${day}'])D['${day}']={date:today(),exercises:{}};D['${day}'].date=this.value;saveLocal()">
+    <input type="date" class="date-inp" value="${savedDate}"
+      onchange="if(!D['${day}'])D['${day}']={date:today(),exercises:{}};D['${day}'].date=this.value;saveLocal()">
   </div>`;
 
   DAYS[day].exercises.forEach(ex => {
@@ -308,15 +327,64 @@ function renderPanel(day) {
     const h1 = simple ? (ex.unit === "сек" ? "сек" : "повт") : "вес " + ex.unit;
     const h2 = simple ? "" : "повт";
 
+    const curVol = calcVolume(d.sets, ex.unit);
+    const lastEntry = exHist.length > 0 ? exHist[exHist.length - 1] : null;
+    const prevVol = lastEntry ? calcVolume(lastEntry.sets, ex.unit) : null;
+
+    let volHTML = "";
+    if (curVol > 0) {
+      let deltaHTML = "";
+      if (prevVol !== null && prevVol > 0) {
+        const diff = curVol - prevVol;
+        const pct = Math.round(Math.abs(diff) / prevVol * 100);
+        if (diff > 0) deltaHTML = `<span class="vol-delta up">▲ +${pct}%</span>`;
+        else if (diff < 0) deltaHTML = `<span class="vol-delta down">▼ −${pct}%</span>`;
+        else deltaHTML = `<span class="vol-delta same">= без изменений</span>`;
+      }
+      volHTML = `<div class="vol-row">
+        <span class="vol-label">объём:</span>
+        <span class="vol-val">${fmtVol(curVol, ex.unit)}</span>
+        ${deltaHTML}
+      </div>`;
+    }
+
+    const isOpen = histOpen[day + "_" + ex.id];
+    const isExpanded = histExpanded[day + "_" + ex.id];
+    const shown = isExpanded ? exHist : exHist.slice(-3);
+    const hasMore = exHist.length > 3;
+
+    let histEntriesHTML = "";
+    if (exHist.length === 0) {
+      histEntriesHTML = `<div class="hist-sets hist-skipped">пока пусто</div>`;
+    } else {
+      shown.slice().reverse().forEach(h => {
+        const vol = calcVolume(h.sets, ex.unit);
+        const sStr = h.sets.map((s,i) => {
+          const f = fmtSet(s, ex.unit);
+          return `<span${f==="пропущено"?' class="hist-skipped"':''}>${i+1}: ${f}</span>`;
+        }).join("  ");
+        histEntriesHTML += `<div class="hist-entry">
+          <div class="hist-entry-top">
+            <span class="hist-date">${h.date}</span>
+            <div style="display:flex;align-items:center;gap:8px;">
+              <span class="hist-vol">${fmtVol(vol, ex.unit)}</span>
+              <button class="btn-del-hist" onclick="delHist('${day}','${ex.id}','${h.date}')">×</button>
+            </div>
+          </div>
+          <div class="hist-sets">${sStr}</div>
+        </div>`;
+      });
+      if (hasMore && !isExpanded) {
+        histEntriesHTML += `<button class="show-more" onclick="expandHist('${day}','${ex.id}')">показать все (${exHist.length})</button>`;
+      }
+    }
+
     html += `<div class="ex-card">
       <div class="ex-head">
-        <div>
-          <div class="ex-name">${ex.name}</div>
-          ${ex.ref ? `<div class="ex-ref">${ex.ref}</div>` : ""}
-        </div>
+        <div class="ex-name">${ex.name}</div>
         <div class="ex-actions">
           ${pr ? `<span class="pr-badge">PR ${pr}</span>` : ""}
-          <button class="btn-add-set" onclick="addSet('${day}','${ex.id}')">+ подход</button>
+          <button class="btn-sm" onclick="addSet('${day}','${ex.id}')">+ подход</button>
         </div>
       </div>
       <div class="sets-head">
@@ -324,25 +392,34 @@ function renderPanel(day) {
       </div>
       <div id="sets-${ex.id}">`;
 
-    d.sets.forEach((s, i) => { html += setRowHTML(day, ex.id, i, s, ex.unit); });
-    html += `</div>`;
+    d.sets.forEach((s,i) => { html += setRowHTML(day, ex.id, i, s, ex.unit); });
 
-    html += `<div class="hist-block"><div class="hist-lbl">история</div>`;
-    if (exHist.length > 0) {
-      exHist.slice().reverse().forEach(h => {
-        const sStr = h.sets.map((s,i) => `${i+1}:${fmtSet(s,ex.unit)}`).join(" ");
-        html += `<div class="hist-row">
-          <div class="hist-txt"><span class="hist-date">${h.date}</span>  ${sStr}</div>
-          <button class="btn-del-hist" onclick="delHist('${day}','${ex.id}','${h.date}')">×</button>
-        </div>`;
-      });
-    } else {
-      html += `<div class="hist-empty">пока пусто</div>`;
-    }
-    html += `</div></div>`;
+    html += `</div>
+      ${volHTML}
+      <div class="hist-block">
+        <button class="hist-toggle" onclick="toggleHist('${day}','${ex.id}')">
+          <span class="hist-arrow${isOpen?' open':''}">▶</span>
+          <span>история ${exHist.length > 0 ? '(' + exHist.length + ')' : ''}</span>
+        </button>
+        <div class="hist-list${isOpen?' open':''}" id="hist-${ex.id}">
+          ${histEntriesHTML}
+        </div>
+      </div>
+    </div>`;
   });
 
   panel.innerHTML = html;
+}
+
+function toggleHist(day, id) {
+  const key = day + "_" + id;
+  histOpen[key] = !histOpen[key];
+  renderPanel(day);
+}
+
+function expandHist(day, id) {
+  histExpanded[day + "_" + id] = true;
+  renderPanel(day);
 }
 
 function upd(day, id, i, field, val) {
@@ -350,6 +427,37 @@ function upd(day, id, i, field, val) {
   if (!d.sets[i]) d.sets[i] = {};
   d.sets[i][field] = val;
   saveLocal();
+  refreshVol(day, id);
+}
+
+function refreshVol(day, id) {
+  const ex = DAYS[day].exercises.find(e => e.id === id);
+  if (!ex) return;
+  const d = exData(day, id);
+  const hist = D[day + "_hist"] || {};
+  const exHist = hist[id] || [];
+  const curVol = calcVolume(d.sets, ex.unit);
+  const lastEntry = exHist.length > 0 ? exHist[exHist.length - 1] : null;
+  const prevVol = lastEntry ? calcVolume(lastEntry.sets, ex.unit) : null;
+  const card = document.getElementById("sets-" + id);
+  if (!card) return;
+  const volEl = card.parentElement.querySelector(".vol-row");
+  if (curVol <= 0) { if (volEl) volEl.remove(); return; }
+  let deltaHTML = "";
+  if (prevVol !== null && prevVol > 0) {
+    const diff = curVol - prevVol;
+    const pct = Math.round(Math.abs(diff) / prevVol * 100);
+    if (diff > 0) deltaHTML = `<span class="vol-delta up">▲ +${pct}%</span>`;
+    else if (diff < 0) deltaHTML = `<span class="vol-delta down">▼ −${pct}%</span>`;
+    else deltaHTML = `<span class="vol-delta same">= без изменений</span>`;
+  }
+  const newHTML = `<div class="vol-row">
+    <span class="vol-label">объём:</span>
+    <span class="vol-val">${fmtVol(curVol, ex.unit)}</span>
+    ${deltaHTML}
+  </div>`;
+  if (volEl) volEl.outerHTML = newHTML;
+  else card.insertAdjacentHTML("afterend", newHTML);
 }
 
 function addSet(day, id) {
@@ -384,7 +492,6 @@ async function saveDay() {
   if (!D[day]) D[day] = { date: today(), exercises: {} };
   const date = D[day].date || today();
   if (!D[day + "_hist"]) D[day + "_hist"] = {};
-
   DAYS[day].exercises.forEach(ex => {
     const d = exData(day, ex.id);
     if (!D[day + "_hist"][ex.id]) D[day + "_hist"][ex.id] = [];
@@ -394,7 +501,6 @@ async function saveDay() {
     if (idx >= 0) hist[idx] = entry; else hist.push(entry);
     if (hist.length > 20) hist.splice(0, hist.length - 20);
   });
-
   saveLocal();
   await gsSet("data_" + day, D[day]);
   await gsSet("hist_" + day, D[day + "_hist"]);
