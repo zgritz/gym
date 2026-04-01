@@ -302,7 +302,7 @@
 <div class="toast" id="toast"></div>
 
 <script>
-const GS_URL = "https://script.google.com/macros/s/AKfycbxh6pQdnmsfwCaU_pi0KltLT08hK3X6KTAgxvaS17hphwXb4VDYdTxAyeoEVWSaE_AQ2w/exec";
+const GS_URL = "https://script.google.com/macros/s/AKfycbzBrKu5a8Ipuuix4UAi6zau51NCR0QgMTcKhKwKUhl-Ww382UtQ3WTwGmDr7m-AKGRa7g/exec";
 
 const DAYS = {
   mon: {
@@ -356,10 +356,11 @@ function setSyncStatus(state, text) {
 async function gsGet(key) {
   try {
     setSyncStatus("loading", "загрузка...");
-    const r = await fetch(GS_URL + "?key=" + encodeURIComponent(key));
-    const text = await r.text();
+    const url = GS_URL + "?action=get&key=" + encodeURIComponent(key);
+    const r = await fetch(url);
+    const json = await r.json();
     setSyncStatus("ok", "синхр.");
-    return text ? JSON.parse(text) : null;
+    return json.value ? JSON.parse(json.value) : null;
   } catch(e) {
     setSyncStatus("err", "нет связи");
     return null;
@@ -369,12 +370,12 @@ async function gsGet(key) {
 async function gsSet(key, value) {
   try {
     setSyncStatus("loading", "сохр...");
-    await fetch(GS_URL, {
-      method: "POST",
-      body: JSON.stringify({ key, value: JSON.stringify(value) }),
-      headers: { "Content-Type": "application/json" }
-    });
-    setSyncStatus("ok", "сохранено");
+    const encoded = encodeURIComponent(JSON.stringify(value));
+    const url = GS_URL + "?action=set&key=" + encodeURIComponent(key) + "&value=" + encoded;
+    const r = await fetch(url);
+    const json = await r.json();
+    if (json.ok) setSyncStatus("ok", "сохранено");
+    else setSyncStatus("err", "ошибка");
   } catch(e) {
     setSyncStatus("err", "нет связи");
   }
