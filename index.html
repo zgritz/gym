@@ -6,821 +6,739 @@
 <title>Gym Tracker</title>
 <link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500&family=IBM+Plex+Sans:wght@400;500&display=swap" rel="stylesheet">
 <style>
-:root {
-  --bg:#0f0f0f;--bg2:#1a1a1a;--bg3:#222;--bg4:#2a2a2a;
+:root{
+  --bg:#0f0f0f;--bg2:#1a1a1a;--bg3:#222;
   --border:#2e2e2e;--border2:#3a3a3a;
   --text:#e8e8e8;--text2:#888;--text3:#555;
   --accent:#c8f060;--accent2:#a0d040;
   --danger:#ff5a5a;--success:#4caf7d;
-  --up:#4caf7d;--down:#ff5a5a;--same:#666;
+  --up:#4caf7d;--dn:#ff5a5a;--eq:#666;
   --r:10px;--rs:6px;
 }
 *{box-sizing:border-box;margin:0;padding:0;}
 html{background:var(--bg);color:var(--text);font-family:'IBM Plex Sans',sans-serif;}
 body{max-width:480px;margin:0 auto;padding-bottom:80px;}
-
-header{padding:16px 16px 10px;border-bottom:1px solid var(--border);display:flex;align-items:center;justify-content:space-between;position:sticky;top:0;background:var(--bg);z-index:10;}
+header{padding:14px 16px 10px;border-bottom:1px solid var(--border);display:flex;align-items:center;justify-content:space-between;position:sticky;top:0;background:var(--bg);z-index:10;}
 .logo{font-family:'IBM Plex Mono',monospace;font-size:14px;font-weight:500;color:var(--accent);}
-.sync-wrap{display:flex;align-items:center;gap:5px;}
-.sync-dot{width:6px;height:6px;border-radius:50%;background:var(--text3);}
-.sync-dot.ok{background:var(--success);}
-.sync-dot.busy{background:var(--accent);animation:blink 1s infinite;}
-.sync-dot.err{background:var(--danger);}
+.sw{display:flex;align-items:center;gap:5px;}
+.dot{width:6px;height:6px;border-radius:50%;background:var(--text3);}
+.dot.ok{background:var(--success);}
+.dot.busy{background:var(--accent);animation:blink 1s infinite;}
+.dot.err{background:var(--danger);}
 @keyframes blink{0%,100%{opacity:1}50%{opacity:.3}}
-.sync-txt{font-size:11px;color:var(--text3);font-family:'IBM Plex Mono',monospace;}
-
+.stxt{font-size:11px;color:var(--text3);font-family:'IBM Plex Mono',monospace;}
 .nav{display:flex;border-bottom:1px solid var(--border);overflow-x:auto;}
 .nav::-webkit-scrollbar{display:none;}
-.nav-btn{flex-shrink:0;padding:10px 16px;font-size:12px;font-family:'IBM Plex Mono',monospace;cursor:pointer;border:none;background:transparent;color:var(--text2);border-bottom:2px solid transparent;margin-bottom:-1px;white-space:nowrap;}
-.nav-btn.active{color:var(--accent);border-bottom-color:var(--accent);}
-
+.nb{flex-shrink:0;padding:10px 16px;font-size:12px;font-family:'IBM Plex Mono',monospace;cursor:pointer;border:none;background:transparent;color:var(--text2);border-bottom:2px solid transparent;margin-bottom:-1px;white-space:nowrap;}
+.nb.active{color:var(--accent);border-bottom-color:var(--accent);}
 .page{display:none;padding:16px;}
 .page.active{display:block;}
-
-/* preset selector */
-.preset-bar{display:flex;align-items:center;gap:8px;margin-bottom:14px;flex-wrap:wrap;}
-.preset-chip{font-size:12px;font-family:'IBM Plex Mono',monospace;padding:5px 12px;border-radius:20px;cursor:pointer;border:1px solid var(--border2);background:transparent;color:var(--text2);white-space:nowrap;}
-.preset-chip.active{background:rgba(200,240,96,.12);color:var(--accent);border-color:rgba(200,240,96,.3);}
-.preset-chip.new-btn{color:var(--text3);}
-
-/* date row */
-.date-row{display:flex;align-items:center;gap:10px;margin-bottom:14px;}
-.date-lbl{font-size:12px;color:var(--text2);font-family:'IBM Plex Mono',monospace;}
-.date-inp{font-size:12px;font-family:'IBM Plex Mono',monospace;padding:5px 8px;border:1px solid var(--border2);border-radius:var(--rs);background:var(--bg2);color:var(--text);}
-
-/* exercise card */
-.ex-card{background:var(--bg2);border:1px solid var(--border);border-radius:var(--r);padding:12px;margin-bottom:10px;}
-.ex-head{display:flex;justify-content:space-between;align-items:center;margin-bottom:8px;gap:8px;}
-.ex-name{font-size:13px;font-weight:500;}
-.ex-actions{display:flex;gap:6px;align-items:center;flex-shrink:0;}
-.pr-badge{font-size:10px;font-family:'IBM Plex Mono',monospace;padding:2px 7px;border-radius:20px;background:rgba(200,240,96,.1);color:var(--accent);border:1px solid rgba(200,240,96,.2);white-space:nowrap;}
-.btn-sm{font-size:11px;font-family:'IBM Plex Mono',monospace;padding:3px 10px;border-radius:var(--rs);cursor:pointer;border:1px solid var(--border2);background:transparent;color:var(--text2);white-space:nowrap;}
-.btn-sm:active{background:var(--bg3);}
-
-/* base weight row */
-.base-row{display:flex;align-items:center;gap:6px;margin-bottom:8px;font-size:11px;color:var(--text3);font-family:'IBM Plex Mono',monospace;}
-.base-inp{width:60px;font-size:11px;font-family:'IBM Plex Mono',monospace;padding:3px 6px;border:1px solid var(--border);border-radius:var(--rs);background:var(--bg3);color:var(--text2);text-align:center;-webkit-appearance:none;}
-.base-inp:focus{outline:none;border-color:var(--border2);}
-.unit-toggle{font-size:10px;font-family:'IBM Plex Mono',monospace;padding:2px 7px;border-radius:20px;cursor:pointer;border:1px solid var(--border);background:transparent;color:var(--text3);}
-.unit-toggle.active{color:var(--accent);border-color:rgba(200,240,96,.3);background:rgba(200,240,96,.08);}
-
-/* sets */
-.sets-head{display:grid;gap:4px;margin-bottom:4px;}
-.sets-head span{font-size:10px;color:var(--text3);font-family:'IBM Plex Mono',monospace;text-align:center;}
-.set-row{display:grid;gap:4px;margin-bottom:4px;align-items:center;}
-.set-num{font-size:11px;color:var(--text3);font-family:'IBM Plex Mono',monospace;text-align:center;}
-.set-inp{width:100%;font-size:14px;font-family:'IBM Plex Mono',monospace;padding:6px 4px;border:1px solid var(--border);border-radius:var(--rs);background:var(--bg3);color:var(--text);text-align:center;-webkit-appearance:none;}
-.set-inp:focus{outline:none;border-color:var(--border2);}
-.btn-del-set{background:transparent;border:none;cursor:pointer;color:var(--text3);font-size:16px;line-height:1;padding:0;}
-.btn-del-set:active{color:var(--danger);}
-
-/* volume */
-.vol-row{display:flex;align-items:center;gap:8px;margin-top:8px;padding-top:8px;border-top:1px solid var(--border);flex-wrap:wrap;}
-.vol-lbl{font-size:11px;color:var(--text3);font-family:'IBM Plex Mono',monospace;}
-.vol-val{font-size:12px;font-family:'IBM Plex Mono',monospace;color:var(--text2);}
-.vol-delta{font-size:11px;font-family:'IBM Plex Mono',monospace;}
-.vol-delta.up{color:var(--up);}
-.vol-delta.down{color:var(--down);}
-.vol-delta.same{color:var(--same);}
-
-/* history */
-.hist-block{margin-top:8px;}
-.hist-toggle{display:flex;align-items:center;gap:6px;cursor:pointer;background:none;border:none;padding:4px 0;color:var(--text3);font-size:11px;font-family:'IBM Plex Mono',monospace;}
-.hist-arrow{font-size:9px;transition:transform .2s;}
-.hist-arrow.open{transform:rotate(90deg);}
-.hist-list{margin-top:6px;display:none;}
-.hist-list.open{display:block;}
-.hist-entry{background:var(--bg3);border-radius:var(--rs);padding:7px 10px;margin-bottom:5px;}
-.hist-entry-top{display:flex;justify-content:space-between;align-items:center;margin-bottom:3px;}
-.hist-date{font-size:11px;color:var(--text3);font-family:'IBM Plex Mono',monospace;}
-.hist-meta{display:flex;align-items:center;gap:8px;}
-.hist-vol{font-size:11px;font-family:'IBM Plex Mono',monospace;color:var(--text2);}
-.hist-sets{font-size:11px;font-family:'IBM Plex Mono',monospace;color:var(--text2);line-height:1.7;}
-.hist-skipped{color:var(--text3);font-style:italic;}
-.btn-del-hist{background:transparent;border:none;cursor:pointer;color:var(--text3);font-size:15px;padding:0 2px;line-height:1;flex-shrink:0;}
-.btn-del-hist:active{color:var(--danger);}
-.show-more{font-size:11px;font-family:'IBM Plex Mono',monospace;color:var(--text3);cursor:pointer;background:none;border:none;padding:2px 0;text-decoration:underline;text-underline-offset:2px;}
-
-/* settings page */
-.settings-section{margin-bottom:24px;}
-.settings-title{font-size:11px;color:var(--text3);font-family:'IBM Plex Mono',monospace;margin-bottom:10px;letter-spacing:.05em;}
-.setting-row{display:flex;align-items:center;justify-content:space-between;padding:10px 0;border-bottom:1px solid var(--border);}
-.setting-lbl{font-size:13px;color:var(--text);}
-.setting-sub{font-size:11px;color:var(--text3);margin-top:2px;}
-.setting-inp{width:90px;font-size:13px;font-family:'IBM Plex Mono',monospace;padding:5px 8px;border:1px solid var(--border2);border-radius:var(--rs);background:var(--bg2);color:var(--text);text-align:right;}
-.setting-inp:focus{outline:none;border-color:var(--accent);}
-
-/* preset editor */
-.preset-editor{background:var(--bg2);border:1px solid var(--border);border-radius:var(--r);padding:12px;margin-bottom:12px;}
-.preset-name-inp{width:100%;font-size:13px;font-family:'IBM Plex Mono',monospace;padding:7px 10px;border:1px solid var(--border2);border-radius:var(--rs);background:var(--bg3);color:var(--text);margin-bottom:10px;}
-.preset-name-inp:focus{outline:none;border-color:var(--accent);}
-.ex-checkbox-list{display:flex;flex-direction:column;gap:4px;margin-bottom:10px;}
-.ex-checkbox-row{display:flex;align-items:center;gap:8px;padding:6px 8px;border-radius:var(--rs);cursor:pointer;}
-.ex-checkbox-row:hover{background:var(--bg3);}
-.ex-checkbox-row input{accent-color:var(--accent);width:15px;height:15px;cursor:pointer;}
-.ex-checkbox-lbl{font-size:12px;color:var(--text2);}
-.btn-action{font-size:12px;font-family:'IBM Plex Mono',monospace;padding:7px 16px;border-radius:var(--rs);cursor:pointer;border:1px solid var(--border2);background:transparent;color:var(--text2);margin-right:8px;}
-.btn-action:active{background:var(--bg3);}
-.btn-action.primary{background:var(--accent);color:#0f0f0f;border-color:transparent;font-weight:500;}
-.btn-action.danger{color:var(--danger);border-color:var(--danger);}
-
-/* export */
-.export-btn{display:block;width:100%;padding:12px;font-size:13px;font-family:'IBM Plex Mono',monospace;border-radius:var(--r);cursor:pointer;border:1px solid var(--border2);background:var(--bg2);color:var(--text2);text-align:left;margin-bottom:10px;}
-.export-btn:active{background:var(--bg3);}
-.export-note{font-size:11px;color:var(--text3);font-family:'IBM Plex Mono',monospace;margin-bottom:16px;line-height:1.6;}
-
-/* bottom bar */
-.bottom-bar{position:fixed;bottom:0;left:0;right:0;background:var(--bg);border-top:1px solid var(--border);padding:10px 16px;display:flex;gap:8px;max-width:480px;margin:0 auto;}
-.btn-main{flex:1;padding:11px;font-size:13px;font-family:'IBM Plex Mono',monospace;border-radius:var(--r);cursor:pointer;border:1px solid var(--border2);background:transparent;color:var(--text2);}
-.btn-main:active{background:var(--bg3);}
-.btn-main.primary{background:var(--accent);color:#0f0f0f;border-color:transparent;font-weight:500;}
-.btn-main.primary:active{background:var(--accent2);}
-
+.chips{display:flex;gap:8px;margin-bottom:14px;flex-wrap:wrap;}
+.chip{font-size:12px;font-family:'IBM Plex Mono',monospace;padding:5px 12px;border-radius:20px;cursor:pointer;border:1px solid var(--border2);background:transparent;color:var(--text2);white-space:nowrap;}
+.chip.on{background:rgba(200,240,96,.12);color:var(--accent);border-color:rgba(200,240,96,.3);}
+.chip.dim{color:var(--text3);}
+.drow{display:flex;align-items:center;gap:10px;margin-bottom:14px;}
+.dlbl{font-size:12px;color:var(--text2);font-family:'IBM Plex Mono',monospace;}
+.dinp{font-size:12px;font-family:'IBM Plex Mono',monospace;padding:5px 8px;border:1px solid var(--border2);border-radius:var(--rs);background:var(--bg2);color:var(--text);}
+.card{background:var(--bg2);border:1px solid var(--border);border-radius:var(--r);padding:12px;margin-bottom:10px;}
+.ch{display:flex;justify-content:space-between;align-items:center;margin-bottom:8px;gap:8px;}
+.cn{font-size:13px;font-weight:500;}
+.ca{display:flex;gap:6px;align-items:center;flex-shrink:0;}
+.badge{font-size:10px;font-family:'IBM Plex Mono',monospace;padding:2px 7px;border-radius:20px;background:rgba(200,240,96,.1);color:var(--accent);border:1px solid rgba(200,240,96,.2);white-space:nowrap;}
+.bxs{font-size:11px;font-family:'IBM Plex Mono',monospace;padding:3px 9px;border-radius:var(--rs);cursor:pointer;border:1px solid var(--border2);background:transparent;color:var(--text2);white-space:nowrap;}
+.bxs:active{background:var(--bg3);}
+.bxs.on{color:var(--accent);border-color:rgba(200,240,96,.3);background:rgba(200,240,96,.08);}
+.binfo{font-size:11px;color:var(--text3);font-family:'IBM Plex Mono',monospace;margin-bottom:8px;}
+.sh{display:grid;grid-template-columns:28px 1fr 1fr 24px;gap:4px;margin-bottom:4px;}
+.sh span{font-size:10px;color:var(--text3);font-family:'IBM Plex Mono',monospace;text-align:center;}
+.sr{display:grid;grid-template-columns:28px 1fr 1fr 24px;gap:4px;margin-bottom:4px;align-items:center;}
+.sn{font-size:11px;color:var(--text3);font-family:'IBM Plex Mono',monospace;text-align:center;}
+.si{width:100%;font-size:14px;font-family:'IBM Plex Mono',monospace;padding:6px 4px;border:1px solid var(--border);border-radius:var(--rs);background:var(--bg3);color:var(--text);text-align:center;-webkit-appearance:none;}
+.si:focus{outline:none;border-color:var(--border2);}
+.si.sm{font-size:12px;}
+.ds{background:transparent;border:none;cursor:pointer;color:var(--text3);font-size:16px;line-height:1;padding:0;}
+.ds:active{color:var(--danger);}
+.vbl{margin-top:8px;padding-top:8px;border-top:1px solid var(--border);}
+.vr{display:flex;align-items:center;gap:8px;flex-wrap:wrap;}
+.vlbl{font-size:11px;color:var(--text3);font-family:'IBM Plex Mono',monospace;}
+.vval{font-size:12px;font-family:'IBM Plex Mono',monospace;color:var(--text2);}
+.vd{font-size:11px;font-family:'IBM Plex Mono',monospace;}
+.vd.up{color:var(--up);}
+.vd.dn{color:var(--dn);}
+.vd.eq{color:var(--eq);}
+.hbl{margin-top:8px;}
+.htog{display:flex;align-items:center;gap:6px;cursor:pointer;background:none;border:none;padding:4px 0;color:var(--text3);font-size:11px;font-family:'IBM Plex Mono',monospace;}
+.harr{font-size:9px;transition:transform .2s;}
+.harr.open{transform:rotate(90deg);}
+.hlist{margin-top:6px;display:none;}
+.hlist.open{display:block;}
+.he{background:var(--bg3);border-radius:var(--rs);padding:7px 10px;margin-bottom:5px;}
+.htop{display:flex;justify-content:space-between;align-items:center;margin-bottom:3px;}
+.hd{font-size:11px;color:var(--text3);font-family:'IBM Plex Mono',monospace;}
+.hm{display:flex;align-items:center;gap:8px;}
+.hv{font-size:11px;font-family:'IBM Plex Mono',monospace;color:var(--text2);}
+.hs{font-size:11px;font-family:'IBM Plex Mono',monospace;color:var(--text2);line-height:1.7;}
+.sk{color:var(--text3);font-style:italic;}
+.dh{background:transparent;border:none;cursor:pointer;color:var(--text3);font-size:15px;padding:0 2px;line-height:1;}
+.dh:active{color:var(--danger);}
+.mb{font-size:11px;font-family:'IBM Plex Mono',monospace;color:var(--text3);cursor:pointer;background:none;border:none;padding:2px 0;text-decoration:underline;text-underline-offset:2px;}
+.ss{margin-bottom:24px;}
+.st{font-size:10px;color:var(--text3);font-family:'IBM Plex Mono',monospace;margin-bottom:10px;letter-spacing:.08em;text-transform:uppercase;}
+.srow{display:flex;align-items:center;justify-content:space-between;padding:10px 0;border-bottom:1px solid var(--border);}
+.slbl{font-size:13px;}
+.ssub{font-size:11px;color:var(--text3);margin-top:2px;}
+.sinp{width:90px;font-size:13px;font-family:'IBM Plex Mono',monospace;padding:5px 8px;border:1px solid var(--border2);border-radius:var(--rs);background:var(--bg2);color:var(--text);text-align:right;}
+.sinp:focus{outline:none;border-color:var(--accent);}
+.editor{background:var(--bg2);border:1px solid var(--border);border-radius:var(--r);padding:12px;margin-bottom:12px;}
+.einp{width:100%;font-size:13px;font-family:'IBM Plex Mono',monospace;padding:7px 10px;border:1px solid var(--border2);border-radius:var(--rs);background:var(--bg3);color:var(--text);margin-bottom:8px;}
+.einp:focus{outline:none;border-color:var(--accent);}
+.esel{width:100%;font-size:12px;font-family:'IBM Plex Mono',monospace;padding:6px 8px;border:1px solid var(--border2);border-radius:var(--rs);background:var(--bg3);color:var(--text);margin-bottom:8px;}
+.esel:focus{outline:none;border-color:var(--accent);}
+.flags{display:flex;gap:14px;margin-bottom:10px;flex-wrap:wrap;}
+.flags label{display:flex;align-items:center;gap:5px;font-size:12px;color:var(--text2);cursor:pointer;}
+.flags input[type=checkbox]{accent-color:var(--accent);}
+.ecr{display:flex;align-items:center;gap:8px;padding:6px 8px;border-radius:var(--rs);}
+.ecr:hover{background:var(--bg3);}
+.ecr input[type=checkbox]{accent-color:var(--accent);width:15px;height:15px;cursor:pointer;flex-shrink:0;}
+.ecl{font-size:12px;color:var(--text2);flex:1;}
+.ecm{font-size:10px;color:var(--text3);font-family:'IBM Plex Mono',monospace;}
+.note{font-size:11px;color:var(--text3);font-family:'IBM Plex Mono',monospace;margin:4px 0 10px;line-height:1.5;}
+.br{display:flex;gap:8px;flex-wrap:wrap;}
+.ba{font-size:12px;font-family:'IBM Plex Mono',monospace;padding:7px 14px;border-radius:var(--rs);cursor:pointer;border:1px solid var(--border2);background:transparent;color:var(--text2);}
+.ba:active{background:var(--bg3);}
+.ba.primary{background:var(--accent);color:#0f0f0f;border-color:transparent;font-weight:500;}
+.ba.danger{color:var(--danger);border-color:rgba(255,90,90,.35);}
+.ba.ghost{color:var(--text3);}
+.expbtn{display:block;width:100%;padding:12px 14px;font-size:13px;font-family:'IBM Plex Mono',monospace;border-radius:var(--r);cursor:pointer;border:1px solid var(--border2);background:var(--bg2);color:var(--text2);text-align:left;margin-bottom:8px;}
+.expbtn:active{background:var(--bg3);}
+.expnote{font-size:11px;color:var(--text3);font-family:'IBM Plex Mono',monospace;margin-bottom:14px;line-height:1.6;}
+.bbar{position:fixed;bottom:0;left:0;right:0;background:var(--bg);border-top:1px solid var(--border);padding:10px 16px;display:flex;gap:8px;max-width:480px;margin:0 auto;}
+.bm{flex:1;padding:11px;font-size:13px;font-family:'IBM Plex Mono',monospace;border-radius:var(--r);cursor:pointer;border:1px solid var(--border2);background:transparent;color:var(--text2);}
+.bm:active{background:var(--bg3);}
+.bm.primary{background:var(--accent);color:#0f0f0f;border-color:transparent;font-weight:500;}
+.bm.primary:active{background:var(--accent2);}
 .toast{position:fixed;bottom:72px;left:50%;transform:translateX(-50%) translateY(20px);background:var(--bg2);border:1px solid var(--border2);color:var(--text);font-size:12px;font-family:'IBM Plex Mono',monospace;padding:8px 16px;border-radius:20px;opacity:0;transition:opacity .2s,transform .2s;pointer-events:none;white-space:nowrap;z-index:100;}
 .toast.show{opacity:1;transform:translateX(-50%) translateY(0);}
-
-.lbs-hint{font-size:10px;color:var(--text3);font-family:'IBM Plex Mono',monospace;margin-left:4px;}
+.lh{font-size:10px;color:var(--text3);}
 </style>
 </head>
 <body>
 <header>
   <div class="logo">GYM_TRACKER</div>
-  <div class="sync-wrap">
-    <div class="sync-dot" id="sdot"></div>
-    <span class="sync-txt" id="stxt">—</span>
-  </div>
+  <div class="sw"><div class="dot" id="sdot"></div><span class="stxt" id="stxt">—</span></div>
 </header>
-
 <div class="nav">
-  <button class="nav-btn active" onclick="showPage('workout')">тренировка</button>
-  <button class="nav-btn" onclick="showPage('settings')">настройки</button>
-  <button class="nav-btn" onclick="showPage('export')">экспорт</button>
+  <button class="nb active" onclick="showPage('workout')">тренировка</button>
+  <button class="nb" onclick="showPage('settings')">настройки</button>
+  <button class="nb" onclick="showPage('export')">экспорт</button>
 </div>
-
-<div id="page-workout" class="page active"></div>
-<div id="page-settings" class="page"></div>
-<div id="page-export" class="page"></div>
-
-<div class="bottom-bar" id="bottom-bar">
-  <button class="btn-main" onclick="clearDay()">Очистить</button>
-  <button class="btn-main primary" onclick="saveDay()">Сохранить тренировку</button>
+<div id="pg-workout" class="page active"></div>
+<div id="pg-settings" class="page"></div>
+<div id="pg-export" class="page"></div>
+<div class="bbar" id="bbar">
+  <button class="bm" onclick="clearDay()">Очистить</button>
+  <button class="bm primary" onclick="saveDay()">Сохранить тренировку</button>
 </div>
-
 <div class="toast" id="toast"></div>
 
 <script>
-const GS = "https://script.google.com/macros/s/AKfycbzBrKu5a8Ipuuix4UAi6zau51NCR0QgMTcKhKwKUhl-Ww382UtQ3WTwGmDr7m-AKGRa7g/exec";
+const GS="https://script.google.com/macros/s/AKfycbzBrKu5a8Ipuuix4UAi6zau51NCR0QgMTcKhKwKUhl-Ww382UtQ3WTwGmDr7m-AKGRa7g/exec";
 
-// All known exercises
-const ALL_EXERCISES = [
-  {id:"hyper", name:"Гиперэкстензия", unit:"кг", crossDay:true},
-  {id:"chest_press", name:"Жим грудь", unit:"кг", hasBar:true},
-  {id:"db_press", name:"Жим гантелей", unit:"кг"},
-  {id:"butterfly", name:"Бабочка", unit:"кг"},
-  {id:"front_raise", name:"Перед собой блин", unit:"кг"},
-  {id:"bicep_ez", name:"Подъём на бицепс EZ", unit:"кг", hasBar:true},
-  {id:"ohp", name:"Жим стоя/сидя", unit:"кг", hasBar:true},
-  {id:"laterals", name:"Махи + перед собой", unit:"кг"},
-  {id:"lunges", name:"Выпады", unit:"кг"},
-  {id:"hack", name:"Гак-присед", unit:"кг"},
-  {id:"leg_ext", name:"Разгибание ног", unit:"кг"},
-  {id:"pullups", name:"Подтягивания", unit:"кг", bodyweight:true},
-  {id:"tbar", name:"Тяга Т-грифа", unit:"кг", hasBar:true},
-  {id:"horiz_row", name:"Горизонтальная тяга", unit:"ф"},
-  {id:"tri_db", name:"Трицепс гантель сидя", unit:"кг"},
-  {id:"tri_rope", name:"Трицепс канат", unit:"ф"},
-  {id:"plank", name:"Планка на локтях", unit:"сек", bodyweight:true},
+// defaultUnit: "кг" | "ф" — дефолтная единица, переключается кнопкой
+// hasBar: базовый вес снаряда из настроек
+// bodyweight: база = вес тела, показывает ±adj
+// timeOnly: секунды, вес не нужен (планка без bodyweight использует только время)
+const BIEX=[
+  {id:"hyper",      name:"Гиперэкстензия",       defaultUnit:"кг"},
+  {id:"chest_press",name:"Жим грудь",             defaultUnit:"кг", hasBar:true},
+  {id:"db_press",   name:"Жим гантелей",          defaultUnit:"кг"},
+  {id:"butterfly",  name:"Бабочка",               defaultUnit:"кг"},
+  {id:"front_raise",name:"Перед собой блин",      defaultUnit:"кг"},
+  {id:"bicep_ez",   name:"Подъём на бицепс EZ",  defaultUnit:"кг", hasBar:true},
+  {id:"ohp",        name:"Жим стоя/сидя",         defaultUnit:"кг", hasBar:true},
+  {id:"laterals",   name:"Махи + перед собой",    defaultUnit:"кг"},
+  {id:"lunges",     name:"Выпады",                defaultUnit:"кг"},
+  {id:"hack",       name:"Гак-присед",            defaultUnit:"кг"},
+  {id:"leg_ext",    name:"Разгибание ног",        defaultUnit:"кг"},
+  {id:"pullups",    name:"Подтягивания",          defaultUnit:"кг", bodyweight:true},
+  {id:"tbar",       name:"Тяга Т-грифа",          defaultUnit:"кг", hasBar:true},
+  {id:"horiz_row",  name:"Горизонтальная тяга",   defaultUnit:"ф"},
+  {id:"tri_db",     name:"Трицепс гантель сидя",  defaultUnit:"кг"},
+  {id:"tri_rope",   name:"Трицепс канат",         defaultUnit:"ф"},
+  {id:"plank",      name:"Планка на локтях",      defaultUnit:"сек", bodyweight:true},
 ];
 
-const BUILT_IN_PRESETS = [
-  {id:"mon", name:"ПН · Грудь/Бицепс", exIds:["hyper","chest_press","db_press","butterfly","front_raise","bicep_ez"]},
-  {id:"thu", name:"ЧТ · Ноги/Плечи", exIds:["hyper","ohp","laterals","lunges","hack","leg_ext"]},
-  {id:"sat", name:"СБ · Спина/Трицепс", exIds:["hyper","pullups","tbar","horiz_row","tri_db","tri_rope","plank"]},
+const BIPR=[
+  {id:"mon", name:"ПН · Грудь/Бицепс",  exIds:["hyper","chest_press","db_press","butterfly","front_raise","bicep_ez"], builtin:true},
+  {id:"thu", name:"ЧТ · Ноги/Плечи",    exIds:["hyper","ohp","laterals","lunges","hack","leg_ext"], builtin:true},
+  {id:"sat", name:"СБ · Спина/Трицепс", exIds:["hyper","pullups","tbar","horiz_row","tri_db","tri_rope","plank"], builtin:true},
 ];
 
-let curPage = "workout";
-let curPreset = "mon";
-let editingPreset = null;
-let histOpen = {};
-let histExpanded = {};
+// ── state ─────────────────────────────────────────────────────────────────────
+let D={};
+try{D=JSON.parse(localStorage.getItem("gym_v9")||"{}");}catch(e){}
+if(!D.settings)    D.settings={bodyWeight:80,barWeights:{chest_press:20,ohp:20,bicep_ez:7,tbar:15}};
+if(!D.cPresets)    D.cPresets=[];   // overrides for builtin + custom presets
+if(!D.cExercises)  D.cExercises=[]; // custom exercises only
+if(!D.exOverrides) D.exOverrides={}; // overrides for builtin exercise names/flags
+if(!D.prExIds)     D.prExIds={};   // exId overrides for builtin presets
+if(!D.workouts)    D.workouts={};
+if(!D.history)     D.history={};
+if(!D.unitPref)    D.unitPref={};
 
-let D = {};
-try { D = JSON.parse(localStorage.getItem("gym_v6") || "{}"); } catch(e) { D = {}; }
+let curPage="workout", curPreset="mon";
+let editPreset=null, editEx=null, showNewExForm=false;
+let histOpen={}, histExp={};
 
-if (!D.settings) D.settings = { bodyWeight: 80, barWeights: { chest_press: 20, ohp: 20, bicep_ez: 7, tbar: 15 } };
-if (!D.customPresets) D.customPresets = [];
-if (!D.workouts) D.workouts = {};
-if (!D.history) D.history = {};
-if (!D.unitPref) D.unitPref = {};
-
-function saveLocal() { try { localStorage.setItem("gym_v6", JSON.stringify(D)); } catch(e) {} }
-
-function setSync(s, t) {
-  document.getElementById("sdot").className = "sync-dot " + s;
-  document.getElementById("stxt").textContent = t;
+// ── persistence ───────────────────────────────────────────────────────────────
+function sl(){try{localStorage.setItem("gym_v9",JSON.stringify(D));}catch(e){}}
+function ssync(s,t){document.getElementById("sdot").className="dot "+s;document.getElementById("stxt").textContent=t;}
+async function gsGet(key){
+  try{ssync("busy","загрузка...");const r=await fetch(GS+"?action=get&key="+encodeURIComponent(key));const j=await r.json();ssync("ok","синхр.");return j.value?JSON.parse(j.value):null;}
+  catch(e){ssync("err","нет связи");return null;}
+}
+async function gsSet(key,val){
+  try{ssync("busy","сохр...");const r=await fetch(GS+"?action=set&key="+encodeURIComponent(key)+"&value="+encodeURIComponent(JSON.stringify(val)));const j=await r.json();if(j.ok)ssync("ok","сохранено");else ssync("err","ошибка");}
+  catch(e){ssync("err","нет связи");}
 }
 
-async function gsGet(key) {
-  try {
-    setSync("busy","загрузка...");
-    const r = await fetch(GS + "?action=get&key=" + encodeURIComponent(key));
-    const j = await r.json();
-    setSync("ok","синхр.");
-    return j.value ? JSON.parse(j.value) : null;
-  } catch(e) { setSync("err","нет связи"); return null; }
-}
-async function gsSet(key, value) {
-  try {
-    setSync("busy","сохр...");
-    const enc = encodeURIComponent(JSON.stringify(value));
-    const r = await fetch(GS + "?action=set&key=" + encodeURIComponent(key) + "&value=" + enc);
-    const j = await r.json();
-    if (j.ok) setSync("ok","сохранено"); else setSync("err","ошибка");
-  } catch(e) { setSync("err","нет связи"); }
+// ── helpers ───────────────────────────────────────────────────────────────────
+function today(){return new Date().toISOString().slice(0,10);}
+function kgToLbs(kg){return+(kg*2.20462).toFixed(1);}
+function lbsToKg(lbs){return+(lbs/2.20462).toFixed(2);}
+
+// all exercises: builtin (with overrides applied) + custom
+function allEx(){
+  const bi=BIEX.map(e=>{
+    const ov=D.exOverrides[e.id]||{};
+    return{...e,...ov};
+  });
+  return[...bi,...D.cExercises];
 }
 
-function today() { return new Date().toISOString().slice(0,10); }
-function allPresets() { return [...BUILT_IN_PRESETS, ...D.customPresets]; }
-function getPreset(id) { return allPresets().find(p => p.id === id); }
-function getEx(id) { return ALL_EXERCISES.find(e => e.id === id); }
-
-function kgToLbs(kg) { return +(kg * 2.20462).toFixed(1); }
-function lbsToKg(lbs) { return +(lbs / 2.20462).toFixed(2); }
-
-function getWorkout(presetId) {
-  if (!D.workouts[presetId]) D.workouts[presetId] = { date: today(), sets: {} };
-  return D.workouts[presetId];
-}
-function getExSets(presetId, exId) {
-  const w = getWorkout(presetId);
-  if (!w.sets[exId]) w.sets[exId] = [{weight:"", reps:"", adj:""}];
-  return w.sets[exId];
+// all presets: builtin (with exIds overrides) + custom
+function allPr(){
+  const bi=BIPR.map(p=>{
+    const exIds=D.prExIds[p.id]||p.exIds;
+    const nameOv=D.prExIds[p.id+"_name"];
+    return{...p,exIds,name:nameOv||p.name};
+  });
+  return[...bi,...D.cPresets];
 }
 
-function getBaseWeight(exId) {
-  const ex = getEx(exId);
-  if (!ex) return 0;
-  if (ex.bodyweight) return parseFloat(D.settings.bodyWeight) || 0;
-  if (ex.hasBar) return parseFloat((D.settings.barWeights || {})[exId]) || 0;
+function getEx(id){return allEx().find(e=>e.id===id);}
+function getPr(id){return allPr().find(p=>p.id===id);}
+
+// effective unit for display: user may have toggled кг↔ф
+function dispUnit(exId){
+  const ex=getEx(exId);if(!ex)return"кг";
+  const def=ex.defaultUnit||"кг";
+  const pref=D.unitPref[exId];
+  if(!pref)return def;
+  // pref "lbs" → show фунты, pref "kg" → show кг
+  if(pref==="lbs")return"ф";
+  if(pref==="kg")return"кг";
+  return def;
+}
+function isLbs(exId){return dispUnit(exId)==="ф";}
+
+function getW(pid){if(!D.workouts[pid])D.workouts[pid]={date:today(),sets:{}};return D.workouts[pid];}
+function getSets(pid,exId){const w=getW(pid);if(!w.sets[exId])w.sets[exId]=[{weight:"",reps:"",adj:""}];return w.sets[exId];}
+
+function baseW(exId){
+  const ex=getEx(exId);if(!ex)return 0;
+  if(ex.bodyweight)return parseFloat(D.settings.bodyWeight)||0;
+  if(ex.hasBar)return parseFloat((D.settings.barWeights||{})[exId])||0;
   return 0;
 }
 
-function effectiveWeight(exId, setObj) {
-  const base = getBaseWeight(exId);
-  const added = parseFloat(setObj.weight) || 0;
-  const adj = parseFloat(setObj.adj) || 0;
-  return base + added + adj;
+function effW(exId,s){
+  const ex=getEx(exId);if(!ex)return 0;
+  const base=baseW(exId);
+  if(ex.bodyweight)return base+(parseFloat(s.adj)||0);
+  return base+(parseFloat(s.weight)||0);
 }
 
-function calcVolume(exId, sets) {
-  const ex = getEx(exId);
-  if (!ex) return 0;
-  if (ex.unit === "сек") {
-    const bw = getBaseWeight(exId);
-    return sets.reduce((s, x) => {
-      const secs = parseFloat(x.reps) || 0;
-      const adj = parseFloat(x.adj) || 0;
-      return s + (bw + adj) * secs;
-    }, 0);
+function calcVol(exId,sets){
+  const ex=getEx(exId);if(!ex||!sets||!sets.length)return 0;
+  const du=ex.defaultUnit||"кг";
+  if(du==="сек"){
+    return sets.reduce((a,x)=>{
+      const bSnap=parseFloat(x.baseSnap)||baseW(exId);
+      return a+(bSnap+(parseFloat(x.adj)||0))*(parseFloat(x.reps)||0);
+    },0);
   }
-  if (ex.unit === "повт") return sets.reduce((s,x) => s + (parseFloat(x.reps)||0), 0);
-  return sets.reduce((s,x) => {
-    const ew = effectiveWeight(exId, x);
-    return s + ew * (parseFloat(x.reps)||0);
-  }, 0);
+  if(du==="повт")return sets.reduce((a,x)=>a+(parseFloat(x.reps)||0),0);
+  // кг or ф: volume always in kg
+  return sets.reduce((a,x)=>a+effW(exId,x)*(parseFloat(x.reps)||0),0);
 }
 
-function fmtVol(vol, unit) {
-  if (unit === "сек") return Math.round(vol) + " кг·с";
-  if (unit === "повт") return Math.round(vol) + " повт";
-  return Math.round(vol) + " кг·повт";
+function fmtVol(v,du){
+  if(du==="сек")return Math.round(v)+" кг·с";
+  if(du==="повт")return Math.round(v)+" повт";
+  return Math.round(v)+" кг·повт";
 }
 
-function getExHistory(exId) {
-  return D.history[exId] || [];
+function getHist(exId){return D.history[exId]||[];}
+
+function calcPR(exId){
+  const ex=getEx(exId);const h=getHist(exId);if(!ex||!h.length)return null;
+  const du=ex.defaultUnit||"кг";
+  if(du==="сек"||du==="повт"){const m=Math.max(...h.flatMap(e=>e.sets.map(s=>parseFloat(s.reps)||0)));return m>0?m+" "+du:null;}
+  const m=Math.max(...h.flatMap(e=>e.sets.map(s=>{
+    const base=parseFloat(s.baseSnap)||baseW(exId);
+    return ex.bodyweight?base+(parseFloat(s.adj)||0):base+(parseFloat(s.weight)||0);
+  })));
+  return m>0?m+" кг":null;
 }
 
-function calcPR(hist, exId) {
-  const ex = getEx(exId);
-  if (!ex || !hist.length) return null;
-  if (ex.unit === "сек" || ex.unit === "повт") {
-    const m = Math.max(...hist.flatMap(h => h.sets.map(s => parseFloat(s.reps)||0)));
-    return m > 0 ? m + " " + ex.unit : null;
-  }
-  const m = Math.max(...hist.flatMap(h => h.sets.map(s => effectiveWeightFromHist(exId, s))));
-  return m > 0 ? m + " кг" : null;
+function fmtSetHist(exId,s){
+  const ex=getEx(exId);if(!ex)return"—";
+  const du=ex.defaultUnit||"кг";
+  const r=parseFloat(s.reps);if(isNaN(r))return"пропущено";
+  const adj=parseFloat(s.adj)||0;
+  if(du==="сек"){const bSnap=parseFloat(s.baseSnap)||baseW(exId);return(adj!==0?(adj>0?"+"+adj:String(adj))+"кг ":"")+r+"с";}
+  if(du==="повт")return(adj!==0?(adj>0?"+"+adj:String(adj))+"кг ":"")+r+"п";
+  const base=parseFloat(s.baseSnap)||baseW(exId);
+  const total=ex.bodyweight?base+adj:base+(parseFloat(s.weight)||0);
+  // always show in кг in history for clarity
+  return total+"кг×"+r;
 }
 
-function effectiveWeightFromHist(exId, s) {
-  const ex = getEx(exId);
-  if (!ex) return 0;
-  const base = parseFloat(s.baseSnap) || getBaseWeight(exId);
-  const added = parseFloat(s.weight) || 0;
-  const adj = parseFloat(s.adj) || 0;
-  return base + added + adj;
-}
+// ── set row HTML ──────────────────────────────────────────────────────────────
+function setRowHTML(pid,exId,i,s){
+  const ex=getEx(exId);if(!ex)return"";
+  const du=ex.defaultUnit||"кг";
+  const bw=!!ex.bodyweight;
+  const lbs=isLbs(exId); // user toggled display unit
 
-function fmtSetDisplay(exId, s) {
-  const ex = getEx(exId);
-  if (!ex) return "—";
-  const r = parseFloat(s.reps);
-  if (ex.unit === "сек") {
-    if (isNaN(r)) return "пропущено";
-    const bw = parseFloat(s.baseSnap) || getBaseWeight(exId);
-    const adj = parseFloat(s.adj) || 0;
-    const totalW = bw + adj;
-    return (adj !== 0 ? (adj > 0 ? "+" + adj : adj) + "кг, " : "") + r + "с";
-  }
-  if (ex.unit === "повт") {
-    if (isNaN(r)) return "пропущено";
-    const adj = parseFloat(s.adj) || 0;
-    return (adj !== 0 ? (adj > 0 ? "+" + adj : adj) + "кг, " : "") + r + "п";
-  }
-  const w = parseFloat(s.weight);
-  if (isNaN(w) && isNaN(r)) return "пропущено";
-  const base = parseFloat(s.baseSnap) || getBaseWeight(exId);
-  const adj = parseFloat(s.adj) || 0;
-  const total = base + (isNaN(w)?0:w) + adj;
-  const rStr = isNaN(r) ? "?" : r;
-  if (ex.unit === "ф") {
-    const lbs = kgToLbs(total);
-    return lbs + "ф×" + rStr + " <span class='lbs-hint'>(" + total.toFixed(1) + "кг)</span>";
-  }
-  return total + "кг×" + rStr;
-}
-
-function isLbs(exId) { return D.unitPref[exId] === "lbs"; }
-
-function setRowHTML(presetId, exId, i, s) {
-  const ex = getEx(exId);
-  if (!ex) return "";
-  const simple = ex.unit === "сек" || ex.unit === "повт";
-  const useLbs = !simple && isLbs(exId);
-  const base = getBaseWeight(exId);
-  const hasBase = base > 0;
-  const hasAdj = ex.bodyweight || ex.hasBar;
-
-  let col1, col2, col3;
-
-  if (ex.unit === "сек") {
-    col1 = `<div></div>`;
-    col2 = `<input class="set-inp" type="number" min="0" step="1" placeholder="сек" value="${s.reps||''}" oninput="updSet('${presetId}','${exId}',${i},'reps',this.value)">`;
-    col3 = hasAdj
-      ? `<input class="set-inp" type="number" step="0.5" placeholder="±кг" value="${s.adj||''}" oninput="updSet('${presetId}','${exId}',${i},'adj',this.value)" style="font-size:12px;">`
-      : `<div></div>`;
-  } else if (ex.unit === "повт") {
-    col1 = `<div></div>`;
-    col2 = `<input class="set-inp" type="number" min="0" step="1" placeholder="повт" value="${s.reps||''}" oninput="updSet('${presetId}','${exId}',${i},'reps',this.value)">`;
-    col3 = hasAdj
-      ? `<input class="set-inp" type="number" step="0.5" placeholder="±кг" value="${s.adj||''}" oninput="updSet('${presetId}','${exId}',${i},'adj',this.value)" style="font-size:12px;">`
-      : `<div></div>`;
-  } else {
-    const dispW = useLbs && s.weight !== "" ? kgToLbs(parseFloat(s.weight)||0) : (s.weight||"");
-    const ph = useLbs ? "фунты" : "кг";
-    col1 = `<input class="set-inp" type="number" min="0" step="${useLbs?'0.5':'0.5'}" placeholder="${ph}" value="${dispW}" oninput="updWeight('${presetId}','${exId}',${i},this.value,${useLbs})">`;
-    col2 = `<input class="set-inp" type="number" min="0" step="1" placeholder="повт" value="${s.reps||''}" oninput="updSet('${presetId}','${exId}',${i},'reps',this.value)">`;
-    col3 = hasAdj
-      ? `<input class="set-inp" type="number" step="0.5" placeholder="±кг" value="${s.adj||''}" oninput="updSet('${presetId}','${exId}',${i},'adj',this.value)" style="font-size:12px;">`
-      : `<div></div>`;
+  if(bw){
+    const rph=du==="сек"?"сек":"повт";
+    return`<div class="sr">
+      <div class="sn">${i+1}</div>
+      <input class="si sm" type="number" step="0.5" placeholder="±кг" value="${s.adj||""}" oninput="updAdj('${pid}','${exId}',${i},this.value)">
+      <input class="si" type="number" min="0" step="1" placeholder="${rph}" value="${s.reps||""}" oninput="updReps('${pid}','${exId}',${i},this.value)">
+      <button class="ds" onclick="delSet('${pid}','${exId}',${i})">×</button>
+    </div>`;
   }
 
-  const cols = hasAdj ? "28px 1fr 1fr 1fr 24px" : "28px 1fr 1fr 24px";
-  return `<div class="set-row" style="grid-template-columns:${cols}">
-    <div class="set-num">${i+1}</div>
-    ${col1}${col2}${col3}
-    <button class="btn-del-set" onclick="delSet('${presetId}','${exId}',${i})">×</button>
+  if(du==="повт"){
+    return`<div class="sr">
+      <div class="sn">${i+1}</div>
+      <div></div>
+      <input class="si" type="number" min="0" step="1" placeholder="повт" value="${s.reps||""}" oninput="updReps('${pid}','${exId}',${i},this.value)">
+      <button class="ds" onclick="delSet('${pid}','${exId}',${i})">×</button>
+    </div>`;
+  }
+
+  if(du==="сек"){
+    return`<div class="sr">
+      <div class="sn">${i+1}</div>
+      <div></div>
+      <input class="si" type="number" min="0" step="1" placeholder="сек" value="${s.reps||""}" oninput="updReps('${pid}','${exId}',${i},this.value)">
+      <button class="ds" onclick="delSet('${pid}','${exId}',${i})">×</button>
+    </div>`;
+  }
+
+  // кг or ф — user can toggle between them
+  const ph=lbs?"фунты":"кг";
+  const raw=parseFloat(s.weight);
+  const dispW=lbs&&!isNaN(raw)?kgToLbs(raw):(s.weight||"");
+
+  return`<div class="sr">
+    <div class="sn">${i+1}</div>
+    <input class="si" type="number" min="0" step="0.5" placeholder="${ph}" value="${dispW}" oninput="updW('${pid}','${exId}',${i},this.value,${lbs})">
+    <input class="si" type="number" min="0" step="1" placeholder="повт" value="${s.reps||""}" oninput="updReps('${pid}','${exId}',${i},this.value)">
+    <button class="ds" onclick="delSet('${pid}','${exId}',${i})">×</button>
   </div>`;
 }
 
-function renderWorkout() {
-  const preset = getPreset(curPreset);
-  if (!preset) return;
-  const w = getWorkout(curPreset);
-  const p = document.getElementById("page-workout");
+// ── volume block ──────────────────────────────────────────────────────────────
+function buildVol(exId,sets){
+  const ex=getEx(exId);if(!ex)return`<div id="vol-${exId}"></div>`;
+  const du=ex.defaultUnit||"кг";
+  const cur=calcVol(exId,sets);
+  if(cur<=0)return`<div id="vol-${exId}"></div>`;
+  const hist=getHist(exId);
+  const prev=hist.length?calcVol(exId,hist[hist.length-1].sets):null;
+  const maxV=hist.length?Math.max(...hist.map(h=>calcVol(exId,h.sets))):0;
+  const dl=[];
+  if(prev!==null&&prev>0){const d=cur-prev,p=Math.round(Math.abs(d)/prev*100);if(d>0)dl.push(`<span class="vd up">▲ +${p}% к прош.</span>`);else if(d<0)dl.push(`<span class="vd dn">▼ −${p}% к прош.</span>`);else dl.push(`<span class="vd eq">= прош.</span>`);}
+  if(maxV>0){const d2=cur-maxV;if(d2>0)dl.push(`<span class="vd up">▲ новый макс!</span>`);else{const p2=Math.round(Math.abs(d2)/maxV*100);dl.push(`<span class="vd eq">−${p2}% к макс.</span>`);}}
+  return`<div id="vol-${exId}" class="vbl"><div class="vr"><span class="vlbl">объём:</span><span class="vval">${fmtVol(cur,du)}</span>${dl.join(" ")}</div></div>`;
+}
 
-  const presetsHTML = allPresets().map(pr =>
-    `<button class="preset-chip${pr.id===curPreset?' active':''}" onclick="switchPreset('${pr.id}')">${pr.name}</button>`
-  ).join("") + `<button class="preset-chip new-btn" onclick="newPreset()">+ новый</button>`;
-
-  let html = `<div class="preset-bar">${presetsHTML}</div>
-  <div class="date-row">
-    <span class="date-lbl">дата:</span>
-    <input type="date" class="date-inp" value="${w.date||today()}" onchange="getWorkout('${curPreset}').date=this.value;saveLocal()">
+// ── history block ─────────────────────────────────────────────────────────────
+function buildHist(exId){
+  const ex=getEx(exId);if(!ex)return"";
+  const du=ex.defaultUnit||"кг";
+  const hist=getHist(exId);
+  const open=histOpen[exId];
+  const exp=histExp[exId];
+  const shown=exp?hist:hist.slice(-3);
+  const hasMore=hist.length>3;
+  let entries=hist.length===0?`<div class="sk">пока пусто</div>`
+    :shown.slice().reverse().map(h=>{
+        const vol=calcVol(exId,h.sets);
+        const sStr=h.sets.map((s,i)=>{const f=fmtSetHist(exId,s);return`<span${f==="пропущено"?' class="sk"':''}>${i+1}: ${f}</span>`;}).join("  ");
+        return`<div class="he"><div class="htop"><span class="hd">${h.date}</span><div class="hm"><span class="hv">${fmtVol(vol,du)}</span><button class="dh" onclick="delHist('${exId}','${h.date}')">×</button></div></div><div class="hs">${sStr}</div></div>`;
+      }).join("")+(hasMore&&!exp?`<button class="mb" onclick="histExp['${exId}']=true;renderWorkout()">показать все (${hist.length})</button>`:"");
+  return`<div class="hbl">
+    <button class="htog" onclick="histOpen['${exId}']=!histOpen['${exId}'];renderWorkout()">
+      <span class="harr${open?" open":""}">▶</span>
+      <span>история${hist.length?` (${hist.length})`:""}</span>
+    </button>
+    <div class="hlist${open?" open":""}">${entries}</div>
   </div>`;
+}
 
-  preset.exIds.forEach(exId => {
-    const ex = getEx(exId);
-    if (!ex) return;
-    const sets = getExSets(curPreset, exId);
-    const hist = getExHistory(exId);
-    const pr = calcPR(hist, exId);
-    const base = getBaseWeight(exId);
-    const hasBase = base > 0;
-    const hasAdj = ex.bodyweight || ex.hasBar;
-    const useLbs = isLbs(exId) && ex.unit !== "сек" && ex.unit !== "повт";
-    const simple = ex.unit === "сек" || ex.unit === "повт";
-    const cols = hasAdj ? "28px 1fr 1fr 1fr 24px" : "28px 1fr 1fr 24px";
+// ── render workout ────────────────────────────────────────────────────────────
+function renderWorkout(){
+  const pr=getPr(curPreset);
+  if(!pr){document.getElementById("pg-workout").innerHTML=`<div style="color:var(--text3);font-size:13px;padding:20px 0">Пресет не найден</div>`;return;}
+  const w=getW(curPreset);
+  const chips=allPr().map(p=>`<button class="chip${p.id===curPreset?" on":""}" onclick="switchPreset('${p.id}')">${p.name}</button>`).join("")
+    +`<button class="chip dim" onclick="goNewPreset()">+ новый</button>`;
+  let html=`<div class="chips">${chips}</div>
+  <div class="drow"><span class="dlbl">дата:</span><input type="date" class="dinp" value="${w.date||today()}" onchange="getW('${curPreset}').date=this.value;sl()"></div>`;
 
-    let h1, h2, h3;
-    if (ex.unit === "сек") { h1=""; h2="сек"; h3=hasAdj?"±кг":""; }
-    else if (ex.unit === "повт") { h1=""; h2="повт"; h3=hasAdj?"±кг":""; }
-    else { h1=useLbs?"фунты":"кг"; h2="повт"; h3=hasAdj?"±кг":""; }
+  pr.exIds.forEach(exId=>{
+    const ex=getEx(exId);if(!ex)return;
+    const sets=getSets(curPreset,exId);
+    const pr2=calcPR(exId);
+    const bw=!!ex.bodyweight;
+    const du=ex.defaultUnit||"кг";
+    const lbs=isLbs(exId);
+    const base=baseW(exId);
+    const showUnitBtn=du!=="сек"&&du!=="повт"&&!bw;
 
-    const curVol = calcVolume(exId, sets);
-    let volHTML = "";
-    if (curVol > 0) {
-      const lastEntry = hist.length > 0 ? hist[hist.length-1] : null;
-      const prevVol = lastEntry ? calcVolume(exId, lastEntry.sets) : null;
-      const maxVol = hist.length > 0 ? Math.max(...hist.map(h => calcVolume(exId, h.sets))) : 0;
-      let deltas = [];
-      if (prevVol !== null && prevVol > 0) {
-        const d = curVol - prevVol;
-        const pct = Math.round(Math.abs(d)/prevVol*100);
-        if (d>0) deltas.push(`<span class="vol-delta up">▲ +${pct}% к прош.</span>`);
-        else if (d<0) deltas.push(`<span class="vol-delta down">▼ −${pct}% к прош.</span>`);
-        else deltas.push(`<span class="vol-delta same">= прош.</span>`);
-      }
-      if (maxVol > 0 && curVol > 0) {
-        const d2 = curVol - maxVol;
-        if (d2 > 0) deltas.push(`<span class="vol-delta up">▲ новый макс!</span>`);
-        else if (maxVol > 0) {
-          const pct2 = Math.round(Math.abs(d2)/maxVol*100);
-          deltas.push(`<span class="vol-delta same">−${pct2}% к макс.</span>`);
-        }
-      }
-      volHTML = `<div class="vol-row" id="vol-${exId}">
-        <span class="vol-lbl">объём:</span>
-        <span class="vol-val">${fmtVol(curVol, ex.unit)}</span>
-        ${deltas.join(" ")}
-      </div>`;
-    } else {
-      volHTML = `<div id="vol-${exId}"></div>`;
-    }
+    // column headers depend on actual display unit
+    let h1="",h2="";
+    if(bw){h1="±кг";h2=du==="сек"?"сек":"повт";}
+    else if(du==="повт"){h1="";h2="повт";}
+    else if(du==="сек"){h1="";h2="сек";}
+    else{h1=lbs?"фунты":"кг";h2="повт";}
 
-    const isOpen = histOpen[exId];
-    const isExpanded = histExpanded[exId];
-    const shown = isExpanded ? hist : hist.slice(-3);
-    const hasMore = hist.length > 3;
+    const unitBtn=showUnitBtn?`<button class="bxs${lbs?" on":""}" onclick="toggleUnit('${exId}')">${lbs?"ф→кг":"кг→ф"}</button>`:"";
+    let binfo="";
+    if(base>0) binfo=`<div class="binfo">${bw?`вес тела: ${base} кг · ±отягощение/резинка`:`гриф/база: ${base} кг`}</div>`;
 
-    let histEntriesHTML = hist.length === 0
-      ? `<div class="hist-skipped">пока пусто</div>`
-      : shown.slice().reverse().map(h => {
-          const vol = calcVolume(exId, h.sets);
-          const sStr = h.sets.map((s,i) => {
-            const f = fmtSetDisplay(exId, s);
-            return `<span${f==="пропущено"?' class="hist-skipped"':''}>${i+1}: ${f}</span>`;
-          }).join("  ");
-          return `<div class="hist-entry">
-            <div class="hist-entry-top">
-              <span class="hist-date">${h.date}</span>
-              <div class="hist-meta">
-                <span class="hist-vol">${fmtVol(vol,ex.unit)}</span>
-                <button class="btn-del-hist" onclick="delHist('${exId}','${h.date}')">×</button>
-              </div>
-            </div>
-            <div class="hist-sets">${sStr}</div>
-          </div>`;
-        }).join("") + (hasMore && !isExpanded ? `<button class="show-more" onclick="expandHist('${exId}')">показать все (${hist.length})</button>` : "");
-
-    let baseInfo = "";
-    if (hasBase) {
-      const bwStr = ex.bodyweight ? `вес тела: ${base} кг` : `гриф/база: ${base} кг`;
-      baseInfo = `<div class="base-row">${bwStr}${hasAdj ? " · ±отягощение в подходе" : ""}</div>`;
-    }
-    let unitToggle = "";
-    if (!simple) {
-      unitToggle = `<button class="unit-toggle${useLbs?' active':''}" onclick="toggleUnit('${exId}')">${useLbs?'фунты → кг':'кг → фунты'}</button>`;
-    }
-
-    html += `<div class="ex-card" id="card-${exId}">
-      <div class="ex-head">
-        <div class="ex-name">${ex.name}</div>
-        <div class="ex-actions">
-          ${pr ? `<span class="pr-badge">PR ${pr}</span>` : ""}
-          ${unitToggle}
-          <button class="btn-sm" onclick="addSet('${curPreset}','${exId}')">+ подход</button>
-        </div>
-      </div>
-      ${baseInfo}
-      <div class="sets-head" style="grid-template-columns:${cols}">
-        <span>#</span><span>${h1}</span><span>${h2}</span><span>${h3}</span>${hasAdj?"":`<span></span>`}
-      </div>
-      <div id="sets-${exId}">`;
-    sets.forEach((s,i) => { html += setRowHTML(curPreset, exId, i, s); });
-    html += `</div>
-      ${volHTML}
-      <div class="hist-block">
-        <button class="hist-toggle" onclick="toggleHist('${exId}')">
-          <span class="hist-arrow${isOpen?' open':''}">▶</span>
-          <span>история${hist.length>0?' ('+hist.length+')':''}</span>
-        </button>
-        <div class="hist-list${isOpen?' open':''}">${histEntriesHTML}</div>
-      </div>
+    html+=`<div class="card">
+      <div class="ch"><div class="cn">${ex.name}</div><div class="ca">${pr2?`<span class="badge">PR ${pr2}</span>`:""}${unitBtn}<button class="bxs" onclick="addSet('${curPreset}','${exId}')">+ подход</button></div></div>
+      ${binfo}
+      <div class="sh"><span>#</span><span>${h1}</span><span>${h2}</span><span></span></div>
+      <div id="sets-${exId}">${sets.map((s,i)=>setRowHTML(curPreset,exId,i,s)).join("")}</div>
+      ${buildVol(exId,sets)}
+      ${buildHist(exId)}
     </div>`;
   });
-
-  p.innerHTML = html;
+  document.getElementById("pg-workout").innerHTML=html;
 }
 
-function renderSettings() {
-  const s = D.settings;
-  let html = `<div class="settings-section">
-    <div class="settings-title">МОЙ ВЕС</div>
-    <div class="setting-row">
-      <div><div class="setting-lbl">Вес тела</div><div class="setting-sub">используется для подтягиваний и планки</div></div>
-      <input class="setting-inp" type="number" step="0.5" value="${s.bodyWeight||80}" onchange="D.settings.bodyWeight=parseFloat(this.value)||80;saveLocal();showToast('сохранено');" placeholder="кг"> 
-    </div>
-  </div>
-  <div class="settings-section">
-    <div class="settings-title">БАЗОВЫЙ ВЕС СНАРЯДОВ</div>
-    <div class="setting-sub" style="margin-bottom:10px;font-size:11px;color:var(--text3);font-family:'IBM Plex Mono',monospace;">вес грифа/базы — прибавляется к каждому подходу при расчёте объёма</div>`;
+// ── render settings ───────────────────────────────────────────────────────────
+function renderSettings(){
+  const s=D.settings;
+  let html=`<div class="ss">
+    <div class="st">Мой вес</div>
+    <div class="srow"><div><div class="slbl">Вес тела</div><div class="ssub">база для подтягиваний и планки</div></div>
+    <input class="sinp" type="number" step="0.5" value="${s.bodyWeight||80}" placeholder="кг" onchange="D.settings.bodyWeight=parseFloat(this.value)||80;sl();showToast('сохранено')"></div>
+  </div>`;
 
-  const barExes = ALL_EXERCISES.filter(e => e.hasBar);
-  barExes.forEach(ex => {
-    const val = (s.barWeights||{})[ex.id] || "";
-    html += `<div class="setting-row">
-      <div class="setting-lbl">${ex.name}</div>
-      <input class="setting-inp" type="number" step="0.5" value="${val}" placeholder="кг"
-        onchange="if(!D.settings.barWeights)D.settings.barWeights={};D.settings.barWeights['${ex.id}']=parseFloat(this.value)||0;saveLocal();showToast('сохранено');">
-    </div>`;
-  });
-  html += `</div>`;
+  // bar weights — all exercises with hasBar
+  const barExes=allEx().filter(e=>e.hasBar);
+  if(barExes.length){
+    html+=`<div class="ss"><div class="st">Базовый вес снарядов</div>`;
+    barExes.forEach(ex=>{
+      const val=(s.barWeights||{})[ex.id]||"";
+      html+=`<div class="srow"><div class="slbl">${ex.name}</div>
+        <input class="sinp" type="number" step="0.5" value="${val}" placeholder="кг"
+          onchange="if(!D.settings.barWeights)D.settings.barWeights={};D.settings.barWeights['${ex.id}']=parseFloat(this.value)||0;sl();showToast('сохранено')">
+      </div>`;
+    });
+    html+=`</div>`;
+  }
 
-  // Preset editor
-  html += `<div class="settings-section">
-    <div class="settings-title">МОИ ПРЕСЕТЫ</div>`;
-
-  D.customPresets.forEach((pr, idx) => {
-    const editing = editingPreset === pr.id;
-    if (editing) {
-      const exChecks = ALL_EXERCISES.map(ex =>
-        `<label class="ex-checkbox-row">
-          <input type="checkbox" ${pr.exIds.includes(ex.id)?'checked':''} onchange="toggleExInPreset('${pr.id}','${ex.id}',this.checked)">
-          <span class="ex-checkbox-lbl">${ex.name}</span>
-        </label>`
-      ).join("");
-      html += `<div class="preset-editor">
-        <input class="preset-name-inp" placeholder="Название пресета" value="${pr.name}"
-          oninput="D.customPresets[${idx}].name=this.value;saveLocal()">
-        <div class="ex-checkbox-list">${exChecks}</div>
-        <button class="btn-action primary" onclick="editingPreset=null;renderSettings()">Готово</button>
-        <button class="btn-action danger" onclick="deletePreset('${pr.id}')">Удалить</button>
+  // ALL presets (builtin + custom)
+  html+=`<div class="ss"><div class="st">Мои пресеты</div>`;
+  allPr().forEach((pr)=>{
+    const isBI=!!pr.builtin;
+    if(editPreset===pr.id){
+      const exList=allEx().map(ex=>{
+        const on=pr.exIds.includes(ex.id);
+        const du=ex.defaultUnit||"кг";
+        const meta=[du,ex.bodyweight?"тело":ex.hasBar?"гриф":""].filter(Boolean).join(" · ");
+        return`<label class="ecr"><input type="checkbox" ${on?"checked":""} onchange="toggleExInPr('${pr.id}',${isBI},'${ex.id}',this.checked)"><span class="ecl">${ex.name}</span><span class="ecm">${meta}</span></label>`;
+      }).join("");
+      const newForm=showNewExForm?`<div style="background:var(--bg3);border-radius:var(--rs);padding:10px;margin-top:8px;">
+        <input class="einp" id="nex-name" placeholder="Название упражнения" style="margin-bottom:6px;">
+        <select class="esel" id="nex-unit"><option value="кг">кг</option><option value="ф">фунты (ф)</option><option value="повт">только повторения</option><option value="сек">секунды</option></select>
+        <div class="flags"><label><input type="checkbox" id="nex-bar"> Есть гриф/база</label><label><input type="checkbox" id="nex-bw"> Вес тела (±adj)</label></div>
+        <div class="br"><button class="ba primary" onclick="createEx('${pr.id}')">Создать</button><button class="ba" onclick="showNewExForm=false;renderSettings()">Отмена</button></div>
+      </div>`:`<button class="ba ghost" style="margin-top:8px;" onclick="showNewExForm=true;renderSettings()">+ создать новое упражнение</button>`;
+      html+=`<div class="editor">
+        <input class="einp" value="${pr.name}" placeholder="Название" oninput="savePrName('${pr.id}',${isBI},this.value)">
+        <div style="max-height:320px;overflow-y:auto;">${exList}</div>
+        ${newForm}
+        <div class="br" style="margin-top:10px;">
+          <button class="ba primary" onclick="editPreset=null;showNewExForm=false;renderSettings()">Готово</button>
+          ${!isBI?`<button class="ba danger" onclick="deletePr('${pr.id}')">Удалить пресет</button>`:""}
+        </div>
       </div>`;
     } else {
-      html += `<div style="display:flex;justify-content:space-between;align-items:center;padding:10px 0;border-bottom:1px solid var(--border);">
-        <div>
-          <div style="font-size:13px;">${pr.name}</div>
-          <div style="font-size:11px;color:var(--text3);font-family:'IBM Plex Mono',monospace;margin-top:2px;">${pr.exIds.length} упражнений</div>
+      html+=`<div class="srow"><div><div class="slbl">${pr.name}</div><div class="ssub">${pr.exIds.length} упражнений${isBI?" · встроенный":""}</div></div>
+        <button class="ba" onclick="editPreset='${pr.id}';showNewExForm=false;renderSettings()">изменить</button></div>`;
+    }
+  });
+  html+=`<button class="ba" style="margin-top:12px;" onclick="createPr()">+ создать пресет</button></div>`;
+
+  // ALL exercises (builtin + custom)
+  html+=`<div class="ss"><div class="st">Все упражнения</div>`;
+  allEx().forEach((ex)=>{
+    const isBI=!!BIEX.find(e=>e.id===ex.id);
+    if(editEx===ex.id){
+      const du=ex.defaultUnit||"кг";
+      html+=`<div class="editor">
+        <input class="einp" id="eex-name" value="${ex.name}" placeholder="Название">
+        <select class="esel" id="eex-unit">
+          <option value="кг"${du==="кг"?" selected":""}>кг</option>
+          <option value="ф"${du==="ф"?" selected":""}>фунты (ф)</option>
+          <option value="повт"${du==="повт"?" selected":""}>только повторения</option>
+          <option value="сек"${du==="сек"?" selected":""}>секунды</option>
+        </select>
+        <div class="flags">
+          <label><input type="checkbox" id="eex-bar" ${ex.hasBar?"checked":""}> Есть гриф/база</label>
+          <label><input type="checkbox" id="eex-bw" ${ex.bodyweight?"checked":""}> Вес тела (±adj)</label>
         </div>
-        <button class="btn-action" onclick="editingPreset='${pr.id}';renderSettings()">изменить</button>
+        <div class="note">история сохраняется при любых изменениях${isBI?" · это встроенное упражнение, удалить нельзя":""}</div>
+        <div class="br">
+          <button class="ba primary" onclick="saveEx('${ex.id}',${isBI})">Сохранить</button>
+          <button class="ba" onclick="editEx=null;renderSettings()">Отмена</button>
+          ${!isBI?`<button class="ba danger" onclick="deleteEx('${ex.id}')">Удалить</button>`:""}
+        </div>
+      </div>`;
+    } else {
+      const du=ex.defaultUnit||"кг";
+      const meta=[du,ex.bodyweight?"тело":ex.hasBar?"гриф":""].filter(Boolean).join(" · ");
+      const hLen=(D.history[ex.id]||[]).length;
+      html+=`<div class="srow">
+        <div><div class="slbl">${ex.name}</div><div class="ssub">${meta}${hLen?` · ${hLen} зап.`:""}${isBI?" · встроенное":""}</div></div>
+        <button class="ba" onclick="editEx='${ex.id}';renderSettings()">изменить</button>
       </div>`;
     }
   });
+  html+=`</div>`;
 
-  html += `<button class="btn-action" style="margin-top:12px;" onclick="createNewPreset()">+ создать пресет</button>
-  </div>`;
-
-  document.getElementById("page-settings").innerHTML = html;
+  document.getElementById("pg-settings").innerHTML=html;
 }
 
-function renderExport() {
-  document.getElementById("page-export").innerHTML = `
-    <div class="export-note">Скачать историю по упражнению или всю сразу в формате CSV — открывается в Excel и Google Sheets.</div>
-    <button class="export-btn" onclick="exportAll()">📥 Скачать всю историю (CSV)</button>
-    ${ALL_EXERCISES.map(ex => `<button class="export-btn" onclick="exportEx('${ex.id}')">${ex.name}</button>`).join("")}
-  `;
+// ── render export ─────────────────────────────────────────────────────────────
+function renderExport(){
+  document.getElementById("pg-export").innerHTML=`
+    <div class="expnote">CSV открывается в Excel и Google Sheets. BOM включён — кириллица корректна.</div>
+    <button class="expbtn" onclick="exportAll()">📥 Скачать всю историю</button>
+    ${allEx().map(ex=>`<button class="expbtn" onclick="exportEx('${ex.id}')">${ex.name}</button>`).join("")}`;
 }
 
-function exportAll() {
-  let rows = ["дата,упражнение,подход,вес(кг),повт/сек,отягощение,объём"];
-  ALL_EXERCISES.forEach(ex => {
-    const hist = getExHistory(ex.id);
-    hist.forEach(h => {
-      h.sets.forEach((s, i) => {
-        const w = parseFloat(s.weight)||0;
-        const r = parseFloat(s.reps)||0;
-        const adj = parseFloat(s.adj)||0;
-        const base = parseFloat(s.baseSnap)||getBaseWeight(ex.id);
-        const vol = ex.unit==="сек" ? (base+adj)*r : ex.unit==="повт" ? r : (base+w+adj)*r;
-        rows.push([h.date,`"${ex.name}"`,i+1,base+w+adj,r,adj,Math.round(vol)].join(","));
+function exportAll(){
+  let rows=["дата,упражнение,подход,вес(кг),повт/сек,объём"];
+  allEx().forEach(ex=>{
+    getHist(ex.id).forEach(h=>{
+      h.sets.forEach((s,i)=>{
+        const base=parseFloat(s.baseSnap)||baseW(ex.id);
+        const adj=parseFloat(s.adj)||0;const w=parseFloat(s.weight)||0;const r=parseFloat(s.reps)||0;
+        const total=ex.bodyweight?base+adj:base+w;
+        const vol=calcVol(ex.id,[{...s,baseSnap:base}]);
+        rows.push([h.date,`"${ex.name}"`,i+1,total,r,Math.round(vol)].join(","));
       });
     });
   });
-  downloadCSV(rows.join("\n"), "gym_history.csv");
+  dlCSV(rows.join("\n"),"gym_history.csv");
 }
 
-function exportEx(exId) {
-  const ex = getEx(exId);
-  if (!ex) return;
-  const hist = getExHistory(exId);
-  let rows = ["дата,подход,вес(кг),повт/сек,отягощение,объём"];
-  hist.forEach(h => {
-    h.sets.forEach((s, i) => {
-      const w = parseFloat(s.weight)||0;
-      const r = parseFloat(s.reps)||0;
-      const adj = parseFloat(s.adj)||0;
-      const base = parseFloat(s.baseSnap)||getBaseWeight(exId);
-      const vol = ex.unit==="сек" ? (base+adj)*r : ex.unit==="повт" ? r : (base+w+adj)*r;
-      rows.push([h.date,i+1,base+w+adj,r,adj,Math.round(vol)].join(","));
+function exportEx(exId){
+  const ex=getEx(exId);if(!ex)return;
+  let rows=["дата,подход,вес(кг),повт/сек,объём"];
+  getHist(exId).forEach(h=>{
+    h.sets.forEach((s,i)=>{
+      const base=parseFloat(s.baseSnap)||baseW(exId);
+      const adj=parseFloat(s.adj)||0;const w=parseFloat(s.weight)||0;const r=parseFloat(s.reps)||0;
+      const total=ex.bodyweight?base+adj:base+w;
+      const vol=calcVol(exId,[{...s,baseSnap:base}]);
+      rows.push([h.date,i+1,total,r,Math.round(vol)].join(","));
     });
   });
-  downloadCSV(rows.join("\n"), ex.name.replace(/\s/g,"_") + ".csv");
+  dlCSV(rows.join("\n"),ex.name.replace(/\s+/g,"_")+".csv");
 }
 
-function downloadCSV(content, filename) {
-  const bom = "\uFEFF";
-  const blob = new Blob([bom+content], {type:"text/csv;charset=utf-8;"});
-  const url = URL.createObjectURL(blob);
-  const a = document.createElement("a");
-  a.href = url; a.download = filename; a.click();
-  URL.revokeObjectURL(url);
+function dlCSV(c,f){
+  const b=new Blob(["\uFEFF"+c],{type:"text/csv;charset=utf-8;"});
+  const u=URL.createObjectURL(b);const a=document.createElement("a");
+  a.href=u;a.download=f;a.click();URL.revokeObjectURL(u);
 }
 
-function switchPreset(id) { curPreset = id; renderWorkout(); }
+// ── interactions ──────────────────────────────────────────────────────────────
+function switchPreset(id){curPreset=id;renderWorkout();}
+function goNewPreset(){showPage("settings");createPr();}
 
-function newPreset() { showPage("settings"); createNewPreset(); }
-
-function createNewPreset() {
-  const id = "custom_" + Date.now();
-  D.customPresets.push({id, name:"Новый пресет", exIds:[]});
-  saveLocal();
-  editingPreset = id;
-  renderSettings();
+function savePrName(id,isBI,name){
+  if(isBI){if(!D.prExIds[id+"_name"]||true)D.prExIds[id+"_name"]=name;sl();}
+  else{const pr=D.cPresets.find(p=>p.id===id);if(pr){pr.name=name;sl();}}
 }
 
-function deletePreset(id) {
-  D.customPresets = D.customPresets.filter(p => p.id !== id);
-  editingPreset = null;
-  if (curPreset === id) curPreset = "mon";
-  saveLocal();
-  renderSettings();
-}
-
-function toggleExInPreset(presetId, exId, checked) {
-  const pr = D.customPresets.find(p => p.id === presetId);
-  if (!pr) return;
-  if (checked && !pr.exIds.includes(exId)) pr.exIds.push(exId);
-  if (!checked) pr.exIds = pr.exIds.filter(e => e !== exId);
-  saveLocal();
-}
-
-function toggleUnit(exId) {
-  D.unitPref[exId] = isLbs(exId) ? "kg" : "lbs";
-  saveLocal();
-  renderWorkout();
-}
-
-function updSet(presetId, exId, i, field, val) {
-  const sets = getExSets(presetId, exId);
-  if (!sets[i]) sets[i] = {};
-  sets[i][field] = val;
-  saveLocal();
-  updateVolDisplay(exId);
-}
-
-function updWeight(presetId, exId, i, val, fromLbs) {
-  const sets = getExSets(presetId, exId);
-  if (!sets[i]) sets[i] = {};
-  sets[i].weight = fromLbs ? lbsToKg(parseFloat(val)||0) : val;
-  saveLocal();
-  updateVolDisplay(exId);
-}
-
-function updateVolDisplay(exId) {
-  const ex = getEx(exId);
-  if (!ex) return;
-  const sets = getExSets(curPreset, exId);
-  const hist = getExHistory(exId);
-  const curVol = calcVolume(exId, sets);
-  const el = document.getElementById("vol-" + exId);
-  if (!el) return;
-  if (curVol <= 0) { el.innerHTML = ""; return; }
-  const lastEntry = hist.length > 0 ? hist[hist.length-1] : null;
-  const prevVol = lastEntry ? calcVolume(exId, lastEntry.sets) : null;
-  const maxVol = hist.length > 0 ? Math.max(...hist.map(h => calcVolume(exId, h.sets))) : 0;
-  let deltas = [];
-  if (prevVol !== null && prevVol > 0) {
-    const d = curVol - prevVol; const pct = Math.round(Math.abs(d)/prevVol*100);
-    if (d>0) deltas.push(`<span class="vol-delta up">▲ +${pct}% к прош.</span>`);
-    else if (d<0) deltas.push(`<span class="vol-delta down">▼ −${pct}% к прош.</span>`);
-    else deltas.push(`<span class="vol-delta same">= прош.</span>`);
+function toggleExInPr(pid,isBI,exId,on){
+  if(isBI){
+    const orig=BIPR.find(p=>p.id===pid);
+    const cur=D.prExIds[pid]?[...D.prExIds[pid]]:[...(orig?.exIds||[])];
+    if(on&&!cur.includes(exId))cur.push(exId);
+    if(!on){const i=cur.indexOf(exId);if(i>=0)cur.splice(i,1);}
+    D.prExIds[pid]=cur;sl();
+  } else {
+    const pr=D.cPresets.find(p=>p.id===pid);if(!pr)return;
+    if(on&&!pr.exIds.includes(exId))pr.exIds.push(exId);
+    if(!on)pr.exIds=pr.exIds.filter(e=>e!==exId);
+    sl();
   }
-  if (maxVol > 0) {
-    const d2 = curVol - maxVol;
-    if (d2 > 0) deltas.push(`<span class="vol-delta up">▲ новый макс!</span>`);
-    else { const pct2 = Math.round(Math.abs(d2)/maxVol*100); deltas.push(`<span class="vol-delta same">−${pct2}% к макс.</span>`); }
+}
+
+function createPr(){
+  const id="cp_"+Date.now();
+  D.cPresets.push({id,name:"Новый пресет",exIds:[]});
+  sl();editPreset=id;showNewExForm=false;renderSettings();
+}
+function deletePr(id){
+  D.cPresets=D.cPresets.filter(p=>p.id!==id);
+  if(curPreset===id)curPreset="mon";
+  editPreset=null;sl();renderSettings();showToast("пресет удалён");
+}
+
+function createEx(pid){
+  const name=(document.getElementById("nex-name")?.value||"").trim();
+  if(!name){showToast("введи название");return;}
+  const defaultUnit=document.getElementById("nex-unit")?.value||"кг";
+  const hasBar=document.getElementById("nex-bar")?.checked||false;
+  const bodyweight=document.getElementById("nex-bw")?.checked||false;
+  const id="ex_"+Date.now();
+  D.cExercises.push({id,name,defaultUnit,hasBar,bodyweight});
+  // add to preset
+  const isBI=!!BIPR.find(p=>p.id===pid);
+  toggleExInPr(pid,isBI,id,true);
+  showNewExForm=false;sl();renderSettings();showToast("упражнение создано");
+}
+
+function saveEx(exId,isBI){
+  const name=(document.getElementById("eex-name")?.value||"").trim();
+  if(!name){showToast("введи название");return;}
+  const defaultUnit=document.getElementById("eex-unit")?.value||"кг";
+  const hasBar=document.getElementById("eex-bar")?.checked||false;
+  const bodyweight=document.getElementById("eex-bw")?.checked||false;
+  if(isBI){
+    // store override
+    D.exOverrides[exId]={name,defaultUnit,hasBar,bodyweight};
+  } else {
+    const idx=D.cExercises.findIndex(e=>e.id===exId);
+    if(idx>=0)D.cExercises[idx]={...D.cExercises[idx],name,defaultUnit,hasBar,bodyweight};
   }
-  el.innerHTML = `<div class="vol-row"><span class="vol-lbl">объём:</span><span class="vol-val">${fmtVol(curVol,ex.unit)}</span>${deltas.join(" ")}</div>`;
+  editEx=null;sl();renderSettings();showToast("сохранено");
 }
 
-function addSet(presetId, exId) {
-  const sets = getExSets(presetId, exId);
-  sets.push({weight:"", reps:"", adj:""});
-  saveLocal();
-  const cont = document.getElementById("sets-" + exId);
-  const i = sets.length - 1;
-  cont.insertAdjacentHTML("beforeend", setRowHTML(presetId, exId, i, sets[i]));
-}
-
-function delSet(presetId, exId, i) {
-  const sets = getExSets(presetId, exId);
-  if (sets.length <= 1) return;
-  sets.splice(i, 1);
-  saveLocal();
-  renderWorkout();
-}
-
-function toggleHist(exId) { histOpen[exId] = !histOpen[exId]; renderWorkout(); }
-function expandHist(exId) { histExpanded[exId] = true; renderWorkout(); }
-
-async function delHist(exId, date) {
-  if (!D.history[exId]) return;
-  D.history[exId] = D.history[exId].filter(h => h.date !== date);
-  saveLocal();
-  await gsSet("hist2_" + exId, D.history[exId]);
-  showToast("запись удалена");
-  renderWorkout();
-}
-
-async function saveDay() {
-  const preset = getPreset(curPreset);
-  if (!preset) return;
-  const w = getWorkout(curPreset);
-  const date = w.date || today();
-
-  preset.exIds.forEach(exId => {
-    const ex = getEx(exId);
-    if (!ex) return;
-    if (!D.history[exId]) D.history[exId] = [];
-    const hist = D.history[exId];
-    const sets = getExSets(curPreset, exId);
-    const setsSnap = sets.map(s => ({...s, baseSnap: getBaseWeight(exId)}));
-    const idx = hist.findIndex(h => h.date === date);
-    const entry = {date, sets: JSON.parse(JSON.stringify(setsSnap))};
-    if (idx >= 0) hist[idx] = entry; else hist.push(entry);
-    if (hist.length > 20) hist.splice(0, hist.length - 20);
+function deleteEx(exId){
+  D.cPresets.forEach(pr=>{pr.exIds=pr.exIds.filter(id=>id!==exId);});
+  // also remove from builtin preset overrides
+  Object.keys(D.prExIds).forEach(pid=>{
+    if(Array.isArray(D.prExIds[pid]))D.prExIds[pid]=D.prExIds[pid].filter(id=>id!==exId);
   });
-
-  saveLocal();
-
-  for (const exId of preset.exIds) {
-    await gsSet("hist2_" + exId, D.history[exId]);
-  }
-  await gsSet("workout_" + curPreset, w);
-  await gsSet("settings", D.settings);
-
-  showToast("сохранено ✓");
-  renderWorkout();
+  D.cExercises=D.cExercises.filter(e=>e.id!==exId);
+  editEx=null;sl();renderSettings();showToast("удалено, история сохранена");
 }
 
-function clearDay() {
-  const preset = getPreset(curPreset);
-  if (!preset) return;
-  const w = getWorkout(curPreset);
-  w.sets = {};
-  saveLocal();
-  renderWorkout();
+function toggleUnit(exId){
+  const cur=dispUnit(exId);
+  D.unitPref[exId]=cur==="ф"?"kg":"lbs";
+  sl();renderWorkout();
 }
 
-async function loadCloud() {
-  const allExIds = [...new Set(ALL_EXERCISES.map(e => e.id))];
-  for (const exId of allExIds) {
-    const h = await gsGet("hist2_" + exId);
-    if (h) D.history[exId] = h;
-  }
-  for (const pr of allPresets()) {
-    const w = await gsGet("workout_" + pr.id);
-    if (w) D.workouts[pr.id] = w;
-  }
-  const settings = await gsGet("settings");
-  if (settings) D.settings = settings;
-  saveLocal();
-  renderWorkout();
-  renderSettings();
+function updReps(pid,exId,i,v){const s=getSets(pid,exId);if(!s[i])s[i]={};s[i].reps=v;sl();refreshVol(exId);}
+function updAdj(pid,exId,i,v){const s=getSets(pid,exId);if(!s[i])s[i]={};s[i].adj=v;sl();refreshVol(exId);}
+function updW(pid,exId,i,v,fromLbs){const s=getSets(pid,exId);if(!s[i])s[i]={};s[i].weight=fromLbs?lbsToKg(parseFloat(v)||0):v;sl();refreshVol(exId);}
+
+function refreshVol(exId){
+  const el=document.getElementById("vol-"+exId);if(!el)return;
+  el.outerHTML=buildVol(exId,getSets(curPreset,exId));
+}
+function addSet(pid,exId){
+  const s=getSets(pid,exId);s.push({weight:"",reps:"",adj:""});sl();
+  const c=document.getElementById("sets-"+exId);
+  if(c)c.insertAdjacentHTML("beforeend",setRowHTML(pid,exId,s.length-1,s[s.length-1]));
+}
+function delSet(pid,exId,i){
+  const s=getSets(pid,exId);if(s.length<=1)return;
+  s.splice(i,1);sl();renderWorkout();
+}
+async function delHist(exId,date){
+  if(!D.history[exId])return;
+  D.history[exId]=D.history[exId].filter(h=>h.date!==date);
+  sl();await gsSet("hist2_"+exId,D.history[exId]);showToast("запись удалена");renderWorkout();
 }
 
-function showPage(name) {
-  curPage = name;
-  document.querySelectorAll(".page").forEach(p => p.classList.remove("active"));
-  document.querySelectorAll(".nav-btn").forEach((b,i) => b.classList.toggle("active", ["workout","settings","export"][i]===name));
-  document.getElementById("page-" + name).classList.add("active");
-  document.getElementById("bottom-bar").style.display = name === "workout" ? "flex" : "none";
-  if (name === "settings") renderSettings();
-  if (name === "export") renderExport();
-  if (name === "workout") renderWorkout();
+async function saveDay(){
+  const pr=getPr(curPreset);if(!pr)return;
+  const w=getW(curPreset);const date=w.date||today();
+  pr.exIds.forEach(exId=>{
+    const ex=getEx(exId);if(!ex)return;
+    if(!D.history[exId])D.history[exId]=[];
+    const hist=D.history[exId];
+    const snap=getSets(curPreset,exId).map(s=>({...s,baseSnap:baseW(exId)}));
+    const entry={date,sets:JSON.parse(JSON.stringify(snap))};
+    const idx=hist.findIndex(h=>h.date===date);
+    if(idx>=0)hist[idx]=entry;else hist.push(entry);
+    if(hist.length>20)hist.splice(0,hist.length-20);
+  });
+  sl();
+  for(const exId of pr.exIds)await gsSet("hist2_"+exId,D.history[exId]);
+  await gsSet("workout_"+curPreset,w);
+  await gsSet("settings",D.settings);
+  await gsSet("cPresets",D.cPresets);
+  await gsSet("cExercises",D.cExercises);
+  await gsSet("exOverrides",D.exOverrides);
+  await gsSet("prExIds",D.prExIds);
+  showToast("сохранено ✓");renderWorkout();
 }
 
-function showToast(msg) {
-  const t = document.getElementById("toast");
-  t.textContent = msg;
-  t.classList.add("show");
-  setTimeout(() => t.classList.remove("show"), 2000);
+function clearDay(){
+  const pr=getPr(curPreset);if(!pr)return;
+  getW(curPreset).sets={};sl();renderWorkout();
 }
 
-renderWorkout();
-renderSettings();
-renderExport();
-setSync("busy","загрузка...");
+function showPage(name){
+  curPage=name;
+  if(name!=="settings"){editPreset=null;editEx=null;showNewExForm=false;}
+  document.querySelectorAll(".page").forEach(p=>p.classList.remove("active"));
+  document.querySelectorAll(".nb").forEach((b,i)=>b.classList.toggle("active",["workout","settings","export"][i]===name));
+  document.getElementById("pg-"+name).classList.add("active");
+  document.getElementById("bbar").style.display=name==="workout"?"flex":"none";
+  if(name==="settings")renderSettings();
+  if(name==="export")renderExport();
+  if(name==="workout")renderWorkout();
+}
+
+function showToast(msg){
+  const t=document.getElementById("toast");t.textContent=msg;
+  t.classList.add("show");setTimeout(()=>t.classList.remove("show"),2200);
+}
+
+async function loadCloud(){
+  const settings=await gsGet("settings");if(settings)D.settings=settings;
+  const cp=await gsGet("cPresets");if(cp)D.cPresets=cp;
+  const ce=await gsGet("cExercises");if(ce)D.cExercises=ce;
+  const eo=await gsGet("exOverrides");if(eo)D.exOverrides=eo;
+  const pi=await gsGet("prExIds");if(pi)D.prExIds=pi;
+  for(const ex of allEx()){const h=await gsGet("hist2_"+ex.id);if(h)D.history[ex.id]=h;}
+  for(const pr of allPr()){const ww=await gsGet("workout_"+pr.id);if(ww)D.workouts[pr.id]=ww;}
+  sl();renderWorkout();renderSettings();renderExport();
+}
+
+renderWorkout();renderSettings();renderExport();
+ssync("busy","загрузка...");
 loadCloud();
 </script>
 </body>
