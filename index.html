@@ -203,19 +203,19 @@ const GS="https://script.google.com/macros/s/AKfycbzBrKu5a8Ipuuix4UAi6zau51NCR0Q
 
 const DEF_EX=[
   {id:"hyper",      name:"Гиперэкстензия",       defaultUnit:"кг", bodyweight:true, bwFactor:0.5, kcalFactor:0.08},
-  {id:"chest_press",name:"Жим грудь",             defaultUnit:"кг", hasBar:true,  kcalFactor:0.12},
-  {id:"db_press",   name:"Жим гантелей",          defaultUnit:"кг", kcalFactor:0.11},
-  {id:"butterfly",  name:"Бабочка",               defaultUnit:"кг", kcalFactor:0.09},
-  {id:"front_raise",name:"Перед собой блин",      defaultUnit:"кг", kcalFactor:0.08},
-  {id:"bicep_ez",   name:"Подъём на бицепс EZ",  defaultUnit:"кг", hasBar:true,  kcalFactor:0.09},
-  {id:"ohp",        name:"Жим стоя/сидя",         defaultUnit:"кг", hasBar:true,  kcalFactor:0.11},
+  {id:"chest_press",name:"Жим грудь",             defaultUnit:"кг", hasBar:true,  kcalFactor:0.12},  // штанга — полный вес
+  {id:"db_press",   name:"Жим гантелей",          defaultUnit:"кг", kcalFactor:0.22},  // 2 гантели — коэф ×2
+  {id:"butterfly",  name:"Бабочка",               defaultUnit:"кг", kcalFactor:0.09},  // тренажёр — полный вес
+  {id:"front_raise",name:"Перед собой блин",      defaultUnit:"кг", kcalFactor:0.08},  // один блин — полный вес
+  {id:"bicep_ez",   name:"Подъём на бицепс EZ",  defaultUnit:"кг", hasBar:true,  kcalFactor:0.09},  // штанга
+  {id:"ohp",        name:"Жим стоя/сидя",         defaultUnit:"кг", hasBar:true,  kcalFactor:0.11},  // штанга или 2 ган — если гантели ставь 0.22
   {id:"lunges",     name:"Выпады",                defaultUnit:"кг", kcalFactor:0.10},
   {id:"hack",       name:"Гак-присед",            defaultUnit:"кг", kcalFactor:0.12},
   {id:"leg_ext",    name:"Разгибание ног",        defaultUnit:"кг", kcalFactor:0.09},
   {id:"pullups",    name:"Подтягивания",          defaultUnit:"кг", bodyweight:true, kcalFactor:0.13},
   {id:"tbar",       name:"Тяга Т-грифа",          defaultUnit:"кг", hasBar:true,  kcalFactor:0.11},
   {id:"horiz_row",  name:"Горизонтальная тяга",   defaultUnit:"ф",  kcalFactor:0.10},
-  {id:"tri_db",     name:"Трицепс гантель сидя",  defaultUnit:"кг", kcalFactor:0.08},
+  {id:"tri_db",     name:"Трицепс гантель сидя",  defaultUnit:"кг", kcalFactor:0.08},  // одна рука — без удвоения
   {id:"tri_rope",   name:"Трицепс канат",         defaultUnit:"ф",  kcalFactor:0.08},
   {id:"plank",      name:"Планка на локтях",      defaultUnit:"сек", bodyweight:true, kcalFactor:0.05},
 ];
@@ -226,7 +226,7 @@ const DEF_SS=[
 ];
 // laterals_ex is a standalone exercise only used inside this superset
 const DEF_EX_EXTRA=[
-  {id:"laterals_ex", name:"Махи в стороны", defaultUnit:"кг", kcalFactor:0.08},
+  {id:"laterals_ex", name:"Махи в стороны", defaultUnit:"кг", kcalFactor:0.18},  // 2 гантели — коэф ×2
 ];
 
 const DEF_PRESETS=[
