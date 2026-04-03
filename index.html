@@ -741,9 +741,17 @@ function renderSettings(){
     `<button class="ba" onclick="showNewSSForm='global';renderSettings()">+ создать суперсет</button>`}</div></div>`;
 
   // reset
+  const hasCustomDefaults=!!localStorage.getItem("gym_v11_defaults");
+  const myDefaultsRow=hasCustomDefaults
+    ?'<div class="srow"><div><div class="slbl">Сбросить к моим настройкам</div><div class="ssub">откат к сохранённой точке. история сохранится.</div></div><button class="ba danger" onclick="askResetToMine()">Сброс</button></div>'
+    :"";
   html+=`<div class="ss-sec"><div class="st">Сброс</div>
-    <div class="srow"><div><div class="slbl">Сбросить всё</div><div class="ssub">упражнения, пресеты, настройки → по умолчанию. история сохранится.</div></div>
-    <button class="ba danger" onclick="askReset()">Сброс</button></div></div>`;
+    <div class="srow"><div><div class="slbl">Сохранить мои настройки</div><div class="ssub">текущие упражнения, пресеты и настройки станут точкой отката</div></div>
+    <button class="ba" onclick="saveMyDefaults()">Сохранить</button></div>
+    ${myDefaultsRow}
+    <div class="srow"><div><div class="slbl">Сбросить к заводским</div><div class="ssub">упражнения, пресеты, настройки → исходные. история сохранится.</div></div>
+    <button class="ba danger" onclick="askReset()">Сброс</button></div>
+  </div>`;
 
   document.getElementById("pg-settings").innerHTML=html;
 }
@@ -935,6 +943,23 @@ async function delHistEntry(type,id,date){
   if(type==="ex"){if(!D.history[id])return;D.history[id]=D.history[id].filter(h=>h.date!==date);sl();await gsSet("hist2_"+id,D.history[id]);}
   else{if(!D.ssHistory[id])return;D.ssHistory[id]=D.ssHistory[id].filter(h=>h.date!==date);sl();await gsSet("ssHist_"+id,D.ssHistory[id]);}
   showToast("запись удалена");renderWorkout();
+}
+function saveMyDefaults(){
+  const snap={settings:JSON.parse(JSON.stringify(D.settings)),exercises:JSON.parse(JSON.stringify(D.exercises)),supersets:JSON.parse(JSON.stringify(D.supersets)),presets:JSON.parse(JSON.stringify(D.presets))};
+  try{localStorage.setItem("gym_v11_defaults",JSON.stringify(snap));}catch(e){}
+  showToast("настройки сохранены как мои по умолчанию");renderSettings();
+}
+function askResetToMine(){showModal("Сбросить к моим настройкам?","Упражнения, пресеты и настройки вернутся к сохранённой точке. История сохраняется.",[{label:"Сбросить",cls:"danger",fn:"doResetToMine()"},{label:"Отмена",fn:"closeModal()"}]);}
+function doResetToMine(){
+  try{
+    const snap=JSON.parse(localStorage.getItem("gym_v11_defaults")||"null");
+    if(!snap){showToast("нет сохранённых настроек");closeModal();return;}
+    const hist=D.history,ssHist=D.ssHistory;
+    D.settings=snap.settings;D.exercises=snap.exercises;D.supersets=snap.supersets;D.presets=snap.presets;
+    D.history=hist;D.ssHistory=ssHist;
+    curPreset=D.presets[0]?.id||"mon";
+    closeModal();sl();renderSettings();renderWorkout();showToast("сброшено к моим настройкам");
+  }catch(e){showToast("ошибка сброса");closeModal();}
 }
 function askReset(){showModal("Сбросить настройки?","Упражнения, суперсеты, пресеты и настройки → по умолчанию. История сохраняется.",[{label:"Сбросить",cls:"danger",fn:"doReset()"},{label:"Отмена",fn:"closeModal()"}]);}
 function doReset(){
