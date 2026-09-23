@@ -3,1222 +3,1325 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black">
+<meta name="apple-mobile-web-app-title" content="Gym">
+<meta name="theme-color" content="#0f0f0f">
 <title>Gym Tracker</title>
 <link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500&family=IBM+Plex+Sans:wght@400;500&display=swap" rel="stylesheet">
 <style>
 :root{
   --bg:#0f0f0f;--bg2:#1a1a1a;--bg3:#222;--bg4:#2a2a2a;
   --border:#2e2e2e;--border2:#3a3a3a;
-  --text:#e8e8e8;--text2:#888;--text3:#555;
+  --text:#e8e8e8;--text2:#9a9a9a;--text3:#626262;
   --accent:#c8f060;--accent2:#a0d040;
-  --danger:#ff5a5a;--success:#4caf7d;
-  --up:#4caf7d;--dn:#ff5a5a;--eq:#666;
+  --danger:#ff5a5a;--success:#4caf7d;--warn:#f0b050;
+  --up:#4caf7d;--dn:#ff5a5a;--eq:#777;
   --r:10px;--rs:6px;
+  --mono:'IBM Plex Mono',ui-monospace,Menlo,monospace;
 }
 *{box-sizing:border-box;margin:0;padding:0;}
-html{background:var(--bg);color:var(--text);font-family:'IBM Plex Sans',sans-serif;}
-body{max-width:480px;margin:0 auto;padding-bottom:80px;}
+html{background:var(--bg);color:var(--text);font-family:'IBM Plex Sans',-apple-system,sans-serif;-webkit-text-size-adjust:100%;}
+body{max-width:480px;margin:0 auto;padding-bottom:150px;background:var(--bg);}
+button{font-family:inherit;}
 
 header{padding:14px 16px 10px;border-bottom:1px solid var(--border);display:flex;align-items:center;justify-content:space-between;position:sticky;top:0;background:var(--bg);z-index:20;}
-.logo{font-family:'IBM Plex Mono',monospace;font-size:14px;font-weight:500;color:var(--accent);}
-.sw{display:flex;align-items:center;gap:5px;}
-.dot{width:6px;height:6px;border-radius:50%;background:var(--text3);}
-.dot.ok{background:var(--success);}.dot.busy{background:var(--accent);animation:blink 1s infinite;}.dot.err{background:var(--danger);}
-@keyframes blink{0%,100%{opacity:1}50%{opacity:.3}}
-.stxt{font-size:11px;color:var(--text3);font-family:'IBM Plex Mono',monospace;}
+.logo{font-family:var(--mono);font-size:14px;font-weight:500;color:var(--accent);}
+.htime{font-size:12px;color:var(--text2);font-family:var(--mono);}
 
 .nav{display:flex;border-bottom:1px solid var(--border);overflow-x:auto;}
 .nav::-webkit-scrollbar{display:none;}
-.nb{flex-shrink:0;padding:10px 16px;font-size:12px;font-family:'IBM Plex Mono',monospace;cursor:pointer;border:none;background:transparent;color:var(--text2);border-bottom:2px solid transparent;margin-bottom:-1px;white-space:nowrap;}
+.nb{flex-shrink:0;padding:10px 16px;font-size:12px;font-family:var(--mono);cursor:pointer;border:none;background:transparent;color:var(--text2);border-bottom:2px solid transparent;margin-bottom:-1px;white-space:nowrap;}
 .nb.active{color:var(--accent);border-bottom-color:var(--accent);}
 
 .page{display:none;padding:16px;}.page.active{display:block;}
 
 .chips{display:flex;gap:8px;margin-bottom:14px;flex-wrap:wrap;}
-.chip{font-size:12px;font-family:'IBM Plex Mono',monospace;padding:5px 12px;border-radius:20px;cursor:pointer;border:1px solid var(--border2);background:transparent;color:var(--text2);white-space:nowrap;}
+.chip{font-size:12px;font-family:var(--mono);padding:5px 12px;border-radius:20px;cursor:pointer;border:1px solid var(--border2);background:transparent;color:var(--text2);white-space:nowrap;}
 .chip.on{background:rgba(200,240,96,.12);color:var(--accent);border-color:rgba(200,240,96,.3);}
 .chip.dim{color:var(--text3);}
 
 .drow{display:flex;align-items:center;gap:10px;margin-bottom:14px;}
-.dlbl{font-size:12px;color:var(--text2);font-family:'IBM Plex Mono',monospace;}
-.dinp{font-size:12px;font-family:'IBM Plex Mono',monospace;padding:5px 8px;border:1px solid var(--border2);border-radius:var(--rs);background:var(--bg2);color:var(--text);}
+.dlbl{font-size:12px;color:var(--text2);font-family:var(--mono);}
+.dinp{font-size:13px;font-family:var(--mono);padding:5px 8px;border:1px solid var(--border2);border-radius:var(--rs);background:var(--bg2);color:var(--text);}
+
+.banner{background:rgba(240,176,80,.08);border:1px solid rgba(240,176,80,.3);color:var(--warn);border-radius:var(--r);padding:10px 12px;font-size:12px;margin-bottom:14px;display:flex;align-items:center;justify-content:space-between;gap:10px;line-height:1.4;}
+
+/* groups (supersets / circuits) */
+.grp{border-left:2px solid rgba(200,240,96,.35);padding-left:8px;margin-bottom:12px;}
+.grp-h{font-size:11px;font-family:var(--mono);color:var(--accent);margin:2px 0 8px;line-height:1.45;}
+.grp-h span{color:var(--text3);}
 
 /* exercise card */
 .card{background:var(--bg2);border:1px solid var(--border);border-radius:var(--r);padding:12px;margin-bottom:10px;position:relative;}
-.card.drag-over{border-color:var(--accent)!important;}
-.card.dragging{opacity:.4;}
-
-/* superset card */
+.grp .card{margin-bottom:8px;}
 .ss-card{border:1px solid var(--border2);border-radius:var(--r);margin-bottom:10px;}
-.ss-card.drag-over{border-color:var(--accent)!important;}
-.ss-card.dragging{opacity:.4;}
 .ss-header{display:flex;align-items:center;justify-content:space-between;padding:8px 12px;background:var(--bg3);border-bottom:1px solid var(--border);border-radius:var(--r) var(--r) 0 0;}
-.ss-label{font-size:11px;font-family:'IBM Plex Mono',monospace;color:var(--text3);letter-spacing:.06em;text-transform:uppercase;}
+.ss-label{font-size:11px;font-family:var(--mono);color:var(--text3);letter-spacing:.06em;text-transform:uppercase;}
 .ss-body{padding:12px;}
-
-.ch{display:flex;justify-content:space-between;align-items:center;margin-bottom:8px;gap:8px;}
-.cn{font-size:13px;font-weight:500;display:flex;align-items:center;gap:6px;}
-.drag-handle{cursor:grab;color:var(--text3);font-size:14px;line-height:1;user-select:none;flex-shrink:0;}
-.drag-handle:active{cursor:grabbing;}
-.ca{display:flex;gap:5px;align-items:center;flex-shrink:0;}
-.badge{font-size:10px;font-family:'IBM Plex Mono',monospace;padding:2px 7px;border-radius:20px;background:rgba(200,240,96,.1);color:var(--accent);border:1px solid rgba(200,240,96,.2);white-space:nowrap;}
-.bxs{font-size:11px;font-family:'IBM Plex Mono',monospace;padding:3px 9px;border-radius:var(--rs);cursor:pointer;border:1px solid var(--border2);background:transparent;color:var(--text2);white-space:nowrap;}
-.bxs:active{background:var(--bg3);}
-.bxs.on{color:var(--accent);border-color:rgba(200,240,96,.3);background:rgba(200,240,96,.08);}
-.binfo{font-size:11px;color:var(--text3);font-family:'IBM Plex Mono',monospace;margin-bottom:8px;}
-
-/* superset inner exercises — separator */
 .ss-ex+.ss-ex{margin-top:10px;padding-top:10px;border-top:1px solid var(--border);}
 .ss-ex-name{font-size:12px;font-weight:500;color:var(--text2);margin-bottom:6px;}
 
-.sh{display:grid;grid-template-columns:28px 1fr 1fr 24px;gap:4px;margin-bottom:4px;}
-.sh span{font-size:10px;color:var(--text3);font-family:'IBM Plex Mono',monospace;text-align:center;}
-.sr{display:grid;grid-template-columns:28px 1fr 1fr 24px;gap:4px;margin-bottom:4px;align-items:center;}
-.sn{font-size:11px;color:var(--text3);font-family:'IBM Plex Mono',monospace;text-align:center;}
-.si{width:100%;font-size:14px;font-family:'IBM Plex Mono',monospace;padding:6px 4px;border:1px solid var(--border);border-radius:var(--rs);background:var(--bg3);color:var(--text);text-align:center;-webkit-appearance:none;}
-.si:focus{outline:none;border-color:var(--border2);}
-.si.sm{font-size:12px;}
-.ds{background:transparent;border:none;cursor:pointer;color:var(--text3);font-size:16px;line-height:1;padding:0;}
+.ch{display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:6px;gap:8px;}
+.cn{font-size:14px;font-weight:500;display:flex;align-items:center;gap:6px;line-height:1.3;}
+.gtag{font-size:10px;font-family:var(--mono);color:#0f0f0f;background:var(--accent);border-radius:4px;padding:1px 5px;font-weight:500;}
+.ca{display:flex;gap:5px;align-items:center;flex-shrink:0;}
+.badge{font-size:10px;font-family:var(--mono);padding:2px 7px;border-radius:20px;background:rgba(200,240,96,.1);color:var(--accent);border:1px solid rgba(200,240,96,.2);white-space:nowrap;}
+.bxs{font-size:11px;font-family:var(--mono);padding:4px 9px;border-radius:var(--rs);cursor:pointer;border:1px solid var(--border2);background:transparent;color:var(--text2);white-space:nowrap;}
+.bxs:active{background:var(--bg3);}
+.bxs.on{color:var(--accent);border-color:rgba(200,240,96,.3);background:rgba(200,240,96,.08);}
+.binfo{font-size:11px;color:var(--text3);font-family:var(--mono);margin-bottom:6px;}
+
+.vchips{display:flex;gap:5px;flex-wrap:wrap;margin-bottom:8px;}
+.vchip{font-size:11px;font-family:var(--mono);padding:3px 9px;border-radius:14px;border:1px solid var(--border2);background:transparent;color:var(--text3);cursor:pointer;}
+.vchip.on{color:var(--text);border-color:var(--text2);background:var(--bg3);}
+
+.info{font-size:11.5px;font-family:var(--mono);line-height:1.5;margin-bottom:3px;color:var(--text2);}
+.info b{font-weight:500;color:var(--text3);}
+.info.hint{color:var(--text2);}
+.info.hint.up{color:var(--accent);}
+.info.hint.warn{color:var(--warn);}
+.info.mynote{color:var(--warn);font-family:'IBM Plex Sans',sans-serif;font-size:12px;}
+.infos{margin-bottom:8px;}
+
+.sh,.sr{display:grid;grid-template-columns:30px 1fr 1fr 42px 20px;gap:5px;align-items:center;}
+.sh{margin-bottom:4px;}
+.sh span{font-size:10px;color:var(--text3);font-family:var(--mono);text-align:center;}
+.sr{margin-bottom:5px;}
+.sn{font-size:12px;color:var(--text3);font-family:var(--mono);text-align:center;background:transparent;border:1px dashed transparent;border-radius:var(--rs);padding:7px 0;cursor:pointer;}
+.sn:active{border-color:var(--border2);}
+.sr.wu .sn{color:var(--warn);border-color:rgba(240,176,80,.35);}
+.si{width:100%;font-size:15px;font-family:var(--mono);padding:7px 4px;border:1px solid var(--border);border-radius:var(--rs);background:var(--bg3);color:var(--text);text-align:center;-webkit-appearance:none;appearance:none;}
+.si::placeholder{color:#555;}
+.si:focus{outline:none;border-color:var(--text3);}
+select.si{font-size:13px;padding:8px 2px;text-align-last:center;}
+.sr.wu .si{border-style:dashed;color:var(--text2);}
+.sr.done .si{border-color:rgba(76,175,125,.55);}
+.ok{height:34px;border-radius:var(--rs);border:1px solid var(--border2);background:transparent;color:var(--text3);font-size:15px;cursor:pointer;}
+.ok.on{background:var(--success);border-color:var(--success);color:#0f0f0f;}
+.ds{background:transparent;border:none;cursor:pointer;color:var(--text3);font-size:17px;line-height:1;padding:0;}
 .ds:active{color:var(--danger);}
+.addrow{display:flex;gap:6px;margin-top:6px;}
 
 .vbl{margin-top:8px;padding-top:8px;border-top:1px solid var(--border);}
 .vr{display:flex;align-items:center;gap:8px;flex-wrap:wrap;}
-.vlbl{font-size:11px;color:var(--text3);font-family:'IBM Plex Mono',monospace;}
-.vval{font-size:12px;font-family:'IBM Plex Mono',monospace;color:var(--text2);}
-.vd{font-size:11px;font-family:'IBM Plex Mono',monospace;}
+.vlbl{font-size:11px;color:var(--text3);font-family:var(--mono);}
+.vval{font-size:12px;font-family:var(--mono);color:var(--text2);}
+.vd{font-size:11px;font-family:var(--mono);}
 .vd.up{color:var(--up);}.vd.dn{color:var(--dn);}.vd.eq{color:var(--eq);}
-.kcal{font-size:11px;font-family:'IBM Plex Mono',monospace;color:var(--text3);margin-left:4px;}
 
-.hbl{margin-top:8px;}
-.htog{display:flex;align-items:center;gap:6px;cursor:pointer;background:none;border:none;padding:4px 0;color:var(--text3);font-size:11px;font-family:'IBM Plex Mono',monospace;}
+.hbl{margin-top:6px;}
+.htog{display:flex;align-items:center;gap:6px;cursor:pointer;background:none;border:none;padding:4px 0;color:var(--text3);font-size:11px;font-family:var(--mono);}
 .harr{font-size:9px;transition:transform .2s;}.harr.open{transform:rotate(90deg);}
-.hlist{margin-top:6px;display:none;}.hlist.open{display:block;}
+.hlist{margin-top:6px;}
 .he{background:var(--bg3);border-radius:var(--rs);padding:7px 10px;margin-bottom:5px;}
 .htop{display:flex;justify-content:space-between;align-items:center;margin-bottom:3px;}
-.hdate2{font-size:11px;color:var(--text3);font-family:'IBM Plex Mono',monospace;}
+.hdate2{font-size:11px;color:var(--text3);font-family:var(--mono);}
 .hm{display:flex;align-items:center;gap:6px;}
-.hv{font-size:11px;font-family:'IBM Plex Mono',monospace;color:var(--text2);}
-.hs{font-size:11px;font-family:'IBM Plex Mono',monospace;color:var(--text2);line-height:1.7;}
-.sk{color:var(--text3);font-style:italic;}
-.dh{background:transparent;border:none;cursor:pointer;color:var(--text3);font-size:14px;padding:0 2px;line-height:1;}
-.dh:active{color:var(--danger);}
-.eh{background:transparent;border:none;cursor:pointer;color:var(--text3);font-size:11px;font-family:'IBM Plex Mono',monospace;padding:0 4px;text-decoration:underline;text-underline-offset:2px;}
-.mbtn{font-size:11px;font-family:'IBM Plex Mono',monospace;color:var(--text3);cursor:pointer;background:none;border:none;padding:2px 0;text-decoration:underline;text-underline-offset:2px;}
+.hv{font-size:11px;font-family:var(--mono);color:var(--text2);}
+.hs{font-size:11px;font-family:var(--mono);color:var(--text2);line-height:1.7;}
+.hs i{color:var(--warn);font-style:normal;}
+.sk{color:var(--text3);font-style:italic;font-size:12px;}
+.dh{background:transparent;border:none;cursor:pointer;color:var(--text3);font-size:15px;padding:0 2px;line-height:1;}
+.eh{background:transparent;border:none;cursor:pointer;color:var(--text3);font-size:11px;font-family:var(--mono);padding:0 4px;text-decoration:underline;text-underline-offset:2px;}
+.mbtn{font-size:11px;font-family:var(--mono);color:var(--text3);cursor:pointer;background:none;border:none;padding:2px 0;text-decoration:underline;text-underline-offset:2px;}
 
-/* total row */
+/* technique panel */
+.tech{background:var(--bg3);border-radius:var(--rs);padding:10px;margin:4px 0 10px;}
+.timg{position:relative;border-radius:var(--rs);overflow:hidden;margin-bottom:10px;background:#0b0b0b;height:210px;}
+.timg img{position:absolute;inset:0;width:100%;height:100%;object-fit:contain;}
+.timg img.f2{animation:flip 2.4s steps(1,end) infinite;}
+@keyframes flip{0%{opacity:0}50%{opacity:1}}
+.tsec{font-size:10px;color:var(--text3);font-family:var(--mono);letter-spacing:.08em;text-transform:uppercase;margin:10px 0 5px;}
+.tp{font-size:13px;line-height:1.5;color:var(--text);}
+.tp b{font-weight:500;color:var(--accent);}
+.tl{padding-left:18px;font-size:13px;line-height:1.5;color:var(--text);}
+.tl li{margin-bottom:4px;}
+.tl.err li::marker{color:var(--danger);}
+.tarea{width:100%;min-height:54px;font-size:13px;font-family:inherit;padding:8px;border:1px solid var(--border2);border-radius:var(--rs);background:var(--bg2);color:var(--text);resize:vertical;}
+.tarea:focus{outline:none;border-color:var(--text3);}
+.tsrc{font-size:10px;color:var(--text3);margin-top:8px;}
+
+/* total */
 .total-row{display:flex;gap:16px;padding:10px 0;border-top:1px solid var(--border);margin-top:4px;flex-wrap:wrap;}
-.total-item{font-size:12px;font-family:'IBM Plex Mono',monospace;color:var(--text2);}
+.total-item{font-size:12px;font-family:var(--mono);color:var(--text2);}
 .total-item span{color:var(--accent);}
+.daynote{margin-top:10px;}
 
 /* settings */
 .ss-sec{margin-bottom:24px;}
-.st{font-size:10px;color:var(--text3);font-family:'IBM Plex Mono',monospace;margin-bottom:10px;letter-spacing:.08em;text-transform:uppercase;}
-.srow{display:flex;align-items:center;justify-content:space-between;padding:10px 0;border-bottom:1px solid var(--border);}
-.slbl{font-size:13px;}.ssub{font-size:11px;color:var(--text3);margin-top:2px;}
-.sinp{width:90px;font-size:13px;font-family:'IBM Plex Mono',monospace;padding:5px 8px;border:1px solid var(--border2);border-radius:var(--rs);background:var(--bg2);color:var(--text);text-align:right;}
+.st{font-size:10px;color:var(--text3);font-family:var(--mono);margin-bottom:10px;letter-spacing:.08em;text-transform:uppercase;}
+.srow{display:flex;align-items:center;justify-content:space-between;padding:10px 0;border-bottom:1px solid var(--border);gap:10px;}
+.slbl{font-size:13px;}.ssub{font-size:11px;color:var(--text3);margin-top:2px;line-height:1.4;}
+.sinp{width:90px;font-size:13px;font-family:var(--mono);padding:5px 8px;border:1px solid var(--border2);border-radius:var(--rs);background:var(--bg2);color:var(--text);text-align:right;}
+.sinp.wide{width:160px;text-align:left;}
 .sinp:focus{outline:none;border-color:var(--accent);}
 .editor{background:var(--bg2);border:1px solid var(--border);border-radius:var(--r);padding:12px;margin-bottom:12px;}
-.einp{width:100%;font-size:13px;font-family:'IBM Plex Mono',monospace;padding:7px 10px;border:1px solid var(--border2);border-radius:var(--rs);background:var(--bg3);color:var(--text);margin-bottom:8px;}
+.einp{width:100%;font-size:13px;font-family:var(--mono);padding:7px 10px;border:1px solid var(--border2);border-radius:var(--rs);background:var(--bg3);color:var(--text);margin-bottom:8px;}
 .einp:focus{outline:none;border-color:var(--accent);}
-.esel{width:100%;font-size:12px;font-family:'IBM Plex Mono',monospace;padding:6px 8px;border:1px solid var(--border2);border-radius:var(--rs);background:var(--bg3);color:var(--text);margin-bottom:8px;}
-.esel:focus{outline:none;border-color:var(--accent);}
+.esel{width:100%;font-size:13px;font-family:var(--mono);padding:6px 8px;border:1px solid var(--border2);border-radius:var(--rs);background:var(--bg3);color:var(--text);margin-bottom:8px;}
 .flags{display:flex;gap:14px;margin-bottom:8px;flex-wrap:wrap;}
 .flags label{display:flex;align-items:center;gap:5px;font-size:12px;color:var(--text2);cursor:pointer;}
 .flags input[type=checkbox]{accent-color:var(--accent);}
 .ecr{display:flex;align-items:center;gap:8px;padding:6px 8px;border-radius:var(--rs);}
-.ecr:hover{background:var(--bg3);}
 .ecl{font-size:12px;color:var(--text2);flex:1;}
-.ecm{font-size:10px;color:var(--text3);font-family:'IBM Plex Mono',monospace;}
-.note{font-size:11px;color:var(--text3);font-family:'IBM Plex Mono',monospace;margin:4px 0 8px;line-height:1.5;}
+.note{font-size:11px;color:var(--text3);font-family:var(--mono);margin:4px 0 8px;line-height:1.5;}
 .br{display:flex;gap:8px;flex-wrap:wrap;}
-.ba{font-size:12px;font-family:'IBM Plex Mono',monospace;padding:7px 14px;border-radius:var(--rs);cursor:pointer;border:1px solid var(--border2);background:transparent;color:var(--text2);}
+.ba{font-size:12px;font-family:var(--mono);padding:7px 14px;border-radius:var(--rs);cursor:pointer;border:1px solid var(--border2);background:transparent;color:var(--text2);}
 .ba:active{background:var(--bg3);}
 .ba.primary{background:var(--accent);color:#0f0f0f;border-color:transparent;font-weight:500;}
 .ba.danger{color:var(--danger);border-color:rgba(255,90,90,.35);}
 .ba.ghost{color:var(--text3);}
 .ba.sm{padding:4px 10px;font-size:11px;}
+.pitem{padding:8px;border-radius:var(--rs);background:var(--bg3);margin-bottom:6px;}
+.pitem-top{display:flex;align-items:center;gap:6px;justify-content:space-between;margin-bottom:6px;}
+.pitem-f{display:flex;align-items:center;gap:4px;flex-wrap:wrap;font-size:11px;color:var(--text3);font-family:var(--mono);}
+.pin{width:44px;font-size:12px;font-family:var(--mono);padding:3px 4px;border:1px solid var(--border2);border-radius:var(--rs);background:var(--bg2);color:var(--text);text-align:center;}
+.mv{background:transparent;border:1px solid var(--border2);border-radius:var(--rs);color:var(--text2);font-size:12px;padding:1px 7px;cursor:pointer;}
 
-.drag-item{cursor:grab;display:flex;align-items:center;gap:8px;padding:6px 8px;border-radius:var(--rs);}
-.drag-item:hover{background:var(--bg3);}
-.drag-item.drag-over-item{background:rgba(200,240,96,.08);outline:1px solid var(--accent);}
-
-/* export */
-.expbtn{display:block;width:100%;padding:12px 14px;font-size:13px;font-family:'IBM Plex Mono',monospace;border-radius:var(--r);cursor:pointer;border:1px solid var(--border2);background:var(--bg2);color:var(--text2);text-align:left;margin-bottom:8px;}
+/* data page */
+.expbtn{display:block;width:100%;padding:12px 14px;font-size:13px;font-family:var(--mono);border-radius:var(--r);cursor:pointer;border:1px solid var(--border2);background:var(--bg2);color:var(--text2);text-align:left;margin-bottom:8px;}
+.expbtn.primary{border-color:rgba(200,240,96,.4);color:var(--accent);}
 .expbtn:active{background:var(--bg3);}
-.expnote{font-size:11px;color:var(--text3);font-family:'IBM Plex Mono',monospace;margin-bottom:14px;line-height:1.6;}
+.expnote{font-size:12px;color:var(--text3);margin-bottom:12px;line-height:1.55;}
+.expnote b{color:var(--text2);font-weight:500;}
+.okline{color:var(--success);}.warnline{color:var(--warn);}
 .exp-preview{background:var(--bg2);border:1px solid var(--border);border-radius:var(--r);padding:12px;margin-top:12px;}
 
 /* bottom */
-.bbar{position:fixed;bottom:0;left:0;right:0;background:var(--bg);border-top:1px solid var(--border);padding:10px 16px;display:flex;gap:8px;max-width:480px;margin:0 auto;}
-.bm{flex:1;padding:11px;font-size:13px;font-family:'IBM Plex Mono',monospace;border-radius:var(--r);cursor:pointer;border:1px solid var(--border2);background:transparent;color:var(--text2);}
-.bm:active{background:var(--bg3);}
-.bm.primary{background:var(--accent);color:#0f0f0f;border-color:transparent;font-weight:500;}
-.bm.primary:active{background:var(--accent2);}
+.bbar{position:fixed;bottom:0;left:0;right:0;background:var(--bg);border-top:1px solid var(--border);padding:10px 16px calc(10px + env(safe-area-inset-bottom));display:flex;gap:8px;max-width:480px;margin:0 auto;z-index:30;}
+.bm{flex:1;padding:12px;font-size:13px;font-family:var(--mono);border-radius:var(--r);cursor:pointer;border:1px solid var(--border2);background:transparent;color:var(--text2);}
+.bm.primary{background:var(--accent);color:#0f0f0f;border-color:transparent;font-weight:500;flex:2;}
+
+/* rest timer */
+.tbar{position:fixed;left:0;right:0;bottom:calc(64px + env(safe-area-inset-bottom));max-width:480px;margin:0 auto;padding:0 16px 8px;z-index:31;display:none;}
+.tbox{position:relative;overflow:hidden;background:var(--bg3);border:1px solid var(--border2);border-radius:var(--r);display:flex;align-items:center;gap:8px;padding:8px 10px;}
+.tfill{position:absolute;left:0;top:0;bottom:0;background:rgba(200,240,96,.10);transition:width .25s linear;}
+.ttxt{position:relative;flex:1;font-family:var(--mono);font-size:13px;color:var(--text);}
+.ttxt small{color:var(--text3);font-size:11px;}
+.tbtn{position:relative;font-family:var(--mono);font-size:12px;padding:6px 10px;border-radius:var(--rs);border:1px solid var(--border2);background:var(--bg2);color:var(--text2);cursor:pointer;}
+.tbox.end{background:var(--accent);border-color:var(--accent);animation:pulse .6s ease-in-out 4;}
+.tbox.end .ttxt{color:#0f0f0f;font-weight:500;}
+@keyframes pulse{50%{opacity:.55}}
 
 /* modal */
 .modal-bg{position:fixed;inset:0;background:rgba(0,0,0,.75);z-index:50;display:flex;align-items:center;justify-content:center;padding:16px;}
-.modal{background:var(--bg2);border:1px solid var(--border2);border-radius:var(--r);padding:20px;width:100%;max-width:360px;max-height:85vh;overflow-y:auto;}
-.modal-title{font-size:14px;font-weight:500;margin-bottom:8px;}
-.modal-text{font-size:13px;color:var(--text2);margin-bottom:16px;line-height:1.5;}
+.modal{background:var(--bg2);border:1px solid var(--border2);border-radius:var(--r);padding:20px;width:100%;max-width:380px;max-height:85vh;overflow-y:auto;}
+.modal-title{font-size:15px;font-weight:500;margin-bottom:8px;}
+.modal-text{font-size:13px;color:var(--text2);margin-bottom:16px;line-height:1.55;white-space:pre-line;}
 .modal-btns{display:flex;gap:8px;flex-wrap:wrap;}
+.mrow{display:flex;align-items:center;gap:6px;margin-bottom:6px;white-space:normal;}
+.mrow input[type=number],.mrow select{width:72px;font-family:var(--mono);padding:5px;border:1px solid var(--border2);border-radius:var(--rs);background:var(--bg3);color:var(--text);font-size:14px;text-align:center;}
+.mrow label{font-size:11px;color:var(--text3);display:flex;align-items:center;gap:3px;}
 
-.toast{position:fixed;bottom:72px;left:50%;transform:translateX(-50%) translateY(20px);background:var(--bg2);border:1px solid var(--border2);color:var(--text);font-size:12px;font-family:'IBM Plex Mono',monospace;padding:8px 16px;border-radius:20px;opacity:0;transition:opacity .2s,transform .2s;pointer-events:none;white-space:nowrap;z-index:100;}
+.toast{position:fixed;bottom:130px;left:50%;transform:translateX(-50%) translateY(20px);background:var(--bg2);border:1px solid var(--border2);color:var(--text);font-size:12px;font-family:var(--mono);padding:8px 16px;border-radius:20px;opacity:0;transition:opacity .2s,transform .2s;pointer-events:none;white-space:nowrap;z-index:100;}
 .toast.show{opacity:1;transform:translateX(-50%) translateY(0);}
 </style>
 </head>
 <body>
 <header>
   <div class="logo">GYM_TRACKER</div>
-  <div class="sw"><div class="dot" id="sdot"></div><span class="stxt" id="stxt">—</span></div>
+  <div class="htime" id="htime"></div>
 </header>
 <div class="nav">
   <button class="nb active" onclick="showPage('workout')">тренировка</button>
   <button class="nb" onclick="showPage('settings')">настройки</button>
-  <button class="nb" onclick="showPage('export')">экспорт</button>
+  <button class="nb" onclick="showPage('data')">данные</button>
 </div>
 <div id="pg-workout" class="page active"></div>
 <div id="pg-settings" class="page"></div>
-<div id="pg-export" class="page"></div>
+<div id="pg-data" class="page"></div>
+<div class="tbar" id="tbar"><div class="tbox" id="tbox"><div class="tfill" id="tfill"></div><div class="ttxt" id="ttxt"></div><button class="tbtn" onclick="addRest(30)">+30с</button><button class="tbtn" onclick="stopRest()">✕</button></div></div>
 <div class="bbar" id="bbar">
-  <button class="bm" onclick="clearDay()">Очистить</button>
+  <button class="bm" onclick="askClearDay()">Очистить</button>
   <button class="bm primary" onclick="saveDay()">Сохранить тренировку</button>
 </div>
+<input type="file" id="restore-inp" accept=".json,application/json,text/plain" style="display:none" onchange="onRestoreFile(this)">
 <div id="modal-root"></div>
 <div class="toast" id="toast"></div>
 
+<script src="ex-images.js"></script>
 <script>
+// ════════════════════════════════════════════════════════════════════════════
+//  GYM TRACKER v12 — всё хранится только на телефоне (localStorage).
+//  Старые данные (ключ gym_v11) подхватываются автоматически и не удаляются.
+// ════════════════════════════════════════════════════════════════════════════
+const LS_KEY="gym_v12", LS_OLD="gym_v11", LS_DEF="gym_v12_defaults";
+// Старая Google-таблица — только для однократного импорта в разделе «данные».
 const GS="https://script.google.com/macros/s/AKfycbzBrKu5a8Ipuuix4UAi6zau51NCR0QgMTcKhKwKUhl-Ww382UtQ3WTwGmDr7m-AKGRa7g/exec";
 
-// ── default data ──────────────────────────────────────────────────────────────
-// Exercise fields:
-//   defaultUnit: кг|ф|повт|сек
-//   hasBar: base weight from settings
-//   bodyweight: base = body weight, shows ±adj column
-//   bwFactor: partial bodyweight coefficient (only valid when bodyweight=true)
-//   kcalFactor: kcal per kg·rep (approx)
-//   crossDay: history shared across all presets (true for all by default now)
-
-// Superset fields:
-//   id, name, exIds[], kcalFactor (avg)
-
-const DEF_EX=[
-  {id:"hyper",      name:"Гиперэкстензия",       defaultUnit:"кг", bodyweight:true, bwFactor:0.5, kcalFactor:0.08},
-  {id:"chest_press",name:"Жим грудь",             defaultUnit:"кг", hasBar:true,  kcalFactor:0.12},  // штанга — полный вес
-  {id:"db_press",   name:"Жим гантелей",          defaultUnit:"кг", kcalFactor:0.22},  // 2 гантели — коэф ×2
-  {id:"butterfly",  name:"Бабочка",               defaultUnit:"кг", kcalFactor:0.09},  // тренажёр — полный вес
-  {id:"front_raise",name:"Перед собой блин",      defaultUnit:"кг", kcalFactor:0.08},  // один блин — полный вес
-  {id:"bicep_ez",   name:"Подъём на бицепс EZ",  defaultUnit:"кг", hasBar:true,  kcalFactor:0.09},  // штанга
-  {id:"ohp",        name:"Жим стоя/сидя",         defaultUnit:"кг", hasBar:true,  kcalFactor:0.11},  // штанга или 2 ган — если гантели ставь 0.22
-  {id:"lunges",     name:"Выпады",                defaultUnit:"кг", kcalFactor:0.10},
-  {id:"hack",       name:"Гак-присед",            defaultUnit:"кг", kcalFactor:0.12},
-  {id:"leg_ext",    name:"Разгибание ног",        defaultUnit:"кг", kcalFactor:0.09},
-  {id:"pullups",    name:"Подтягивания",          defaultUnit:"кг", bodyweight:true, kcalFactor:0.13},
-  {id:"tbar",       name:"Тяга Т-грифа",          defaultUnit:"кг", hasBar:true,  kcalFactor:0.11},
-  {id:"horiz_row",  name:"Горизонтальная тяга",   defaultUnit:"ф",  kcalFactor:0.10},
-  {id:"tri_db",     name:"Трицепс гантель сидя",  defaultUnit:"кг", kcalFactor:0.08},  // одна рука — без удвоения
-  {id:"tri_rope",   name:"Трицепс канат",         defaultUnit:"ф",  kcalFactor:0.08},
-  {id:"plank",      name:"Планка на локтях",      defaultUnit:"сек", bodyweight:true, kcalFactor:0.05},
+// ── упражнения ───────────────────────────────────────────────────────────────
+// defaultUnit: кг|ф|повт|сек · hasBar: вес грифа из настроек · bodyweight: база = вес тела
+// usesBand: вместо ±кг выбирается резинка · inc: шаг прибавки веса (кг) · start: стартовый вес
+const EX_DEFS=[
+  {id:"hack",name:"Гак-присед",defaultUnit:"кг",inc:5,start:"~125–130 кг",note:"Против тошноты: 6–10 повторов, отдых 3 мин, между подходами ходить, воду пить маленькими глотками."},
+  {id:"chest_press",name:"Жим штанги лёжа",defaultUnit:"кг",hasBar:true,inc:2.5,start:"40 кг вместе с грифом — первые недели техника"},
+  {id:"pullups",name:"Подтягивания",defaultUnit:"кг",bodyweight:true,usesBand:true,start:"без резинки; если выходит меньше 6 — с резинкой"},
+  {id:"db_ohp",name:"Жим гантелей сидя",defaultUnit:"кг",inc:2,start:"10 кг"},
+  {id:"leg_curl",name:"Сгибание ног",defaultUnit:"кг",inc:5,start:"подобрать вес на 12–15 повторов"},
+  {id:"laterals_ex",name:"Махи в стороны",defaultUnit:"кг",inc:1,start:"7–8 кг"},
+  {id:"rdl_db",name:"Румынская тяга с гантелями",defaultUnit:"кг",inc:2,start:"14–16 кг, сначала техника"},
+  {id:"leg_ext",name:"Разгибание ног",defaultUnit:"кг",inc:5,start:"75–80 кг"},
+  {id:"incline_db",name:"Жим гантелей на наклонной",defaultUnit:"кг",inc:2,start:"16 кг"},
+  {id:"tbar",name:"Тяга Т-грифа",defaultUnit:"кг",hasBar:true,inc:2.5,start:"35–40 кг"},
+  {id:"pulldown_close",name:"Верхний блок узким хватом",defaultUnit:"кг",inc:5,start:"подобрать вес на 10–12"},
+  {id:"face_pull",name:"Тяга каната к лицу",defaultUnit:"кг",inc:2.5,start:"лёгкий вес на 15–20"},
+  {id:"bicep_ez",name:"Бицепс EZ стоя",defaultUnit:"кг",hasBar:true,inc:2.5,start:"14.5–17 кг"},
+  {id:"preacher",name:"Бицепс на скамье Скотта",defaultUnit:"кг",inc:2.5,start:"подобрать"},
+  {id:"db_curl",name:"Бицепс с гантелями",defaultUnit:"кг",inc:2,start:"подобрать"},
+  {id:"tri_rope",name:"Трицепс канат",defaultUnit:"ф",inc:4.54,start:"30–40 ф"},
+  {id:"cable_crunch",name:"Скручивания на блоке",defaultUnit:"кг",inc:5,start:"подобрать на 10–15"},
+  {id:"calf_stand",name:"Икры стоя",defaultUnit:"кг",inc:5,start:"подобрать"},
+  {id:"calf_seated",name:"Икры сидя",defaultUnit:"кг",inc:5,start:"подобрать"},
+  {id:"reverse_fly",name:"Обратная бабочка",defaultUnit:"кг",inc:5,start:"лёгкий вес на 15–20"},
+  {id:"pallof",name:"Паллоф-пресс",defaultUnit:"кг",inc:2.5,start:"лёгкий, повторы на каждую сторону"},
+  {id:"dead_bug",name:"Дэд баг",defaultUnit:"повт"},
+  {id:"hanging_raise",name:"Подъёмы ног в висе",defaultUnit:"повт"},
+  {id:"home_bulg",name:"Болгарские выпады (дом)",defaultUnit:"повт"},
+  {id:"pushups",name:"Отжимания",defaultUnit:"повт"},
+  {id:"band_row",name:"Тяга резинки к поясу",defaultUnit:"повт"},
+  {id:"pike_pushup",name:"Отжимания уголком",defaultUnit:"повт"},
+  {id:"plank",name:"Планка на локтях",defaultUnit:"сек",bodyweight:true},
+  // старые упражнения — остаются с историей
+  {id:"hyper",name:"Гиперэкстензия",defaultUnit:"кг",bodyweight:true,bwFactor:0.5},
+  {id:"db_press",name:"Жим гантелей",defaultUnit:"кг",inc:2},
+  {id:"butterfly",name:"Бабочка",defaultUnit:"кг",inc:5},
+  {id:"front_raise",name:"Перед собой блин",defaultUnit:"кг"},
+  {id:"ohp",name:"Жим стоя/сидя",defaultUnit:"кг",hasBar:true,inc:2},
+  {id:"lunges",name:"Выпады",defaultUnit:"кг",inc:2},
+  {id:"horiz_row",name:"Горизонтальная тяга",defaultUnit:"ф",inc:4.54},
+  {id:"tri_db",name:"Трицепс гантель сидя",defaultUnit:"кг",inc:2},
 ];
 
-// "Махи + перед собой" is a superset
-const DEF_SS=[
-  {id:"laterals_ss", name:"Махи + перед собой", exIds:["laterals_ex","front_raise"], kcalFactor:0.09},
-];
-// laterals_ex is a standalone exercise only used inside this superset
-const DEF_EX_EXTRA=[
-  {id:"laterals_ex", name:"Махи в стороны", defaultUnit:"кг", kcalFactor:0.18},  // 2 гантели — коэф ×2
-];
-
-const DEF_PRESETS=[
-  {id:"mon", name:"ПН · Грудь/Бицепс",  items:[
-    {type:"ex",id:"hyper"},{type:"ex",id:"chest_press"},{type:"ex",id:"db_press"},
-    {type:"ex",id:"butterfly"},{type:"ex",id:"front_raise"},{type:"ex",id:"bicep_ez"}
+// ── программа (блок 1) ───────────────────────────────────────────────────────
+// sets × repMin–repMax, rest — отдых (сек), group — суперсет/круг, alts — варианты на выбор
+const PROGRAM=[
+  {id:"pA",name:"ПН · Всё тело A",items:[
+    {type:"ex",id:"hack",sets:3,repMin:6,repMax:10,rest:180},
+    {type:"ex",id:"chest_press",sets:3,repMin:6,repMax:10,rest:90,group:"A"},
+    {type:"ex",id:"pullups",sets:3,repMin:6,repMax:10,rest:90,group:"A"},
+    {type:"ex",id:"db_ohp",sets:2,repMin:8,repMax:12,rest:120},
+    {type:"ex",id:"leg_curl",sets:2,repMin:10,repMax:15,rest:60,group:"B"},
+    {type:"ex",id:"laterals_ex",sets:3,repMin:12,repMax:20,rest:60,group:"B"},
   ]},
-  {id:"thu", name:"ЧТ · Ноги/Плечи", items:[
-    {type:"ex",id:"hyper"},{type:"ex",id:"ohp"},
-    {type:"ss",id:"laterals_ss"},
-    {type:"ex",id:"lunges"},{type:"ex",id:"hack"},{type:"ex",id:"leg_ext"}
+  {id:"pB",name:"СР · Всё тело B",items:[
+    {type:"ex",id:"rdl_db",sets:3,repMin:8,repMax:12,rest:150},
+    {type:"ex",id:"leg_ext",sets:2,repMin:12,repMax:15,rest:90},
+    {type:"ex",id:"incline_db",sets:3,repMin:8,repMax:12,rest:90,group:"A"},
+    {type:"ex",id:"tbar",sets:3,repMin:8,repMax:12,rest:90,group:"A"},
+    {type:"ex",id:"pulldown_close",sets:2,repMin:10,repMax:12,rest:60,group:"B"},
+    {type:"ex",id:"face_pull",sets:2,repMin:12,repMax:20,rest:60,group:"B"},
   ]},
-  {id:"sat", name:"СБ · Спина/Трицепс", items:[
-    {type:"ex",id:"hyper"},{type:"ex",id:"pullups"},{type:"ex",id:"tbar"},
-    {type:"ex",id:"horiz_row"},{type:"ex",id:"tri_db"},{type:"ex",id:"tri_rope"},{type:"ex",id:"plank"}
+  {id:"pF",name:"ПТ · Лёгкая",items:[
+    {type:"ex",id:"bicep_ez",alts:["preacher","db_curl"],sets:3,repMin:8,repMax:12,rest:60,group:"A"},
+    {type:"ex",id:"tri_rope",sets:3,repMin:10,repMax:15,rest:60,group:"A"},
+    {type:"ex",id:"cable_crunch",sets:3,repMin:10,repMax:15,rest:60,group:"B"},
+    {type:"ex",id:"calf_stand",alts:["calf_seated"],sets:3,repMin:10,repMax:15,rest:60,group:"B"},
+    {type:"ex",id:"laterals_ex",alts:["reverse_fly"],sets:2,repMin:12,repMax:20,rest:60,group:"C"},
+    {type:"ex",id:"pallof",alts:["dead_bug","hanging_raise"],sets:2,repMin:8,repMax:12,rest:60,group:"C"},
+  ]},
+  {id:"pH",name:"Дом · Минимум",items:[
+    {type:"ex",id:"home_bulg",sets:3,repMin:10,repMax:15,rest:30,group:"K"},
+    {type:"ex",id:"pushups",sets:3,repMin:8,repMax:20,rest:30,group:"K"},
+    {type:"ex",id:"band_row",sets:3,repMin:15,repMax:20,rest:30,group:"K"},
+    {type:"ex",id:"pike_pushup",sets:3,repMin:8,repMax:15,rest:30,group:"K"},
+    {type:"ex",id:"dead_bug",alts:["plank"],sets:3,repMin:8,repMax:12,rest:30,group:"K",over:{plank:{repMin:30,repMax:60}}},
   ]},
 ];
+
+// ── техника ──────────────────────────────────────────────────────────────────
+const TECH={
+hack:{img:"Hack_Squat",prim:"квадрицепс, ягодицы",sec:"приводящие, задняя поверхность бедра",feel:"передняя поверхность бедра; в нижней точке подключаются ягодицы",
+ how:["Спина и таз плотно прижаты к спинке всё движение, плечи под упорами.","Стопы на ширине плеч, носки чуть врозь. Стопы ниже на платформе — больше квадрицепса, выше — больше ягодиц.","Колени идут по направлению носков, не заваливаются внутрь.","Опускайся подконтрольно 2–3 секунды — до 90° в колене и глубже, пока таз не начинает отрываться от спинки.","Вставай, толкая всей стопой. Наверху колени не выпрямляй «в замок».","Дыхание: вдох перед спуском, выдох на подъёме."],
+ err:["Таз отрывается и подкручивается внизу — уменьши глубину.","Колени сводятся внутрь при подъёме.","Отрыв пяток от платформы.","Бросаешь вес вниз и отбиваешься."]},
+chest_press:{img:"Barbell_Bench_Press_-_Medium_Grip",prim:"грудные",sec:"передняя дельта, трицепс",feel:"грудь растягивается внизу и сокращается при жиме; плечи не должны уставать первыми",
+ how:["Ляг так, чтобы глаза были под грифом. Страховки рамы — чуть ниже груди в нижней точке.","Сведи лопатки и опусти их вниз («в задние карманы») — держи так весь подход.","Небольшой прогиб в пояснице, ягодицы на скамье, стопы твёрдо в полу.","Хват чуть шире плеч. Гриф лежит на основании ладони, запястье ровное над предплечьем — не заваливается назад.","Опускай гриф на низ груди (линия сосков) за 2 секунды, локти под 45–60° к корпусу.","Лёгкое касание груди без отбива — жми вверх и чуть назад к стойкам.","Не получается последний повтор — опусти гриф на страховки."],
+ err:["Запястье загнуто назад — отсюда была боль в запястье. Держи гриф ближе к основанию ладони.","Локти разведены под 90° — нагрузка уходит в плечи.","Отбив от груди, ягодицы отрываются от скамьи.","Лопатки «расползаются» к последним повторам."]},
+pullups:{img:"Pullups",prim:"широчайшие",sec:"бицепс, задняя дельта, середина спины, пресс",feel:"бока спины под мышками; тянешь локтями вниз",
+ how:["Хват чуть шире плеч, большой палец можно не обхватывать.","Из виса сначала опусти плечи от ушей (лопатки вниз), потом тяни.","Думай «локти в карманы», а не «подбородок к перекладине».","Подбородок выше перекладины, грудь тянется к ней.","Опускайся подконтрольно 2 секунды до почти прямых рук.","Корпус без раскачки, ноги чуть впереди, пресс напряжён.","С резинкой: колено или стопа в петле. Резинка сильнее всего помогает внизу и почти не помогает вверху."],
+ err:["Раскачка и рывки.","Полуповторы: не опускаешься до конца.","Плечи поднимаются к ушам в нижней точке."]},
+db_ohp:{img:"Seated_Dumbbell_Press",prim:"передняя и средняя дельты",sec:"трицепс, верх груди",feel:"верх и бока плеч",
+ how:["Спинка скамьи почти вертикально (75–85°).","Сесть с гантелями: поставь их на бёдра и по очереди «закинь» коленом к плечам.","Предплечья вертикально, локти чуть впереди корпуса, не строго в стороны.","Выжимай вверх и немного друг к другу, не стукая гантели.","Внизу гантели примерно на уровне ушей или подбородка.","Поясница прижата к спинке, без сильного прогиба."],
+ err:["Сильный прогиб в пояснице — жим превращается в жим грудью.","Локти уходят назад за линию корпуса.","Неполная амплитуда внизу."]},
+ohp:{img:"Seated_Dumbbell_Press",prim:"передняя и средняя дельты",sec:"трицепс",feel:"верх и бока плеч",
+ how:["Спинка скамьи почти вертикально.","Предплечья вертикально, локти чуть впереди корпуса.","Выжимай вверх и немного друг к другу.","Поясница прижата, пресс напряжён."],err:["Прогиб в пояснице.","Неполная амплитуда."]},
+leg_curl:{img:"Lying_Leg_Curls",prim:"задняя поверхность бедра",sec:"икроножные",feel:"задняя поверхность бедра",
+ how:["Ось тренажёра на уровне колена.","Валик чуть выше пяток, на ахилловом сухожилии.","Таз прижат к скамье (лёжа) или бёдра зафиксированы (сидя).","Сгибай до конца, пауза 1 секунда, опускай 2–3 секунды.","Носки на себя — задняя поверхность бедра работает сильнее."],
+ err:["Таз поднимается от скамьи.","Рывки и бросок веса.","Не выпрямляешь ноги внизу — теряется амплитуда."]},
+laterals_ex:{img:"Side_Lateral_Raise",prim:"средняя дельта",sec:"передняя дельта, трапеция",feel:"сбоку плеча, а не в шее",
+ how:["Чуть наклонись вперёд (10–15°), колени мягкие.","Локти слегка согнуты и зафиксированы.","Поднимай руки в стороны «локтями», а не кистями — до уровня плеч, не выше.","Кисти не выше локтей, мизинец не выше большого пальца.","Опускай медленно, 2–3 секунды.","Вес лёгкий: 15–20 чистых повторов лучше, чем 8 с раскачкой."],
+ err:["Раскачка корпусом.","Плечи поднимаются к ушам — работает трапеция.","Слишком тяжёлый вес."]},
+rdl_db:{img:"Stiff-Legged_Dumbbell_Deadlift",prim:"задняя поверхность бедра, ягодицы",sec:"разгибатели спины, хват",feel:"сильное натяжение по задней поверхности бедра, наверху — ягодицы",
+ how:["Стопы на ширине таза, колени чуть согнуты — угол почти не меняется.","Движение — таз назад, будто закрываешь дверь попой.","Спина прямая всё время, лопатки сведены, грудь вперёд.","Гантели скользят вдоль бёдер, близко к ногам.","Опускайся до сильного натяжения задней поверхности — обычно до середины голени. Ниже, чем держится прямая спина, не надо.","Вверх — толкни таз вперёд и сожми ягодицы, не отклоняйся назад."],
+ err:["Круглая спина — главный риск в этом упражнении.","Превращается в присед: колени сильно сгибаются.","Гантели уходят далеко от ног.","Переразгибание назад в верхней точке."]},
+leg_ext:{img:"Leg_Extensions",prim:"квадрицепс",sec:"—",feel:"передняя поверхность бедра, особенно над коленом",
+ how:["Ось тренажёра напротив колена.","Валик на нижней части голени.","Держись за ручки, таз прижат к сиденью.","Разгибай до почти прямых ног, пауза 1 секунда наверху.","Опускай 2–3 секунды, не бросай вес.","Если неприятно в колене — уменьши амплитуду внизу."],
+ err:["Рывок и бросок веса.","Таз отрывается от сиденья."]},
+incline_db:{img:"Incline_Dumbbell_Press",prim:"верх грудных",sec:"передняя дельта, трицепс",feel:"верх груди под ключицами",
+ how:["Наклон скамьи около 30° (при 45° больше работают плечи).","Лопатки сведены и опущены, как в жиме лёжа.","Гантели опускай к верху груди до лёгкого растяжения.","Локти под 45–60° к корпусу.","Выжимай вверх и чуть друг к другу, не стукая.","Запястья ровные."],
+ err:["Слишком высокий наклон — жим уходит в плечи.","Локти под 90°.","Отбив внизу."]},
+tbar:{img:"T-Bar_Row_with_Handle",prim:"широчайшие, середина спины",sec:"задняя дельта, бицепс, разгибатели спины",feel:"середина спины и между лопатками",
+ how:["Колени согнуты, таз назад, корпус наклонён примерно на 45°.","Спина прямая, поясница нейтральная.","Тяни рукоять к низу груди или животу, локти идут назад вдоль корпуса.","Наверху сведи лопатки, пауза 1 секунда.","Опускай до прямых рук с лёгким растяжением спины.","Корпус неподвижен — без рывков."],
+ err:["Круглая спина.","Рывки разгибанием корпуса.","Тянешь руками (бицепсом), а не локтями."]},
+pulldown_close:{img:"Close-Grip_Front_Lat_Pulldown",prim:"широчайшие",sec:"бицепс, середина спины",feel:"бока спины, ближе к низу",
+ how:["Бёдра зафиксированы валиками.","Отклонись назад на 10–20°.","Сначала опусти плечи (лопатки вниз), потом тяни рукоять к верху груди.","Локти идут вниз вдоль корпуса.","Вверх — подконтрольно, до полного растяжения."],
+ err:["Сильный откид корпусом.","Тянешь бицепсом.","Рукоять за голову."]},
+face_pull:{img:"Face_Pull",prim:"задняя дельта",sec:"середина трапеции, ромбовидные, вращатели плеча",feel:"задняя часть плеча и между лопатками",
+ how:["Блок на уровне лица или чуть выше, канат хватом сверху, отойди на шаг.","Тяни концы каната к лицу, разводя руки в стороны.","Локти выше кистей.","В конце кулаки у ушей, как в позе «двойной бицепс». Пауза 1 секунда.","Медленно вернуть.","Вес лёгкий — это не силовое упражнение, а работа на качество."],
+ err:["Откидывание корпусом.","Тяжёлый вес — работает спина вместо задней дельты.","Локти ниже кистей."]},
+bicep_ez:{img:"EZ-Bar_Curl",prim:"бицепс",sec:"брахиалис, предплечья",feel:"передняя часть плеча",
+ how:["Стой прямо, пресс напряжён.","Хват на изгибах EZ-грифа.","Локти прижаты к бокам и не уходят вперёд.","Сгибай до сокращения, короткая пауза.","Опускай 2–3 секунды до почти прямых рук."],
+ err:["Раскачка корпусом.","Локти уходят вперёд — включаются плечи.","Бросок вниз."]},
+preacher:{img:"Preacher_Curl",prim:"бицепс",sec:"брахиалис",feel:"бицепс, особенно в нижней части",
+ how:["Подмышки плотно на верхнем краю подушки.","Опускай медленно до почти прямых рук — внизу самая нагрузка.","Не распрямляй руки до щелчка и не бросай вес.","Наверху не поднимай так высоко, что нагрузка уходит."],
+ err:["Быстрое опускание — риск для сухожилия бицепса.","Локти отрываются от подушки."]},
+db_curl:{img:"Dumbbell_Bicep_Curl",prim:"бицепс",sec:"брахиалис, плечелучевая",feel:"бицепс",
+ how:["Стоя или сидя, локти у корпуса.","На подъёме разворачивай ладонь вверх.","Можно попеременно.","Опускай медленно."],err:["Раскачка корпусом.","Локти уходят вперёд."]},
+tri_rope:{img:"Triceps_Pushdown_-_Rope_Attachment",prim:"трицепс",sec:"—",feel:"задняя часть плеча",
+ how:["Блок наверху, корпус чуть наклонён вперёд.","Локти прижаты к бокам и неподвижны.","Разгибай до прямых рук, в конце разведи концы каната в стороны.","Пауза, затем медленно вверх до угла около 90° в локтях."],
+ err:["Локти гуляют вверх-вниз.","Давишь весом корпуса."]},
+tri_db:{img:null,prim:"трицепс",sec:"—",feel:"задняя часть плеча",how:["Локоть смотрит вверх и не разводится в стороны.","Опускай гантель за голову до растяжения, разгибай до конца."],err:["Локоть уходит в сторону."]},
+cable_crunch:{img:"Cable_Crunch",prim:"прямая мышца живота",sec:"косые",feel:"пресс «сжимается»",
+ how:["Встань на колени лицом к блоку, канат держи у головы.","Бёдра неподвижны, таз не садится на пятки.","Скручивайся: рёбра к тазу, спина округляется, локти к коленям.","Выдох при скручивании, пауза.","Медленно вверх до растяжения пресса."],
+ err:["Сгибаешься в тазу (приседаешь) вместо скручивания.","Тянешь руками."]},
+calf_stand:{img:"Standing_Calf_Raises",prim:"икроножные",sec:"камбаловидная",feel:"икры",
+ how:["Носки на краю платформы, пятки свободно.","Опускайся медленно до сильного растяжения, пауза 1–2 секунды внизу.","Поднимайся на максимум носков, пауза.","Колени почти прямые."],
+ err:["Короткие пружинящие повторы без растяжения.","Сгибание коленей."]},
+calf_seated:{img:"Seated_Calf_Raise",prim:"камбаловидная",sec:"икроножные",feel:"нижняя часть икры",
+ how:["Колени под углом 90°, валик на бёдрах у колен.","Растяжение внизу с паузой, пик наверху."],err:["Короткая амплитуда."]},
+reverse_fly:{img:"Reverse_Machine_Flyes",prim:"задняя дельта",sec:"ромбовидные, середина трапеции",feel:"задняя часть плеча",
+ how:["Лицом к тренажёру, грудь прижата к спинке.","Ручки на уровне плеч.","Руки почти прямые, локти слегка согнуты.","Разводи в стороны до линии корпуса — думай «руки в стороны», а не «свести лопатки».","Медленно назад."],
+ err:["Большой вес и рывки.","Плечи поднимаются к ушам."]},
+pallof:{img:"Pallof_Press",prim:"косые, поперечная мышца живота",sec:"ягодицы",feel:"боковая часть пресса — корпус сопротивляется повороту",
+ how:["Встань боком к блоку, рукоять на уровне груди, ноги на ширине плеч.","Рукоять у груди двумя руками.","Выжми руки вперёд и держи 2–3 секунды, не давая блоку развернуть корпус.","Верни к груди.","Все повторы на одну сторону, потом на другую."],
+ err:["Корпус разворачивается или наклоняется к блоку."]},
+dead_bug:{img:"Dead_Bug",prim:"поперечная и прямая мышцы живота",sec:"—",feel:"низ живота, поясница прижата к полу",
+ how:["Лёжа на спине: руки вверх, ноги согнуты под 90°.","Поясница прижата к полу всё время — это главное.","Медленно опускай противоположные руку и ногу, выдох.","Вернись, смени сторону. Один повтор — обе стороны."],
+ err:["Поясница отрывается от пола — уменьши амплитуду."]},
+hanging_raise:{img:"Hanging_Leg_Raise",prim:"нижняя часть пресса",sec:"сгибатели бедра",feel:"низ живота",
+ how:["Вис на перекладине, плечи активны, не висишь «на связках».","Подними колени (или прямые ноги) к груди, подкручивая таз вверх — это главное.","Медленно вниз без раскачки.","Легче — согнутые колени, сложнее — прямые ноги."],
+ err:["Раскачка.","Поднимаешь только бёдра без подкручивания таза — работают сгибатели бедра, а не пресс."]},
+home_bulg:{img:"Split_Squat_with_Dumbbells",prim:"квадрицепс, ягодицы",sec:"приводящие",feel:"передняя поверхность бедра и ягодица передней ноги",
+ how:["Задняя нога носком на стуле или диване.","Передняя стопа далеко вперёд — внизу колено над стопой.","Опускайся вертикально вниз, пока заднее колено почти не коснётся пола.","Корпус чуть вперёд — больше ягодиц, вертикально — больше квадрицепса.","Толкайся пяткой передней ноги.","Сначала все повторы одной ногой, потом другой. Для утяжеления — рюкзак."],
+ err:["Колено заваливается внутрь.","Толкаешься задней ногой."]},
+pushups:{img:"Pushups",prim:"грудные",sec:"трицепс, передняя дельта, пресс",feel:"грудь и трицепс",
+ how:["Руки чуть шире плеч.","Тело — прямая линия от головы до пяток: пресс и ягодицы напряжены.","Локти под 45° к корпусу.","Грудь почти до пола.","Усложнение: ноги на кровати, пауза внизу, медленный спуск 3 секунды."],
+ err:["Провисание таза.","Локти под 90° в стороны.","Неполная амплитуда."]},
+band_row:{img:"Seated_Cable_Rows",prim:"широчайшие, середина спины",sec:"бицепс, задняя дельта",feel:"середина спины",
+ how:["Резинку зацепи за ножку тяжёлой мебели или сядь и заведи её за стопы (движение как на фото, только резинкой).","Тяни к поясу, локти идут вдоль корпуса.","Сведи лопатки, пауза 1–2 секунды.","Медленно верни.","Без резинки: тяга полотенца, зажатого дверью (дверь должна закрываться к тебе), или подтягивания под крепким столом."],
+ err:["Рывки.","Плечи поднимаются к ушам."]},
+pike_pushup:{img:null,prim:"передняя и средняя дельты",sec:"трицепс, верх груди",feel:"плечи",
+ how:["Упор лёжа, затем подними таз высоко — тело «домиком».","Руки на ширине плеч.","Опускай голову вниз-вперёд между руками к полу.","Локти не разводи в стороны, веди их чуть назад.","Усложнение: ноги на стуле."],
+ err:["Локти разведены в стороны.","Таз опускается — упражнение превращается в обычные отжимания."]},
+plank:{img:"Plank",prim:"поперечная и прямая мышцы живота",sec:"ягодицы, плечи",feel:"весь корпус, особенно низ живота",
+ how:["Локти под плечами.","Тело — прямая линия от головы до пяток.","Сожми ягодицы и чуть подкрути таз — поясница не прогибается.","Смотри в пол, дыши ровно.","3 подхода по 30–45 секунд качественно лучше, чем 2 минуты с провисшим тазом."],
+ err:["Провисший таз.","Таз слишком высоко."]},
+hyper:{img:"Hyperextensions_Back_Extensions",prim:"разгибатели спины, ягодицы",sec:"задняя поверхность бедра",feel:"поясница и ягодицы",
+ how:["Валик под тазовыми костями.","Опускайся с прямой спиной до растяжения задней поверхности бедра.","Поднимайся до прямой линии тела — не выше.","Для акцента на ягодицы — чуть округли верх спины и сжимай ягодицы наверху."],
+ err:["Переразгибание поясницы наверху.","Рывки."]},
+db_press:{img:"Dumbbell_Bench_Press",prim:"грудные",sec:"передняя дельта, трицепс",feel:"грудь",
+ how:["Лопатки сведены и опущены.","Гантели опускай до уровня груди, локти под 45–60°.","Выжимай вверх и чуть друг к другу."],err:["Локти под 90°.","Отбив внизу."]},
+butterfly:{img:"Butterfly",prim:"грудные",sec:"передняя дельта",feel:"середина груди",
+ how:["Спина прижата, локти чуть согнуты и зафиксированы.","Своди руки до касания, пауза.","Разводи медленно до растяжения груди."],err:["Руки сгибаются-разгибаются, как в жиме.","Слишком глубокое разведение с большим весом."]},
+lunges:{img:"Dumbbell_Lunges",prim:"квадрицепс, ягодицы",sec:"приводящие",feel:"бедро и ягодица передней ноги",
+ how:["Шаг вперёд достаточно широкий.","Опускайся вниз, заднее колено почти касается пола.","Толкайся пяткой передней ноги."],err:["Колено внутрь.","Короткий шаг — колено сильно уходит за носок."]},
+horiz_row:{img:"Seated_Cable_Rows",prim:"широчайшие, середина спины",sec:"бицепс, задняя дельта",feel:"середина спины",
+ how:["Спина прямая, корпус почти неподвижен.","Тяни к поясу, локти вдоль корпуса.","Сведи лопатки, пауза.","Медленно вперёд до растяжения."],err:["Раскачка корпусом.","Плечи к ушам."]},
+};
+
+// ── состояние ───────────────────────────────────────────────────────────────
+const clone=o=>JSON.parse(JSON.stringify(o));
+function num(v){if(v===null||v===undefined)return 0;const x=parseFloat(String(v).replace(",","."));return isNaN(x)?0:x;}
+function has(v){return v!==null&&v!==undefined&&String(v).trim()!=="";}
+function esc(s){return String(s??"").replace(/&/g,"&amp;").replace(/</g,"&lt;").replace(/>/g,"&gt;").replace(/"/g,"&quot;").replace(/'/g,"&#39;");}
+function pad(n){return String(n).padStart(2,"0");}
+function today(){const d=new Date();return d.getFullYear()+"-"+pad(d.getMonth()+1)+"-"+pad(d.getDate());}
+function ddmm(date){const p=String(date).split("-");return p.length===3?p[2]+"."+p[1]:date;}
+function round05(x){return Math.round(x*2)/2;}
 
 function freshD(){
-  return{
-    settings:{bodyWeight:74,bodyHeight:192,bodyFat:14,barWeights:{chest_press:20,ohp:20,bicep_ez:7,tbar:15}},
-    exercises:JSON.parse(JSON.stringify([...DEF_EX,...DEF_EX_EXTRA])),
-    supersets:JSON.parse(JSON.stringify(DEF_SS)),
-    presets:JSON.parse(JSON.stringify(DEF_PRESETS)),
-    workouts:{},history:{},ssHistory:{},unitPref:{}
-  };
+  return{v:12,programV:1,
+    settings:{bodyWeight:74,bodyHeight:192,barWeights:{chest_press:20,bicep_ez:7,tbar:15},bands:["красная"],lastBackup:null},
+    exercises:clone(EX_DEFS),supersets:[],presets:clone(PROGRAM),
+    workouts:{},history:{},ssHistory:{},unitPref:{},dayNotes:{}};
 }
 
-let D={};
-try{D=JSON.parse(localStorage.getItem("gym_v11")||"{}");}catch(e){}
-if(!D.settings||!D.exercises||!D.presets||!D.supersets){D=freshD();}
-if(!D.ssHistory)D.ssHistory={};
-
-let curPage="workout",curPreset=D.presets[0]?.id||"mon";
-let editPreset=null,editEx=null,editSS=null;
-let showNewExForm=false,showNewSSForm=false;
-let histOpen={},histExp={};
-let dragSrc=null,dragOver_=null;
-
-// ── sync ──────────────────────────────────────────────────────────────────────
-function sl(){try{localStorage.setItem("gym_v11",JSON.stringify(D));}catch(e){}}
-function ssync(s,t){document.getElementById("sdot").className="dot "+s;document.getElementById("stxt").textContent=t;}
-async function gsGet(key){
-  try{ssync("busy","загрузка...");const r=await fetch(GS+"?action=get&key="+encodeURIComponent(key));const j=await r.json();ssync("ok","синхр.");return j.value?JSON.parse(j.value):null;}
-  catch(e){ssync("err","нет связи");return null;}
+// приводит любые данные (v11, v12, файл копии) к текущему формату. Ничего не удаляет из истории.
+function migrate(d){
+  d=d||{};
+  if(!d.settings)d.settings={};
+  const s=d.settings;
+  delete s.bodyFat;
+  if(!s.bodyWeight)s.bodyWeight=74;
+  if(!s.bodyHeight)s.bodyHeight=192;
+  if(!s.barWeights)s.barWeights={};
+  if(!Array.isArray(s.bands)||!s.bands.length)s.bands=["красная"];
+  if(s.lastBackup===undefined)s.lastBackup=null;
+  if(!Array.isArray(d.exercises))d.exercises=[];
+  if(!Array.isArray(d.supersets))d.supersets=[];
+  if(!d.history)d.history={};
+  if(!d.ssHistory)d.ssHistory={};
+  if(!d.workouts)d.workouts={};
+  if(!d.unitPref)d.unitPref={};
+  if(!d.dayNotes)d.dayNotes={};
+  // упражнения: добавить недостающие, дополнить поля, убрать ккал
+  d.exercises.forEach(e=>delete e.kcalFactor);
+  EX_DEFS.forEach(def=>{
+    const ex=d.exercises.find(e=>e.id===def.id);
+    if(!ex){d.exercises.push(clone(def));return;}
+    ["inc","start"].forEach(k=>{if(ex[k]===undefined&&def[k]!==undefined)ex[k]=def[k];});
+    if(def.usesBand&&ex.usesBand===undefined)ex.usesBand=true;
+    if(ex.note===undefined&&def.note)ex.note=def.note;
+  });
+  const ren={chest_press:["Жим грудь","Жим штанги лёжа"],bicep_ez:["Подъём на бицепс EZ","Бицепс EZ стоя"]};
+  Object.keys(ren).forEach(id=>{const ex=d.exercises.find(e=>e.id===id);if(ex&&ex.name===ren[id][0])ex.name=ren[id][1];});
+  d.supersets.forEach(x=>delete x.kcalFactor);
+  // программа: старые пресеты откладываются (можно вернуть в настройках)
+  if(!d.programV){
+    if(Array.isArray(d.presets)&&d.presets.length)d.oldPresets=d.presets;
+    d.presets=clone(PROGRAM);d.programV=1;
+  }
+  if(!Array.isArray(d.presets)||!d.presets.length)d.presets=clone(PROGRAM);
+  // история по датам
+  Object.keys(d.history).forEach(k=>{if(Array.isArray(d.history[k]))d.history[k].sort((a,b)=>a.date<b.date?-1:a.date>b.date?1:0);else delete d.history[k];});
+  Object.keys(d.ssHistory).forEach(k=>{if(Array.isArray(d.ssHistory[k]))d.ssHistory[k].sort((a,b)=>a.date<b.date?-1:a.date>b.date?1:0);else delete d.ssHistory[k];});
+  d.v=12;
+  return d;
 }
-async function gsSet(key,val){
-  try{ssync("busy","сохр...");const r=await fetch(GS+"?action=set&key="+encodeURIComponent(key)+"&value="+encodeURIComponent(JSON.stringify(val)));const j=await r.json();if(j.ok)ssync("ok","сохранено");else ssync("err","ошибка");}
-  catch(e){ssync("err","нет связи");}
+
+function loadData(){
+  let d=null;
+  try{d=JSON.parse(localStorage.getItem(LS_KEY)||"null");}catch(e){}
+  if(d&&d.exercises)return migrate(d);
+  let old=null;
+  try{old=JSON.parse(localStorage.getItem(LS_OLD)||"null");}catch(e){}
+  if(old&&old.exercises){FIRST_MIGRATION=true;return migrate(old);}
+  return migrate(freshD());
+}
+let FIRST_MIGRATION=false;
+let D=loadData();
+function sl(){try{localStorage.setItem(LS_KEY,JSON.stringify(D));}catch(e){showToast("⚠ не удалось сохранить в память телефона");}}
+sl();
+
+let curPage="workout";
+let curPreset=pickStartPreset();
+let editPreset=null,editEx=null,editSS=null,showNewExForm=false,showNewSSForm=false;
+let histOpen={},histExp={},techOpen={};
+let PENDING_RESTORE=null,STORAGE_PERSIST=null;
+
+function pickStartPreset(){
+  const byDay={1:"pA",3:"pB",5:"pF"}[new Date().getDay()];
+  const ids=D.presets.map(p=>p.id);
+  const active=D.presets.find(p=>{const w=D.workouts[p.id];return w&&w.started&&w.date===today();});
+  if(active)return active.id;
+  if(byDay&&ids.includes(byDay))return byDay;
+  if(D.lastPreset&&ids.includes(D.lastPreset))return D.lastPreset;
+  return ids[0]||"";
 }
 
-// ── helpers ───────────────────────────────────────────────────────────────────
-function today(){return new Date().toISOString().slice(0,10);}
-function kgToLbs(kg){return+(kg*2.20462).toFixed(1);}
-function lbsToKg(lbs){return+(lbs/2.20462).toFixed(2);}
+// ── доступ ──────────────────────────────────────────────────────────────────
 function getEx(id){return D.exercises.find(e=>e.id===id);}
 function getSS(id){return D.supersets.find(s=>s.id===id);}
 function getPr(id){return D.presets.find(p=>p.id===id);}
 function dispUnit(exId){
   const ex=getEx(exId);if(!ex)return"кг";
-  const p=D.unitPref[exId];
-  if(p==="lbs")return"ф";if(p==="kg")return"кг";
+  const p=D.unitPref[exId];if(p==="lbs")return"ф";if(p==="kg")return"кг";
   return ex.defaultUnit||"кг";
 }
 function isLbs(exId){return dispUnit(exId)==="ф";}
+function kgToLbs(kg){return+(kg*2.20462).toFixed(1);}
+function lbsToKg(lbs){return+(lbs/2.20462).toFixed(2);}
+function isRepsOnly(ex){return ex.defaultUnit==="повт"||ex.defaultUnit==="сек";}
 
-function getW(pid){if(!D.workouts[pid])D.workouts[pid]={date:today(),sets:{},ssSets:{}};return D.workouts[pid];}
-function getSets(pid,exId){const w=getW(pid);if(!w.sets[exId])w.sets[exId]=[{weight:"",reps:"",adj:""}];return w.sets[exId];}
-// ssSets[ssId] = [{exId: {weight,reps,adj}, exId2: ...}, ...] — one object per round
+function newSet(wu){return{weight:"",reps:"",adj:"",band:"",wu:!!wu,done:false};}
+function getW(pid){
+  if(!D.workouts[pid])D.workouts[pid]={date:today(),sets:{},ssSets:{},variant:{},started:null,note:""};
+  const w=D.workouts[pid];
+  if(!w.sets)w.sets={};if(!w.ssSets)w.ssSets={};if(!w.variant)w.variant={};if(w.note===undefined)w.note="";
+  return w;
+}
+function workoutHasData(w){
+  return Object.values(w.sets||{}).some(a=>(a||[]).some(s=>has(s.reps)||s.done))||Object.values(w.ssSets||{}).some(r=>(r||[]).some(x=>Object.values(x).some(s=>has(s.reps))));
+}
+function effItem(item,exId){return Object.assign({},item,(item.over||{})[exId]||{});}
+function itemExId(pid,idx,item){const w=getW(pid);const v=w.variant[idx];return(v&&(v===item.id||(item.alts||[]).includes(v)))?v:item.id;}
+function getSets(pid,exId,n){
+  const w=getW(pid);
+  if(!w.sets[exId]){
+    const ex=getEx(exId);const ph=ex&&ex.usesBand?placeholders(exId,w.date).work:[];
+    w.sets[exId]=[];
+    for(let i=0;i<Math.max(1,n||1);i++){const ns=newSet(false);if(ph[i])ns.band=ph[i].band||"";w.sets[exId].push(ns);}
+  }
+  return w.sets[exId];
+}
 function getSSRounds(pid,ssId){
   const w=getW(pid);
-  if(!w.ssSets)w.ssSets={};
-  if(!w.ssSets[ssId]){
-    const ss=getSS(ssId);
-    const empty={};
-    (ss?.exIds||[]).forEach(id=>{empty[id]={weight:"",reps:"",adj:""};});
-    w.ssSets[ssId]=[JSON.parse(JSON.stringify(empty))];
-  }
+  if(!w.ssSets[ssId]){const ss=getSS(ssId);const r={};(ss?.exIds||[]).forEach(id=>r[id]=newSet(false));w.ssSets[ssId]=[r];}
   return w.ssSets[ssId];
 }
 
 function baseW(exId){
   const ex=getEx(exId);if(!ex)return 0;
-  const bw=parseFloat(D.settings.bodyWeight)||74;
-  if(ex.bodyweight){const f=ex.bwFactor||1;return bw*f;}
-  if(ex.hasBar)return parseFloat((D.settings.barWeights||{})[exId])||0;
+  if(ex.bodyweight)return num(D.settings.bodyWeight||74)*(ex.bwFactor||1);
+  if(ex.hasBar)return num((D.settings.barWeights||{})[exId]);
   return 0;
 }
 function effW(exId,s){
   const ex=getEx(exId);if(!ex)return 0;
-  const base=baseW(exId);
-  if(ex.bodyweight)return base+(parseFloat(s.adj)||0);
-  return base+(parseFloat(s.weight)||0);
+  const base=has(s.baseSnap)?num(s.baseSnap):baseW(exId);
+  return base+(ex.bodyweight?num(s.adj):num(s.weight));
 }
-
+const isWork=s=>!s.wu&&num(s.reps)>0;
 function calcVol(exId,sets){
   const ex=getEx(exId);if(!ex||!sets?.length)return 0;
-  const du=ex.defaultUnit||"кг";
-  if(du==="сек")return sets.reduce((a,x)=>{const bs=parseFloat(x.baseSnap)||baseW(exId);return a+(bs+(parseFloat(x.adj)||0))*(parseFloat(x.reps)||0);},0);
-  if(du==="повт")return sets.reduce((a,x)=>a+(parseFloat(x.reps)||0),0);
-  return sets.reduce((a,x)=>a+effW(exId,x)*(parseFloat(x.reps)||0),0);
-}
-function calcKcalEx(exId,sets){
-  const ex=getEx(exId);if(!ex||!sets?.length)return 0;
-  const f=ex.kcalFactor||0.1;
-  const du=ex.defaultUnit||"кг";
-  if(du==="сек")return sets.reduce((a,x)=>{const bs=parseFloat(x.baseSnap)||baseW(exId);return a+(bs+(parseFloat(x.adj)||0))*(parseFloat(x.reps)||0)*f;},0);
-  if(du==="повт")return sets.reduce((a,x)=>a+(parseFloat(x.reps)||0)*f*parseFloat(D.settings.bodyWeight||74),0);
-  return sets.reduce((a,x)=>a+effW(exId,x)*(parseFloat(x.reps)||0)*f,0);
-}
-function calcKcalSS(ssId,rounds){
-  const ss=getSS(ssId);if(!ss||!rounds?.length)return 0;
-  return rounds.reduce((total,round)=>{
-    return total+(ss.exIds||[]).reduce((a,exId)=>{
-      const s=round[exId]||{};const ex=getEx(exId);if(!ex)return a;
-      const f=ex.kcalFactor||0.1;
-      return a+effW(exId,s)*(parseFloat(s.reps)||0)*f;
-    },0);
-  },0);
+  const w=(sets||[]).filter(isWork);
+  if(ex.defaultUnit==="повт"||(ex.defaultUnit==="сек"&&!ex.bodyweight))return w.reduce((a,s)=>a+num(s.reps),0);
+  return w.reduce((a,s)=>a+effW(exId,s)*num(s.reps),0);
 }
 function calcVolSS(ssId,rounds){
-  // total volume = sum of all exercises in all rounds
   const ss=getSS(ssId);if(!ss||!rounds?.length)return 0;
-  return rounds.reduce((t,round)=>{
-    return t+(ss.exIds||[]).reduce((a,exId)=>{
-      const s=round[exId]||{};return a+effW(exId,s)*(parseFloat(s.reps)||0);
-    },0);
-  },0);
+  return rounds.reduce((t,r)=>t+(ss.exIds||[]).reduce((a,id)=>{const s=r[id]||{};return a+effW(id,s)*num(s.reps);},0),0);
 }
-function fmtVol(v,du){
-  if(du==="сек")return Math.round(v)+" кг·с";
-  if(du==="повт")return Math.round(v)+" повт";
+function fmtVol(v,ex){
+  if(ex&&ex.defaultUnit==="повт")return Math.round(v)+" повт";
+  if(ex&&ex.defaultUnit==="сек"&&!ex.bodyweight)return Math.round(v)+" сек";
+  if(ex&&ex.defaultUnit==="сек")return Math.round(v)+" кг·с";
   return Math.round(v)+" кг·повт";
 }
 function getHist(exId){return D.history[exId]||[];}
 function getSSHist(ssId){return D.ssHistory[ssId]||[];}
 function calcPR(exId){
   const ex=getEx(exId);const h=getHist(exId);if(!ex||!h.length)return null;
-  const du=ex.defaultUnit||"кг";
-  if(du==="сек"||du==="повт"){const m=Math.max(...h.flatMap(e=>e.sets.map(s=>parseFloat(s.reps)||0)));return m>0?m+" "+du:null;}
-  const m=Math.max(...h.flatMap(e=>e.sets.map(s=>{const base=parseFloat(s.baseSnap)||baseW(exId);return ex.bodyweight?base+(parseFloat(s.adj)||0):base+(parseFloat(s.weight)||0);})));
-  return m>0?m+" кг":null;
+  const sets=h.flatMap(e=>e.sets).filter(s=>isWork(s)&&!s.band);
+  if(!sets.length)return null;
+  if(isRepsOnly(ex)){const m=Math.max(...sets.map(s=>num(s.reps)));return m>0?m+(ex.defaultUnit==="сек"?" с":" повт"):null;}
+  if(ex.bodyweight)return null;
+  const m=Math.max(...sets.map(s=>effW(exId,s)));
+  if(!(m>0))return null;
+  return isLbs(exId)?Math.round(kgToLbs(m))+" ф":m+" кг";
 }
-function calcPRSS(ssId){
-  const h=getSSHist(ssId);if(!h.length)return null;
-  const m=Math.max(...h.map(e=>calcVolSS(ssId,e.rounds)));
-  return m>0?Math.round(m)+" кг·повт":null;
-}
-function fmtSetHist(exId,s){
+
+// формат одного подхода
+function fmtSet(exId,s){
   const ex=getEx(exId);if(!ex)return"—";
-  const du=ex.defaultUnit||"кг";
-  const r=parseFloat(s.reps);if(isNaN(r))return"пропущено";
-  const adj=parseFloat(s.adj)||0;
-  if(du==="сек")return(adj!==0?(adj>0?"+"+adj:String(adj))+"кг ":"")+r+"с";
-  if(du==="повт")return(adj!==0?(adj>0?"+"+adj:String(adj))+"кг ":"")+r+"п";
-  const base=parseFloat(s.baseSnap)||baseW(exId);
-  const total=ex.bodyweight?base+adj:base+(parseFloat(s.weight)||0);
-  return total+"кг×"+r;
+  const r=num(s.reps);if(!(r>0))return"—";
+  const wu=s.wu?"<i>Р</i> ":"";
+  if(ex.usesBand&&s.band)return wu+esc(s.band)+"×"+r;
+  if(ex.defaultUnit==="сек")return wu+(num(s.adj)?(num(s.adj)>0?"+":"")+num(s.adj)+"кг ":"")+r+"с";
+  if(ex.defaultUnit==="повт")return wu+r;
+  if(ex.bodyweight){const a=num(s.adj);return wu+(a?(a>0?"+":"")+a+"кг":"свой")+"×"+r;}
+  if(isLbs(exId))return wu+Math.round(kgToLbs(num(s.weight)))+"ф×"+r;
+  return wu+(+effW(exId,s).toFixed(2))+"×"+r;
+}
+function fmtWeight(exId,total){
+  const base=baseW(exId);
+  if(isLbs(exId))return Math.round(kgToLbs(total))+" ф";
+  if(base>0&&!getEx(exId)?.bodyweight)return total+" кг (блины "+(+(total-base).toFixed(2))+")";
+  return total+" кг";
 }
 
-// ── set row HTML (for single exercise) ───────────────────────────────────────
-function setRowHTML(pid,exId,i,s,isSS){
-  const ex=getEx(exId);if(!ex)return"";
-  const du=ex.defaultUnit||"кг";
-  const bw=!!ex.bodyweight;const lbs=isLbs(exId);
-  const pfx=isSS?`updSSSet('${pid}','${isSS}',${i},'${exId}'`:`updSet('${pid}','${exId}',${i}`;
-
-  if(bw){
-    const rph=du==="сек"?"сек":"повт";
-    return`<div class="sr"><div class="sn">${i+1}</div>
-      <input class="si sm" type="number" step="0.5" placeholder="±кг" value="${s.adj||""}" oninput="${pfx},'adj',this.value)">
-      <input class="si" type="number" min="0" step="1" placeholder="${rph}" value="${s.reps||""}" oninput="${pfx},'reps',this.value)">
-      <button class="ds" onclick="${isSS?`delSSRound('${pid}','${isSS}',${i})`:`delSet('${pid}','${exId}',${i})`}">×</button></div>`;
+// ── прошлый результат и подсказка прогрессии ─────────────────────────────────
+function lastEntry(exId,beforeDate){
+  const h=getHist(exId).filter(e=>e.date<beforeDate&&(e.sets||[]).some(s=>num(s.reps)>0));
+  return h.length?h[h.length-1]:null;
+}
+function progInfo(item,exId,date){
+  const ex=getEx(exId);if(!ex)return{};
+  const last=lastEntry(exId,date);
+  if(!last){
+    return{last:null,hint:ex.start?"старт: "+ex.start:"первый раз: подбери вес, чтобы оставалось 1–2 повтора в запасе",cls:""};
   }
-  if(du==="повт"||du==="сек"){
-    const ph=du==="сек"?"сек":"повт";
-    return`<div class="sr"><div class="sn">${i+1}</div><div></div>
-      <input class="si" type="number" min="0" step="1" placeholder="${ph}" value="${s.reps||""}" oninput="${pfx},'reps',this.value)">
-      <button class="ds" onclick="${isSS?`delSSRound('${pid}','${isSS}',${i})`:`delSet('${pid}','${exId}',${i})`}">×</button></div>`;
+  const ws=last.sets.filter(isWork);
+  const wuN=last.sets.filter(s=>s.wu&&num(s.reps)>0).length;
+  const lastStr=ddmm(last.date)+": "+(ws.length?ws.map(s=>fmtSet(exId,s)).join(" · "):"только разминка")+(wuN?` <span style="color:var(--text3)">(+${wuN} разм.)</span>`:"");
+  if(!item||!item.repMax||!ws.length)return{last:lastStr,hint:null};
+  const top=item.repMax,bot=item.repMin||0,n=item.sets||ws.length;
+  const unitS=ex.defaultUnit==="сек"?" сек":"";
+  if(ex.usesBand){
+    const bands=[...new Set(ws.map(s=>s.band||""))];
+    const allTop=ws.length>=n&&ws.slice(0,n).every(s=>num(s.reps)>=top);
+    if(allTop)return{last:lastStr,hint:bands.some(b=>b)?"⬆ все подходы по "+top+" — пора: резинку слабее или без неё":"⬆ все подходы по "+top+" — можно добавить вес на поясе",cls:"up"};
+    return{last:lastStr,hint:"цель: +1 повтор хотя бы в одном подходе"+(bands.some(b=>b)?" с той же резинкой":""),cls:""};
   }
-  const ph=lbs?"фунты":"кг";
-  const raw=parseFloat(s.weight);const dispW=lbs&&!isNaN(raw)?kgToLbs(raw):(s.weight||"");
-  return`<div class="sr"><div class="sn">${i+1}</div>
-    <input class="si" type="number" min="0" step="0.5" placeholder="${ph}" value="${dispW}" oninput="${pfx},'weight',this.value,${lbs})">
-    <input class="si" type="number" min="0" step="1" placeholder="повт" value="${s.reps||""}" oninput="${pfx},'reps',this.value)">
-    <button class="ds" onclick="${isSS?`delSSRound('${pid}','${isSS}',${i})`:`delSet('${pid}','${exId}',${i})`}">×</button></div>`;
+  if(isRepsOnly(ex)||ex.bodyweight){
+    const allTop=ws.length>=n&&ws.slice(0,n).every(s=>num(s.reps)>=top);
+    if(allTop)return{last:lastStr,hint:"⬆ все подходы по "+top+unitS+" — пора усложнить: медленнее, пауза или сложнее вариант",cls:"up"};
+    return{last:lastStr,hint:"цель: "+n+" × "+top+unitS+" — добавь повтор"+(ex.defaultUnit==="сек"?" или 5 секунд":""),cls:""};
+  }
+  const maxW=Math.max(...ws.map(s=>effW(exId,s)));
+  const atMax=ws.filter(s=>Math.abs(effW(exId,s)-maxW)<0.01);
+  const inc=num(ex.inc)||2.5;
+  if(atMax.length>=n&&atMax.slice(0,n).every(s=>num(s.reps)>=top)){
+    const next=round05(maxW+inc);
+    return{last:lastStr,hint:"⬆ пора: "+fmtWeight(exId,next)+" — все подходы были по "+top,cls:"up"};
+  }
+  if(bot&&atMax.some(s=>num(s.reps)<bot))return{last:lastStr,hint:"вес тяжеловат: оставь "+fmtWeight(exId,maxW)+", пока не выйдет "+bot+"+ во всех подходах",cls:"warn"};
+  return{last:lastStr,hint:"цель: "+fmtWeight(exId,maxW)+" — довести до "+n+" × "+top,cls:""};
+}
+function placeholders(exId,date){
+  const last=lastEntry(exId,date);
+  if(!last)return{work:[],wu:[]};
+  return{work:last.sets.filter(isWork),wu:last.sets.filter(s=>s.wu&&num(s.reps)>0)};
 }
 
-// ── vol block ─────────────────────────────────────────────────────────────────
-function buildVolBlock(id,vol,prevVol,maxVol,du,kcal){
-  if(vol<=0)return`<div id="vol-${id}"></div>`;
+// ── строка подхода ──────────────────────────────────────────────────────────
+function setRowHTML(o){ // o:{pid,exId,i,s,ph,ssId,workNo}
+  const ex=getEx(o.exId);if(!ex)return"";
+  const s=o.s,ph=o.ph||{};
+  const du=ex.defaultUnit||"кг";const lbs=isLbs(o.exId);
+  const upd=o.ssId?`updSSSet('${o.pid}','${o.ssId}',${o.i},'${o.exId}'`:`updSet('${o.pid}','${o.exId}',${o.i}`;
+  let f1="";
+  if(ex.usesBand){
+    const bands=D.settings.bands||[];
+    const cur=s.band||"";
+    f1=`<select class="si" onchange="${upd},'band',this.value)"><option value=""${cur===""?" selected":""}>без</option>${bands.map(b=>`<option value="${esc(b)}"${cur===b?" selected":""}>${esc(b)}</option>`).join("")}${cur&&!bands.includes(cur)?`<option value="${esc(cur)}" selected>${esc(cur)}</option>`:""}</select>`;
+  }else if(ex.bodyweight){
+    f1=`<input class="si" type="number" inputmode="decimal" step="0.5" placeholder="${has(ph.adj)?num(ph.adj):"±кг"}" value="${esc(s.adj)}" oninput="${upd},'adj',this.value)">`;
+  }else if(isRepsOnly(ex)){
+    f1=`<div></div>`;
+  }else{
+    const raw=num(s.weight);const dv=has(s.weight)?(lbs?Math.round(kgToLbs(raw)*10)/10:s.weight):"";
+    const pv=has(ph.weight)?(lbs?Math.round(kgToLbs(num(ph.weight))):num(ph.weight)):(lbs?"фунты":"кг");
+    f1=`<input class="si" type="number" inputmode="decimal" step="0.5" placeholder="${pv}" value="${esc(dv)}" oninput="${upd},'weight',this.value,${lbs})">`;
+  }
+  const rph=has(ph.reps)?num(ph.reps):(du==="сек"?"сек":"повт");
+  const f2=`<input class="si" type="number" inputmode="numeric" step="1" placeholder="${rph}" value="${esc(s.reps)}" oninput="${upd},'reps',this.value)">`;
+  const numLbl=s.wu?"Р":o.workNo;
+  const numBtn=o.ssId?`<div class="sn">${o.i+1}</div>`:`<button class="sn" onclick="toggleWu('${o.pid}','${o.exId}',${o.i})" title="разминка">${numLbl}</button>`;
+  const okFn=o.ssId?`doneSS('${o.pid}','${o.ssId}',${o.i},'${o.exId}')`:`doneSet('${o.pid}','${o.exId}',${o.i})`;
+  const delFn=o.ssId?`delSSRound('${o.pid}','${o.ssId}',${o.i})`:`delSet('${o.pid}','${o.exId}',${o.i})`;
+  return`<div class="sr${s.wu?" wu":""}${s.done?" done":""}">${numBtn}${f1}${f2}<button class="ok${s.done?" on":""}" onclick="${okFn}">✓</button><button class="ds" onclick="${delFn}">×</button></div>`;
+}
+function headHTML(ex,exId){
+  let h1="";
+  if(ex.usesBand)h1="резинка";else if(ex.bodyweight)h1="±кг";else if(isRepsOnly(ex))h1="";else h1=isLbs(exId)?"фунты":"кг";
+  const h2=ex.defaultUnit==="сек"?"сек":"повт";
+  return`<div class="sh"><span>#</span><span>${h1}</span><span>${h2}</span><span></span><span></span></div>`;
+}
+
+// ── панель техники ──────────────────────────────────────────────────────────
+function techHTML(exId){
+  const ex=getEx(exId);const t=TECH[exId];
+  const imgs=t&&t.img&&window.EX_IMG&&window.EX_IMG[t.img];
+  let h=`<div class="tech">`;
+  if(imgs)h+=`<div class="timg"><img src="${imgs[0]}" alt=""><img class="f2" src="${imgs[1]}" alt=""></div>`;
+  if(t){
+    h+=`<div class="tp"><b>Работают:</b> ${esc(t.prim)}${t.sec&&t.sec!=="—"?` · <span style="color:var(--text2)">помогают: ${esc(t.sec)}</span>`:""}</div>`;
+    if(t.feel)h+=`<div class="tp" style="margin-top:4px"><b>Чувствовать:</b> ${esc(t.feel)}</div>`;
+    h+=`<div class="tsec">Техника</div><ol class="tl">${t.how.map(x=>`<li>${esc(x)}</li>`).join("")}</ol>`;
+    if(t.err&&t.err.length)h+=`<div class="tsec">Частые ошибки</div><ul class="tl err">${t.err.map(x=>`<li>${esc(x)}</li>`).join("")}</ul>`;
+  }else{
+    h+=`<div class="tp" style="color:var(--text3)">Для этого упражнения описания нет — можно записать свои подсказки ниже.</div>`;
+  }
+  h+=`<div class="tsec">Моя заметка</div><textarea class="tarea" placeholder="например: сиденье на 4, ноги выше" oninput="setExNote('${exId}',this.value)">${esc(ex?.note||"")}</textarea>`;
+  if(imgs)h+=`<div class="tsrc">фото: Free Exercise DB (public domain)</div>`;
+  h+=`<div style="margin-top:8px"><button class="bxs" onclick="toggleTech('${exId}')">свернуть</button></div></div>`;
+  return h;
+}
+function setExNote(exId,v){const ex=getEx(exId);if(!ex)return;ex.note=v;sl();}
+function toggleTech(exId){techOpen[exId]=!techOpen[exId];renderWorkout();}
+
+// ── объём и история ─────────────────────────────────────────────────────────
+function volBlock(id,vol,prevVol,maxVol,ex){
+  if(!(vol>0))return`<div id="vol-${id}"></div>`;
   const dl=[];
-  if(prevVol!==null&&prevVol>0){const d=vol-prevVol,p=Math.round(Math.abs(d)/prevVol*100);if(d>0)dl.push(`<span class="vd up">▲ +${p}% к прош.</span>`);else if(d<0)dl.push(`<span class="vd dn">▼ −${p}% к прош.</span>`);else dl.push(`<span class="vd eq">= прош.</span>`);}
-  if(maxVol>0){const d2=vol-maxVol;if(d2>0)dl.push(`<span class="vd up">▲ новый макс!</span>`);else{const p2=Math.round(Math.abs(d2)/maxVol*100);dl.push(`<span class="vd eq">−${p2}% к макс.</span>`);}}
-  const kcalStr=kcal>0?`<span class="kcal">~${Math.round(kcal)} ккал</span>`:"";
-  return`<div id="vol-${id}" class="vbl"><div class="vr"><span class="vlbl">объём:</span><span class="vval">${fmtVol(vol,du)}</span>${dl.join(" ")}${kcalStr}</div></div>`;
+  if(prevVol>0){const d=vol-prevVol,p=Math.round(Math.abs(d)/prevVol*100);dl.push(d>0?`<span class="vd up">▲ +${p}% к прош.</span>`:d<0?`<span class="vd dn">▼ −${p}% к прош.</span>`:`<span class="vd eq">= прош.</span>`);}
+  if(maxVol>0){const d2=vol-maxVol;dl.push(d2>0?`<span class="vd up">▲ рекорд объёма</span>`:`<span class="vd eq">−${Math.round(Math.abs(d2)/maxVol*100)}% к макс.</span>`);}
+  return`<div id="vol-${id}" class="vbl"><div class="vr"><span class="vlbl">объём:</span><span class="vval">${fmtVol(vol,ex)}</span>${dl.join(" ")}</div></div>`;
 }
-function buildVol(exId,sets){
-  const ex=getEx(exId);if(!ex)return`<div id="vol-${exId}"></div>`;
-  const du=ex.defaultUnit||"кг";
-  const vol=calcVol(exId,sets);
-  const hist=getHist(exId);
-  const prev=hist.length?calcVol(exId,hist[hist.length-1].sets):null;
+function buildVol(exId,sets,date){
+  const ex=getEx(exId);const vol=calcVol(exId,sets);
+  const hist=getHist(exId).filter(h=>h.date<date);
+  const prev=hist.length?calcVol(exId,hist[hist.length-1].sets):0;
   const maxV=hist.length?Math.max(...hist.map(h=>calcVol(exId,h.sets))):0;
-  const kcal=calcKcalEx(exId,sets);
-  return buildVolBlock(exId,vol,prev,maxV,du,kcal);
+  return volBlock(exId,vol,prev,maxV,ex);
 }
-function buildVolSS(ssId,rounds){
-  const ss=getSS(ssId);if(!ss)return`<div id="vol-${ssId}"></div>`;
-  const vol=calcVolSS(ssId,rounds);
-  const hist=getSSHist(ssId);
-  const prev=hist.length?calcVolSS(ssId,hist[hist.length-1].rounds):null;
+function buildVolSS(ssId,rounds,date){
+  const vol=calcVolSS(ssId,rounds);const hist=getSSHist(ssId).filter(h=>h.date<date);
+  const prev=hist.length?calcVolSS(ssId,hist[hist.length-1].rounds):0;
   const maxV=hist.length?Math.max(...hist.map(h=>calcVolSS(ssId,h.rounds))):0;
-  const kcal=calcKcalSS(ssId,rounds);
-  return buildVolBlock(ssId,vol,prev,maxV,"кг",kcal);
+  return volBlock(ssId,vol,prev,maxV,null);
 }
-
-// ── history blocks ────────────────────────────────────────────────────────────
 function buildHist(exId){
   const ex=getEx(exId);if(!ex)return"";
-  const du=ex.defaultUnit||"кг";
-  const hist=getHist(exId);
-  const open=histOpen["ex_"+exId],exp=histExp["ex_"+exId];
-  const shown=exp?hist:hist.slice(-3);const hasMore=hist.length>3;
-  let entries=!hist.length?`<div class="sk">пока пусто</div>`
-    :shown.slice().reverse().map(h=>{
-        const vol=calcVol(exId,h.sets);
-        const sStr=h.sets.map((s,i)=>`${i+1}: ${fmtSetHist(exId,s)}`).join("  ");
-        return`<div class="he"><div class="htop"><span class="hdate2">${h.date}</span><div class="hm"><span class="hv">${fmtVol(vol,du)}</span><button class="eh" onclick="openEditHist('ex','${exId}','${h.date}')">ред.</button><button class="dh" onclick="askDelHist('ex','${exId}','${h.date}')">×</button></div></div><div class="hs">${sStr}</div></div>`;
-      }).join("")+(hasMore&&!exp?`<button class="mbtn" onclick="histExp['ex_${exId}']=true;renderWorkout()">все (${hist.length})</button>`:"");
-  return`<div class="hbl"><button class="htog" onclick="histOpen['ex_${exId}']=!histOpen['ex_${exId}'];renderWorkout()"><span class="harr${open?" open":""}">▶</span><span>история${hist.length?` (${hist.length})`:""}</span></button><div class="hlist${open?" open":""}">${entries}</div></div>`;
+  const hist=getHist(exId).filter(h=>(h.sets||[]).some(s=>num(s.reps)>0));
+  const key="ex_"+exId,open=histOpen[key],exp=histExp[key];
+  const shown=exp?hist:hist.slice(-3);
+  let entries="";
+  if(open){
+    entries=!hist.length?`<div class="sk">пока пусто</div>`:shown.slice().reverse().map(h=>{
+      const sStr=h.sets.filter(s=>num(s.reps)>0).map(s=>fmtSet(exId,s)).join(" · ")||"—";
+      return`<div class="he"><div class="htop"><span class="hdate2">${h.date}</span><div class="hm"><span class="hv">${fmtVol(calcVol(exId,h.sets),ex)}</span><button class="eh" onclick="openEditHist('ex','${exId}','${h.date}')">ред.</button><button class="dh" onclick="askDelHist('ex','${exId}','${h.date}')">×</button></div></div><div class="hs">${sStr}</div></div>`;
+    }).join("")+(hist.length>3&&!exp?`<button class="mbtn" onclick="histExp['${key}']=true;renderWorkout()">показать все (${hist.length})</button>`:"");
+  }
+  return`<div class="hbl"><button class="htog" onclick="histOpen['${key}']=!histOpen['${key}'];renderWorkout()"><span class="harr${open?" open":""}">▶</span><span>история${hist.length?` (${hist.length})`:""}</span></button>${open?`<div class="hlist">${entries}</div>`:""}</div>`;
 }
 function buildHistSS(ssId){
   const ss=getSS(ssId);if(!ss)return"";
-  const hist=getSSHist(ssId);
-  const open=histOpen["ss_"+ssId],exp=histExp["ss_"+ssId];
-  const shown=exp?hist:hist.slice(-3);const hasMore=hist.length>3;
-  let entries=!hist.length?`<div class="sk">пока пусто</div>`
-    :shown.slice().reverse().map(h=>{
-        const vol=calcVolSS(ssId,h.rounds);
-        const rStr=h.rounds.map((round,i)=>{
-          const parts=(ss.exIds||[]).map(exId=>{const s=round[exId]||{};return fmtSetHist(exId,s);});
-          return`${i+1}: ${parts.join(" + ")}`;
-        }).join("  ");
-        return`<div class="he"><div class="htop"><span class="hdate2">${h.date}</span><div class="hm"><span class="hv">~${Math.round(vol)} кг·повт</span><button class="eh" onclick="openEditHist('ss','${ssId}','${h.date}')">ред.</button><button class="dh" onclick="askDelHist('ss','${ssId}','${h.date}')">×</button></div></div><div class="hs">${rStr}</div></div>`;
-      }).join("")+(hasMore&&!exp?`<button class="mbtn" onclick="histExp['ss_${ssId}']=true;renderWorkout()">все (${hist.length})</button>`:"");
-  return`<div class="hbl"><button class="htog" onclick="histOpen['ss_${ssId}']=!histOpen['ss_${ssId}'];renderWorkout()"><span class="harr${open?" open":""}">▶</span><span>история${hist.length?` (${hist.length})`:""}</span></button><div class="hlist${open?" open":""}">${entries}</div></div>`;
+  const hist=getSSHist(ssId);const key="ss_"+ssId,open=histOpen[key];
+  let entries="";
+  if(open)entries=!hist.length?`<div class="sk">пока пусто</div>`:hist.slice(-5).reverse().map(h=>{
+    const rStr=h.rounds.map((r,i)=>`${i+1}: `+(ss.exIds||[]).map(id=>fmtSet(id,r[id]||{})).join(" + ")).join("  ");
+    return`<div class="he"><div class="htop"><span class="hdate2">${h.date}</span><div class="hm"><button class="eh" onclick="openEditHist('ss','${ssId}','${h.date}')">ред.</button><button class="dh" onclick="askDelHist('ss','${ssId}','${h.date}')">×</button></div></div><div class="hs">${rStr}</div></div>`;
+  }).join("");
+  return`<div class="hbl"><button class="htog" onclick="histOpen['${key}']=!histOpen['${key}'];renderWorkout()"><span class="harr${open?" open":""}">▶</span><span>история${hist.length?` (${hist.length})`:""}</span></button>${open?`<div class="hlist">${entries}</div>`:""}</div>`;
 }
 
-// ── workout render ────────────────────────────────────────────────────────────
-function renderWorkout(){
-  const pr=getPr(curPreset);
-  if(!pr){document.getElementById("pg-workout").innerHTML=`<div style="color:var(--text3);font-size:13px;padding:20px 0">Пресет не найден</div>`;return;}
-  const w=getW(curPreset);
-  const chips=D.presets.map(p=>`<button class="chip${p.id===curPreset?" on":""}" onclick="switchPreset('${p.id}')">${p.name}</button>`).join("")+`<button class="chip dim" onclick="goNewPreset()">+ новый</button>`;
-
-  let html=`<div class="chips">${chips}</div>
-  <div class="drow"><span class="dlbl">дата:</span><input type="date" class="dinp" value="${w.date||today()}" onchange="getW('${curPreset}').date=this.value;sl()"></div>`;
-
-  let totalVol=0,totalKcal=0;
-
-  (pr.items||[]).forEach((item,idx)=>{
-    const dAttr=`draggable="true" ondragstart="dStart(event,'${curPreset}',${idx})" ondragover="dOver(event,'${curPreset}',${idx})" ondrop="dDrop(event,'${curPreset}',${idx})" ondragend="dEnd(event)"`;
-    if(item.type==="ex"){
-      const ex=getEx(item.id);if(!ex)return;
-      const sets=getSets(curPreset,item.id);
-      const pr2=calcPR(item.id);
-      const du=ex.defaultUnit||"кг";
-      const bw=!!ex.bodyweight;const lbs=isLbs(item.id);
-      const vol=calcVol(item.id,sets);const kcal=calcKcalEx(item.id,sets);
-      totalVol+=vol;totalKcal+=kcal;
-      const base=baseW(item.id);
-      let h1="",h2="";
-      if(bw){h1="±кг";h2=du==="сек"?"сек":"повт";}
-      else if(du==="повт"){h1="";h2="повт";}
-      else if(du==="сек"){h1="";h2="сек";}
-      else{h1=lbs?"фунты":"кг";h2="повт";}
-      const unitBtn=du!=="сек"&&du!=="повт"&&!bw?`<button class="bxs${lbs?" on":""}" onclick="toggleUnit('${item.id}')">${lbs?"ф→кг":"кг→ф"}</button>`:"";
-      let binfo="";
-      if(base>0){
-        if(bw&&ex.bwFactor&&ex.bwFactor<1)binfo=`<div class="binfo">частичный вес тела: ${base.toFixed(1)} кг (×${ex.bwFactor}) · ±отяг.</div>`;
-        else if(bw)binfo=`<div class="binfo">вес тела: ${base} кг · ±отяг./резинка</div>`;
-        else binfo=`<div class="binfo">гриф/база: ${base} кг</div>`;
-      }
-      // prev vol for delta
-      const hist=getHist(item.id);
-      const prevVol=hist.length?calcVol(item.id,hist[hist.length-1].sets):null;
-      const maxV=hist.length?Math.max(...hist.map(h=>calcVol(item.id,h.sets))):0;
-      html+=`<div class="card" id="ci-${idx}" ${dAttr}>
-        <div class="ch"><div class="cn"><span class="drag-handle">⠿</span>${ex.name}</div>
-        <div class="ca">${pr2?`<span class="badge">PR ${pr2}</span>`:""}${unitBtn}<button class="bxs" onclick="addSet('${curPreset}','${item.id}')">+ подход</button></div></div>
-        ${binfo}
-        <div class="sh"><span>#</span><span>${h1}</span><span>${h2}</span><span></span></div>
-        <div id="sets-${item.id}">${sets.map((s,i)=>setRowHTML(curPreset,item.id,i,s,null)).join("")}</div>
-        ${buildVolBlock(item.id,vol,prevVol,maxV,du,kcal)}
-        ${buildHist(item.id)}
-      </div>`;
-    } else if(item.type==="ss"){
-      const ss=getSS(item.id);if(!ss)return;
-      const rounds=getSSRounds(curPreset,item.id);
-      const pr2=calcPRSS(item.id);
-      const vol=calcVolSS(item.id,rounds);const kcal=calcKcalSS(item.id,rounds);
-      totalVol+=vol;totalKcal+=kcal;
-
-      let innerHTML="";
-      rounds.forEach((round,ri)=>{
-        innerHTML+=`<div style="${ri>0?"margin-top:10px;padding-top:10px;border-top:1px solid var(--border);":""}">
-          <div style="font-size:11px;color:var(--text3);font-family:'IBM Plex Mono',monospace;margin-bottom:6px;">Раунд ${ri+1} <button class="ds" style="font-size:13px;" onclick="delSSRound('${curPreset}','${item.id}',${ri})">×</button></div>`;
-        (ss.exIds||[]).forEach(exId=>{
-          const ex=getEx(exId);if(!ex)return;
-          const s=round[exId]||{weight:"",reps:"",adj:""};
-          const du=ex.defaultUnit||"кг";const bw=!!ex.bodyweight;const lbs=isLbs(exId);
-          let h1="",h2="";
-          if(bw){h1="±кг";h2=du==="сек"?"сек":"повт";}
-          else if(du==="повт"||du==="сек"){h1="";h2=du;}
-          else{h1=lbs?"фунты":"кг";h2="повт";}
-          innerHTML+=`<div class="ss-ex">
-            <div class="ss-ex-name">${ex.name}</div>
-            <div class="sh"><span>#</span><span>${h1}</span><span>${h2}</span><span></span></div>
-            ${setRowHTML(curPreset,exId,ri,s,item.id)}
-          </div>`;
-        });
-        innerHTML+=`</div>`;
-      });
-
-      const hist=getSSHist(item.id);
-      const prevVol=hist.length?calcVolSS(item.id,hist[hist.length-1].rounds):null;
-      const maxV=hist.length?Math.max(...hist.map(h=>calcVolSS(item.id,h.rounds))):0;
-
-      html+=`<div class="ss-card" id="ci-${idx}" ${dAttr}>
-        <div class="ss-header">
-          <div style="display:flex;align-items:center;gap:8px;"><span class="drag-handle" style="font-size:14px;">⠿</span><span class="ss-label">суперсет · ${ss.name}</span>${pr2?`<span class="badge">${pr2}</span>`:""}</div>
-          <button class="bxs" onclick="addSSRound('${curPreset}','${item.id}')">+ раунд</button>
-        </div>
-        <div class="ss-body">
-          ${innerHTML}
-          ${buildVolBlock(item.id,vol,prevVol,maxV,"кг",kcal)}
-          ${buildHistSS(item.id)}
-        </div>
-      </div>`;
-    }
-  });
-
-  // total row
-  if(totalVol>0||totalKcal>0){
-    html+=`<div class="total-row"><span class="total-item">Итого объём: <span>${Math.round(totalVol)} кг·повт</span></span><span class="total-item">~<span>${Math.round(totalKcal)} ккал</span></span></div>`;
+// ── экран тренировки ────────────────────────────────────────────────────────
+function fmtRest(sec){sec=Math.round(sec||0);return Math.floor(sec/60)+":"+pad(sec%60);}
+function groupTitle(g,count){
+  if(g==="K")return`Круг — по очереди, почти без отдыха <span>· 2–3 раунда</span>`;
+  return`Суперсет ${esc(g)} — чередуй подходы <span>· ${Array.from({length:count},(_,i)=>g+(i+1)).join(" → ")} → отдых</span>`;
+}
+function exCardHTML(pid,idx,item0,label){
+  const w=getW(pid);
+  const exId=itemExId(pid,idx,item0);
+  const item=effItem(item0,exId);
+  const ex=getEx(exId);if(!ex)return`<div class="card"><div class="sk">упражнение не найдено: ${esc(exId)}</div></div>`;
+  const sets=getSets(pid,exId,item.sets);
+  const pr=calcPR(exId);
+  const lbs=isLbs(exId);
+  const unitBtn=!isRepsOnly(ex)&&!ex.bodyweight?`<button class="bxs${lbs?" on":""}" onclick="toggleUnit('${exId}')">${lbs?"ф":"кг"}</button>`:"";
+  const techBtn=`<button class="bxs${techOpen[exId]?" on":""}" onclick="toggleTech('${exId}')">ⓘ</button>`;
+  // варианты
+  let vch="";
+  if(item.alts&&item.alts.length){
+    vch=`<div class="vchips">`+[item0.id,...item0.alts].map(id=>{const e=getEx(id);return e?`<button class="vchip${id===exId?" on":""}" onclick="setVariant('${pid}',${idx},'${id}')">${esc(e.name)}</button>`:"";}).join("")+`</div>`;
   }
-
-  document.getElementById("pg-workout").innerHTML=html;
-}
-
-// ── drag & drop ───────────────────────────────────────────────────────────────
-function dStart(e,pid,idx){
-  dragSrc={pid,idx};
-  e.currentTarget.classList.add("dragging");
-  e.dataTransfer.effectAllowed="move";
-  e.dataTransfer.setData("text/plain",String(idx));
-}
-function dOver(e,pid,idx){
-  e.preventDefault();e.stopPropagation();
-  e.dataTransfer.dropEffect="move";
-  document.querySelectorAll(".card,.ss-card").forEach(el=>el.classList.remove("drag-over"));
-  e.currentTarget.classList.add("drag-over");
-  dragOver_={pid,idx};
-}
-function dDrop(e,pid,idx){
-  e.preventDefault();e.stopPropagation();
-  if(!dragSrc||dragSrc.pid!==pid||dragSrc.idx===idx)return;
-  const pr=getPr(pid);if(!pr?.items)return;
-  const[moved]=pr.items.splice(dragSrc.idx,1);
-  let target=idx;if(dragSrc.idx<idx)target=idx;
-  pr.items.splice(target,0,moved);
-  dragSrc=null;sl();renderWorkout();
-}
-function dEnd(e){
-  dragSrc=null;
-  document.querySelectorAll(".card,.ss-card").forEach(el=>el.classList.remove("dragging","drag-over"));
-}
-
-// same for settings list
-let dragSrcSettings=null;
-function dStartSettings(e,listId,idx){dragSrcSettings={listId,idx};e.dataTransfer.effectAllowed="move";}
-function dOverSettings(e,listId,idx){e.preventDefault();e.currentTarget.classList.add("drag-over-item");}
-function dDropSettings(e,listId,idx){
-  e.preventDefault();e.currentTarget.classList.remove("drag-over-item");
-  if(!dragSrcSettings||dragSrcSettings.listId!==listId||dragSrcSettings.idx===idx)return;
-  // reorder preset items
-  const pr=getPr(listId);
-  if(pr?.items){const[m]=pr.items.splice(dragSrcSettings.idx,1);pr.items.splice(idx,0,m);sl();renderSettings();}
-  // reorder ss exIds
-  const ss=getSS(listId);
-  if(ss?.exIds){const[m]=ss.exIds.splice(dragSrcSettings.idx,1);ss.exIds.splice(idx,0,m);sl();renderSettings();}
-}
-function dEndSettings(e){e.currentTarget.classList.remove("drag-over-item");}
-
-// ── settings render ───────────────────────────────────────────────────────────
-function renderSettings(){
-  const s=D.settings;
-  let html=`<div class="ss-sec">
-    <div class="st">Мои данные</div>
-    <div class="srow"><div><div class="slbl">Вес тела</div></div><input class="sinp" type="number" step="0.5" value="${s.bodyWeight||74}" placeholder="кг" onchange="D.settings.bodyWeight=parseFloat(this.value)||74;sl();showToast('сохранено')"></div>
-    <div class="srow"><div><div class="slbl">Рост</div></div><input class="sinp" type="number" step="1" value="${s.bodyHeight||192}" placeholder="см" onchange="D.settings.bodyHeight=parseFloat(this.value)||192;sl();showToast('сохранено')"></div>
-    <div class="srow"><div><div class="slbl">% жира</div><div class="ssub">используется для расчёта ккал</div></div><input class="sinp" type="number" step="0.5" value="${s.bodyFat||14}" placeholder="%" onchange="D.settings.bodyFat=parseFloat(this.value)||14;sl();showToast('сохранено')"></div>
+  // инфо
+  const pi=progInfo(item,exId,w.date);
+  let infos="";
+  if(ex.note)infos+=`<div class="info mynote">📝 ${esc(ex.note)}</div>`;
+  if(item.repMax)infos+=`<div class="info"><b>план:</b> ${item.sets||"?"} × ${item.repMin&&item.repMin!==item.repMax?item.repMin+"–":""}${item.repMax}${ex.defaultUnit==="сек"?" сек":""} · отдых ${fmtRest(item.rest||90)}</div>`;
+  if(pi.last)infos+=`<div class="info"><b>прошлый раз</b> ${pi.last}</div>`;
+  if(pi.hint)infos+=`<div class="info hint ${pi.cls||""}">${esc(pi.hint)}</div>`;
+  let binfo="";
+  const base=baseW(exId);
+  if(ex.hasBar&&base>0&&!lbs)binfo=`<div class="binfo">вводи вес блинов · гриф ${base} кг прибавится сам</div>`;
+  // строки
+  const ph=placeholders(exId,w.date);
+  let wn=0,wun=0;
+  const rows=sets.map((s,i)=>{const p=s.wu?ph.wu[wun++]:ph.work[wn++];return setRowHTML({pid,exId,i,s,ph:p||{},workNo:s.wu?0:wn});}).join("");
+  return`<div class="card" id="card-${idx}">
+    <div class="ch"><div class="cn">${label?`<span class="gtag">${label}</span>`:""}${esc(ex.name)}</div><div class="ca">${pr?`<span class="badge">PR ${pr}</span>`:""}${unitBtn}${techBtn}</div></div>
+    ${vch}
+    ${techOpen[exId]?techHTML(exId):""}
+    <div class="infos">${infos}</div>
+    ${binfo}
+    ${headHTML(ex,exId)}
+    <div id="sets-${exId}">${rows}</div>
+    <div class="addrow"><button class="bxs" onclick="addSet('${pid}','${exId}',false)">+ подход</button><button class="bxs" onclick="addSet('${pid}','${exId}',true)">+ разминка</button></div>
+    ${buildVol(exId,sets,w.date)}
+    ${buildHist(exId)}
   </div>`;
-
-  const barExes=D.exercises.filter(e=>e.hasBar);
-  if(barExes.length){
-    html+=`<div class="ss-sec"><div class="st">Базовый вес снарядов</div>`;
-    barExes.forEach(ex=>{
-      const val=(s.barWeights||{})[ex.id]||"";
-      html+=`<div class="srow"><div class="slbl">${ex.name}</div><input class="sinp" type="number" step="0.5" value="${val}" placeholder="кг" onchange="if(!D.settings.barWeights)D.settings.barWeights={};D.settings.barWeights['${ex.id}']=parseFloat(this.value)||0;sl();showToast('сохранено')"></div>`;
+}
+function ssCardHTML(pid,idx,item){
+  const ss=getSS(item.id);if(!ss)return"";
+  const w=getW(pid);
+  const rounds=getSSRounds(pid,item.id);
+  let inner="";
+  rounds.forEach((round,ri)=>{
+    inner+=`<div style="${ri>0?"margin-top:10px;padding-top:10px;border-top:1px solid var(--border);":""}"><div style="font-size:11px;color:var(--text3);font-family:var(--mono);margin-bottom:6px;">Раунд ${ri+1}</div>`;
+    (ss.exIds||[]).forEach(exId=>{
+      const ex=getEx(exId);if(!ex)return;
+      const s=round[exId]||newSet(false);
+      inner+=`<div class="ss-ex"><div class="ss-ex-name">${esc(ex.name)}</div>${headHTML(ex,exId)}${setRowHTML({pid,exId,i:ri,s,ssId:item.id,workNo:ri+1})}</div>`;
     });
-    html+=`</div>`;
+    inner+=`</div>`;
+  });
+  return`<div class="ss-card"><div class="ss-header"><span class="ss-label">суперсет · ${esc(ss.name)}</span><button class="bxs" onclick="addSSRound('${pid}','${item.id}')">+ раунд</button></div>
+    <div class="ss-body">${inner}${buildVolSS(item.id,rounds,w.date)}${buildHistSS(item.id)}</div></div>`;
+}
+function backupBanner(){
+  const n=Object.values(D.history).reduce((a,h)=>a+h.length,0);
+  if(!n)return"";
+  const lb=D.settings.lastBackup;
+  const days=lb?Math.floor((Date.now()-lb)/864e5):null;
+  if(days!==null&&days<7)return"";
+  return`<div class="banner"><span>${days===null?"Резервной копии ещё нет. Данные теперь только на телефоне.":"Последняя резервная копия — "+days+" дн. назад."}</span><button class="ba sm" onclick="doBackup()">сделать</button></div>`;
+}
+function renderWorkout(){
+  const pg=document.getElementById("pg-workout");
+  const pr=getPr(curPreset);
+  const chips=D.presets.map(p=>`<button class="chip${p.id===curPreset?" on":""}" onclick="switchPreset('${p.id}')">${esc(p.name)}</button>`).join("");
+  if(!pr){pg.innerHTML=`<div class="chips">${chips}</div><div class="sk">Выбери тренировку</div>`;return;}
+  const w=getW(curPreset);
+  if(!w.started&&!w.dateManual&&!workoutHasData(w)&&w.date!==today())w.date=today();
+  let html=(FIRST_MIGRATION?`<div class="banner" style="color:var(--accent);border-color:rgba(200,240,96,.3);background:rgba(200,240,96,.06)"><span>Новая версия. История перенесена, старые пресеты убраны в настройки. Синхронизации больше нет — делай резервную копию.</span><button class="ba sm" onclick="FIRST_MIGRATION=false;renderWorkout()">ок</button></div>`:"")+backupBanner();
+  html+=`<div class="chips">${chips}</div>
+  <div class="drow"><span class="dlbl">дата:</span><input type="date" class="dinp" value="${w.date}" onchange="const w=getW('${curPreset}');w.date=this.value||today();w.dateManual=true;sl();renderWorkout()"></div>`;
+  let totalVol=0,workSets=0;
+  const items=pr.items||[];
+  let i=0;
+  while(i<items.length){
+    const item=items[i];
+    if(item.type==="ex"&&item.group){
+      const g=item.group;let j=i;const grp=[];
+      while(j<items.length&&items[j].type==="ex"&&items[j].group===g){grp.push(j);j++;}
+      html+=`<div class="grp"><div class="grp-h">${groupTitle(g,grp.length)}</div>`;
+      grp.forEach((k,n)=>{html+=exCardHTML(curPreset,k,items[k],g==="K"?String(n+1):g+(n+1));});
+      html+=`</div>`;i=j;
+    }else if(item.type==="ex"){html+=exCardHTML(curPreset,i,item,"");i++;}
+    else if(item.type==="ss"){html+=ssCardHTML(curPreset,i,item);i++;}
+    else i++;
   }
-
-  // presets
-  html+=`<div class="ss-sec"><div class="st">Пресеты</div>`;
-  D.presets.forEach((pr)=>{
-    if(editPreset===pr.id){
-      const itemsHTML=(pr.items||[]).map((item,idx)=>{
-        const label=item.type==="ex"?(getEx(item.id)?.name||item.id):`суперсет: ${getSS(item.id)?.name||item.id}`;
-        return`<div class="drag-item" draggable="true" ondragstart="dStartSettings(event,'${pr.id}',${idx})" ondragover="dOverSettings(event,'${pr.id}',${idx})" ondrop="dDropSettings(event,'${pr.id}',${idx})" ondragend="dEndSettings(event)">
-          <span style="color:var(--text3);font-size:13px;">⠿</span>
-          <span class="ecl">${label}</span>
-          <button class="ba sm ghost" onclick="removePrItem('${pr.id}',${idx})">убрать</button>
-        </div>`;
-      }).join("");
-
-      // available to add
-      const usedExIds=(pr.items||[]).filter(i=>i.type==="ex").map(i=>i.id);
-      const usedSSIds=(pr.items||[]).filter(i=>i.type==="ss").map(i=>i.id);
-      const availEx=D.exercises.filter(e=>!usedExIds.includes(e.id));
-      const availSS=D.supersets.filter(s=>!usedSSIds.includes(s.id));
-
-      const addHTML=`<div style="margin-top:10px;">
-        ${availEx.length?`<div style="font-size:11px;color:var(--text3);font-family:'IBM Plex Mono',monospace;margin-bottom:4px;">добавить упражнение:</div>
-        <div style="display:flex;flex-wrap:wrap;gap:4px;margin-bottom:8px;">${availEx.map(ex=>`<button class="ba sm ghost" onclick="addToPr('${pr.id}','ex','${ex.id}')">${ex.name}</button>`).join("")}</div>`:""}
-        ${availSS.length?`<div style="font-size:11px;color:var(--text3);font-family:'IBM Plex Mono',monospace;margin-bottom:4px;">добавить суперсет:</div>
-        <div style="display:flex;flex-wrap:wrap;gap:4px;margin-bottom:8px;">${availSS.map(ss=>`<button class="ba sm ghost" onclick="addToPr('${pr.id}','ss','${ss.id}')">${ss.name}</button>`).join("")}</div>`:""}
-      </div>`;
-
-      const newExBtn=showNewExForm===pr.id?`<div style="background:var(--bg3);border-radius:var(--rs);padding:10px;margin-top:6px;">${newExFormHTML(`createExInPr('${pr.id}')`)}</div>`
-        :`<button class="ba sm ghost" onclick="showNewExForm='${pr.id}';renderSettings()">+ новое упражнение</button>`;
-      const newSSBtn=showNewSSForm===pr.id?`<div style="background:var(--bg3);border-radius:var(--rs);padding:10px;margin-top:6px;">${newSSFormHTML(`createSSInPr('${pr.id}')`)}</div>`
-        :`<button class="ba sm ghost" onclick="showNewSSForm='${pr.id}';renderSettings()">+ новый суперсет</button>`;
-
-      html+=`<div class="editor">
-        <input class="einp" value="${pr.name}" oninput="getPr('${pr.id}').name=this.value;sl()">
-        <div style="max-height:260px;overflow-y:auto;">${itemsHTML}</div>
-        ${addHTML}
-        <div class="br" style="margin-top:6px;">${newExBtn}${newSSBtn}</div>
-        <div class="br" style="margin-top:10px;">
-          <button class="ba primary" onclick="editPreset=null;showNewExForm=false;showNewSSForm=false;renderSettings()">Готово</button>
-          <button class="ba danger" onclick="askDeletePr('${pr.id}')">Удалить</button>
-        </div>
-      </div>`;
-    } else {
-      html+=`<div class="srow"><div><div class="slbl">${pr.name}</div><div class="ssub">${(pr.items||[]).length} элементов</div></div>
-        <button class="ba" onclick="editPreset='${pr.id}';showNewExForm=false;showNewSSForm=false;renderSettings()">изменить</button></div>`;
-    }
+  items.forEach((item,k)=>{
+    if(item.type==="ex"){const id=itemExId(curPreset,k,item);const s=w.sets[id]||[];totalVol+=calcVol(id,s);workSets+=s.filter(isWork).length;}
+    else if(item.type==="ss"){totalVol+=calcVolSS(item.id,w.ssSets[item.id]||[]);}
   });
-  html+=`<button class="ba" style="margin-top:12px;" onclick="createPr()">+ создать пресет</button></div>`;
-
-  // exercises
-  html+=`<div class="ss-sec"><div class="st">Упражнения</div>`;
-  D.exercises.forEach(ex=>{
-    if(editEx===ex.id){
-      html+=`<div class="editor">${exEditFormHTML(ex)}</div>`;
-    } else {
-      const du=ex.defaultUnit||"кг";
-      const meta=[du,ex.bodyweight?`тело${ex.bwFactor?` ×${ex.bwFactor}`:""}`:ex.hasBar?"гриф":""].filter(Boolean).join(" · ");
-      const hLen=(D.history[ex.id]||[]).length;
-      html+=`<div class="srow"><div><div class="slbl">${ex.name}</div><div class="ssub">${meta}${hLen?` · ${hLen} зап.`:""}</div></div>
-        <button class="ba" onclick="editEx='${ex.id}';renderSettings()">изм.</button></div>`;
-    }
-  });
-  html+=`<div style="margin-top:10px;">${showNewExForm==="global"?`<div class="editor">${newExFormHTML("createExGlobal()")}</div>`:
-    `<button class="ba" onclick="showNewExForm='global';renderSettings()">+ создать упражнение</button>`}</div></div>`;
-
-  // supersets
-  html+=`<div class="ss-sec"><div class="st">Суперсеты</div>`;
-  D.supersets.forEach(ss=>{
-    if(editSS===ss.id){
-      const exOrder=(ss.exIds||[]).map((exId,idx)=>{
-        const ex=getEx(exId);
-        return`<div class="drag-item" draggable="true" ondragstart="dStartSettings(event,'${ss.id}',${idx})" ondragover="dOverSettings(event,'${ss.id}',${idx})" ondrop="dDropSettings(event,'${ss.id}',${idx})" ondragend="dEndSettings(event)">
-          <span style="color:var(--text3);font-size:13px;">⠿</span>
-          <span class="ecl">${ex?ex.name:exId}</span>
-          <button class="ba sm ghost" onclick="removeExFromSS('${ss.id}',${idx})">убрать</button>
-        </div>`;
-      }).join("");
-      const usedIds=ss.exIds||[];
-      const availForSS=D.exercises.filter(e=>!usedIds.includes(e.id));
-      html+=`<div class="editor">
-        <input class="einp" value="${ss.name}" oninput="getSS('${ss.id}').name=this.value;sl()">
-        <div style="font-size:11px;color:var(--text3);font-family:'IBM Plex Mono',monospace;margin-bottom:6px;">Порядок упражнений (перетащи):</div>
-        ${exOrder}
-        ${availForSS.length?`<div style="margin-top:8px;font-size:11px;color:var(--text3);font-family:'IBM Plex Mono',monospace;margin-bottom:4px;">добавить:</div>
-          <div style="display:flex;flex-wrap:wrap;gap:4px;">${availForSS.map(e=>`<button class="ba sm ghost" onclick="addExToSS('${ss.id}','${e.id}')">${e.name}</button>`).join("")}</div>`:""}
-        <div class="br" style="margin-top:10px;">
-          <button class="ba primary" onclick="editSS=null;renderSettings()">Готово</button>
-          <button class="ba danger" onclick="askDeleteSS('${ss.id}')">Удалить</button>
-        </div>
-      </div>`;
-    } else {
-      const hLen=(D.ssHistory[ss.id]||[]).length;
-      html+=`<div class="srow"><div><div class="slbl">${ss.name}</div><div class="ssub">${(ss.exIds||[]).length} упр.${hLen?` · ${hLen} зап.`:""}</div></div>
-        <button class="ba" onclick="editSS='${ss.id}';renderSettings()">изм.</button></div>`;
-    }
-  });
-  html+=`<div style="margin-top:10px;">${showNewSSForm==="global"?`<div class="editor">${newSSFormHTML("createSSGlobal()")}</div>`:
-    `<button class="ba" onclick="showNewSSForm='global';renderSettings()">+ создать суперсет</button>`}</div></div>`;
-
-  // reset
-  const hasCustomDefaults=!!localStorage.getItem("gym_v11_defaults");
-  const myDefaultsRow=hasCustomDefaults
-    ?'<div class="srow"><div><div class="slbl">Сбросить к моим настройкам</div><div class="ssub">откат к сохранённой точке. история сохранится.</div></div><button class="ba danger" onclick="askResetToMine()">Сброс</button></div>'
-    :"";
-  html+=`<div class="ss-sec"><div class="st">Сброс</div>
-    <div class="srow"><div><div class="slbl">Сохранить мои настройки</div><div class="ssub">текущие упражнения, пресеты и настройки станут точкой отката</div></div>
-    <button class="ba" onclick="saveMyDefaults()">Сохранить</button></div>
-    ${myDefaultsRow}
-    <div class="srow"><div><div class="slbl">Сбросить к заводским</div><div class="ssub">упражнения, пресеты, настройки → исходные. история сохранится.</div></div>
-    <button class="ba danger" onclick="askReset()">Сброс</button></div>
-  </div>`;
-
-  document.getElementById("pg-settings").innerHTML=html;
+  const mins=w.started?Math.round((Date.now()-w.started)/60000):null;
+  html+=`<div class="total-row"><span class="total-item">рабочих подходов: <span>${workSets}</span></span><span class="total-item">объём: <span>${Math.round(totalVol)}</span></span>${mins!==null?`<span class="total-item">идёт: <span>${mins} мин</span></span>`:""}</div>
+  <div class="daynote"><div class="tsec" style="margin-top:4px">Заметка к тренировке</div><textarea class="tarea" placeholder="самочувствие, сон, что было тяжело…" oninput="getW('${curPreset}').note=this.value;sl()">${esc(w.note)}</textarea></div>`;
+  pg.innerHTML=html;
+  updateHeader();
 }
 
-function newExFormHTML(onSave){
-  return`<input class="einp" id="nex-name" placeholder="Название" style="margin-bottom:6px;">
-    <select class="esel" id="nex-unit"><option value="кг">кг</option><option value="ф">фунты</option><option value="повт">повторения</option><option value="сек">секунды</option></select>
-    <div class="flags">
-      <label><input type="checkbox" id="nex-bar"> Гриф/база</label>
-      <label><input type="checkbox" id="nex-bw" onchange="document.getElementById('nex-bwf-wrap').style.display=this.checked?'flex':'none'"> Вес тела</label>
-    </div>
-    <div id="nex-bwf-wrap" style="display:none;align-items:center;gap:8px;margin-bottom:8px;">
-      <label style="display:flex;align-items:center;gap:5px;font-size:12px;color:var(--text2);cursor:pointer;"><input type="checkbox" id="nex-bwf" accent-color="var(--accent)"> Частичный коэф.</label>
-      <input id="nex-bwfactor" type="number" min="0.1" max="1" step="0.05" value="0.5" style="width:60px;font-size:12px;font-family:'IBM Plex Mono',monospace;padding:3px 6px;border:1px solid var(--border2);border-radius:var(--rs);background:var(--bg2);color:var(--text);">
-    </div>
-    <div style="font-size:11px;color:var(--text3);font-family:'IBM Plex Mono',monospace;margin-bottom:8px;">ккал/кг·повт: <input id="nex-kcal" type="number" min="0" step="0.01" value="0.10" style="width:60px;font-size:11px;font-family:'IBM Plex Mono',monospace;padding:3px 6px;border:1px solid var(--border2);border-radius:var(--rs);background:var(--bg2);color:var(--text);"></div>
-    <div class="br"><button class="ba primary" onclick="${onSave}">Создать</button><button class="ba" onclick="showNewExForm=false;renderSettings()">Отмена</button></div>`;
-}
-
-function newSSFormHTML(onSave){
-  return`<input class="einp" id="nss-name" placeholder="Название суперсета" style="margin-bottom:8px;">
-    <div style="font-size:11px;color:var(--text3);font-family:'IBM Plex Mono',monospace;margin-bottom:6px;">Выбери упражнения (мин. 2):</div>
-    ${D.exercises.map(ex=>`<label class="ecr"><input type="checkbox" class="ss-ex-chk" value="${ex.id}"><span class="ecl">${ex.name}</span></label>`).join("")}
-    <div class="br" style="margin-top:8px;"><button class="ba primary" onclick="${onSave}">Создать</button><button class="ba" onclick="showNewSSForm=false;renderSettings()">Отмена</button></div>`;
-}
-
-function exEditFormHTML(ex){
-  const du=ex.defaultUnit||"кг";
-  return`<input class="einp" id="eex-name" value="${ex.name}" placeholder="Название">
-    <select class="esel" id="eex-unit"><option value="кг"${du==="кг"?" selected":""}>кг</option><option value="ф"${du==="ф"?" selected":""}>фунты</option><option value="повт"${du==="повт"?" selected":""}>повторения</option><option value="сек"${du==="сек"?" selected":""}>секунды</option></select>
-    <div class="flags">
-      <label><input type="checkbox" id="eex-bar" ${ex.hasBar?"checked":""}> Гриф/база</label>
-      <label><input type="checkbox" id="eex-bw" ${ex.bodyweight?"checked":""} onchange="document.getElementById('eex-bwf-wrap').style.display=this.checked?'flex':'none'"> Вес тела</label>
-    </div>
-    <div id="eex-bwf-wrap" style="display:${ex.bodyweight?"flex":"none"};align-items:center;gap:8px;margin-bottom:8px;">
-      <label style="display:flex;align-items:center;gap:5px;font-size:12px;color:var(--text2);cursor:pointer;"><input type="checkbox" id="eex-bwf" ${ex.bwFactor&&ex.bwFactor<1?"checked":""} style="accent-color:var(--accent)"> Частичный коэф.</label>
-      <input id="eex-bwfactor" type="number" min="0.1" max="1" step="0.05" value="${ex.bwFactor||0.5}" style="width:60px;font-size:12px;font-family:'IBM Plex Mono',monospace;padding:3px 6px;border:1px solid var(--border2);border-radius:var(--rs);background:var(--bg2);color:var(--text);">
-    </div>
-    <div style="font-size:11px;color:var(--text3);font-family:'IBM Plex Mono',monospace;margin-bottom:8px;">ккал/кг·повт: <input id="eex-kcal" type="number" min="0" step="0.01" value="${ex.kcalFactor||0.10}" style="width:60px;font-size:11px;font-family:'IBM Plex Mono',monospace;padding:3px 6px;border:1px solid var(--border2);border-radius:var(--rs);background:var(--bg2);color:var(--text);"></div>
-    <div class="note">история сохраняется при изменениях</div>
-    <div class="br"><button class="ba primary" onclick="saveEx('${ex.id}')">Сохранить</button><button class="ba" onclick="editEx=null;renderSettings()">Отмена</button><button class="ba danger" onclick="askDeleteEx('${ex.id}')">Удалить</button></div>`;
-}
-
-// ── export render ─────────────────────────────────────────────────────────────
-function renderExport(){
-  const allDates=new Set();
-  D.exercises.forEach(ex=>(D.history[ex.id]||[]).forEach(h=>allDates.add(h.date)));
-  D.supersets.forEach(ss=>(D.ssHistory[ss.id]||[]).forEach(h=>allDates.add(h.date)));
-  const dates=[...allDates].sort().reverse();
-  let html=`<div class="expnote">Просмотр и скачивание истории.</div>
-  <div style="margin-bottom:16px;">
-    <div style="font-size:11px;color:var(--text3);font-family:'IBM Plex Mono',monospace;margin-bottom:8px;">просмотр по дате:</div>
-    <select class="esel" id="exp-date-sel" onchange="renderExpPreview(this.value)" style="margin-bottom:0;">
-      <option value="">— выбери дату —</option>
-      ${dates.map(d=>`<option value="${d}">${d}</option>`).join("")}
-    </select>
-    <div id="exp-preview"></div>
-  </div>
-  <button class="expbtn" onclick="exportAll()">📥 Скачать всю историю (CSV)</button>
-  ${D.exercises.map(ex=>`<button class="expbtn" onclick="exportEx('${ex.id}')">${ex.name}</button>`).join("")}
-  ${D.supersets.map(ss=>`<button class="expbtn" onclick="exportSS('${ss.id}')">${ss.name} (суперсет)</button>`).join("")}`;
-  document.getElementById("pg-export").innerHTML=html;
-}
-
-function renderExpPreview(date){
-  if(!date){document.getElementById("exp-preview").innerHTML="";return;}
-  let html=`<div class="exp-preview"><div style="font-size:12px;font-weight:500;margin-bottom:10px;">${date}</div>`;
-  let found=false;let totalKcal=0;
-  D.exercises.forEach(ex=>{
-    const h=(D.history[ex.id]||[]).find(h=>h.date===date);if(!h)return;found=true;
-    const du=ex.defaultUnit||"кг";const vol=calcVol(ex.id,h.sets);const kcal=calcKcalEx(ex.id,h.sets);totalKcal+=kcal;
-    const sStr=h.sets.map((s,i)=>`${i+1}: ${fmtSetHist(ex.id,s)}`).join("  ");
-    html+=`<div style="margin-bottom:8px;"><div style="font-size:12px;font-weight:500;">${ex.name} <span style="font-size:11px;color:var(--text3);font-weight:400;">${fmtVol(vol,du)}</span></div>
-      <div style="font-size:11px;font-family:'IBM Plex Mono',monospace;color:var(--text2);">${sStr}</div>
-      <div style="font-size:11px;font-family:'IBM Plex Mono',monospace;color:var(--text3);">~${Math.round(kcal)} ккал</div>
-      <div style="margin-top:4px;"><button class="ba sm ghost" onclick="openEditHist('ex','${ex.id}','${date}')">редактировать</button></div>
-    </div>`;
-  });
-  D.supersets.forEach(ss=>{
-    const h=(D.ssHistory[ss.id]||[]).find(h=>h.date===date);if(!h)return;found=true;
-    const vol=calcVolSS(ss.id,h.rounds);const kcal=calcKcalSS(ss.id,h.rounds);totalKcal+=kcal;
-    const rStr=h.rounds.map((round,i)=>{const parts=(ss.exIds||[]).map(exId=>fmtSetHist(exId,round[exId]||{}));return`${i+1}: ${parts.join(" + ")}`;}).join("  ");
-    html+=`<div style="margin-bottom:8px;"><div style="font-size:12px;font-weight:500;">${ss.name} <span style="font-size:11px;color:var(--text3);font-weight:400;">~${Math.round(vol)} кг·повт</span></div>
-      <div style="font-size:11px;font-family:'IBM Plex Mono',monospace;color:var(--text2);">${rStr}</div>
-      <div style="font-size:11px;font-family:'IBM Plex Mono',monospace;color:var(--text3);">~${Math.round(kcal)} ккал</div>
-      <div style="margin-top:4px;"><button class="ba sm ghost" onclick="openEditHist('ss','${ss.id}','${date}')">редактировать</button></div>
-    </div>`;
-  });
-  if(!found)html+=`<div class="sk">нет данных за эту дату</div>`;
-  else html+=`<div style="font-size:12px;font-family:'IBM Plex Mono',monospace;color:var(--accent);margin-top:8px;padding-top:8px;border-top:1px solid var(--border);">Итого: ~${Math.round(totalKcal)} ккал</div>`;
-  html+=`</div>`;
-  document.getElementById("exp-preview").innerHTML=html;
-}
-
-// ── edit history in modal ─────────────────────────────────────────────────────
-function openEditHist(type,id,date){
-  if(type==="ex"){
-    const ex=getEx(id);if(!ex)return;
-    const h=(D.history[id]||[]).find(h=>h.date===date);if(!h)return;
-    const du=ex.defaultUnit||"кг";const bw=!!ex.bodyweight;
-    const sHTML=h.sets.map((s,i)=>{
-      const v1=bw?`<input type="number" step="0.5" placeholder="±кг" value="${s.adj||""}" oninput="editHistSetField('ex','${id}','${date}',${i},'adj',this.value)" style="width:70px;font-family:'IBM Plex Mono',monospace;padding:4px;border:1px solid var(--border2);border-radius:var(--rs);background:var(--bg3);color:var(--text);font-size:13px;text-align:center;">`:`<input type="number" step="0.5" placeholder="${du}" value="${s.weight||""}" oninput="editHistSetField('ex','${id}','${date}',${i},'weight',this.value)" style="width:70px;font-family:'IBM Plex Mono',monospace;padding:4px;border:1px solid var(--border2);border-radius:var(--rs);background:var(--bg3);color:var(--text);font-size:13px;text-align:center;">`;
-      const v2=`<input type="number" step="1" placeholder="${du==="сек"?"сек":"повт"}" value="${s.reps||""}" oninput="editHistSetField('ex','${id}','${date}',${i},'reps',this.value)" style="width:70px;font-family:'IBM Plex Mono',monospace;padding:4px;border:1px solid var(--border2);border-radius:var(--rs);background:var(--bg3);color:var(--text);font-size:13px;text-align:center;">`;
-      return`<div style="display:flex;align-items:center;gap:8px;margin-bottom:6px;"><span style="font-size:12px;color:var(--text3);font-family:'IBM Plex Mono',monospace;width:20px;">${i+1}</span>${v1}${v2}</div>`;
-    }).join("");
-    showModal(`Ред. ${ex.name} · ${date}`,"",
-      [{label:"Сохранить",cls:"primary",fn:`saveEditHist('ex','${id}','${date}')`},{label:"Отмена",fn:"closeModal()"}]);
-    document.querySelector(".modal-text").innerHTML=sHTML;
-  } else {
-    const ss=getSS(id);if(!ss)return;
-    const h=(D.ssHistory[id]||[]).find(h=>h.date===date);if(!h)return;
-    let rHTML=h.rounds.map((round,ri)=>{
-      const parts=(ss.exIds||[]).map(exId=>{
-        const ex=getEx(exId);if(!ex)return"";
-        const s=round[exId]||{};
-        return`<div style="margin-bottom:4px;"><span style="font-size:11px;color:var(--text3);">${ex.name}</span><div style="display:flex;gap:6px;margin-top:3px;">
-          <input type="number" step="0.5" placeholder="вес" value="${s.weight||s.adj||""}" oninput="editHistSSField('${id}','${date}',${ri},'${exId}','weight',this.value)" style="width:70px;font-family:'IBM Plex Mono',monospace;padding:4px;border:1px solid var(--border2);border-radius:var(--rs);background:var(--bg3);color:var(--text);font-size:13px;text-align:center;">
-          <input type="number" step="1" placeholder="повт" value="${s.reps||""}" oninput="editHistSSField('${id}','${date}',${ri},'${exId}','reps',this.value)" style="width:70px;font-family:'IBM Plex Mono',monospace;padding:4px;border:1px solid var(--border2);border-radius:var(--rs);background:var(--bg3);color:var(--text);font-size:13px;text-align:center;">
-        </div></div>`;
-      }).join("");
-      return`<div style="margin-bottom:10px;"><div style="font-size:11px;color:var(--text2);font-family:'IBM Plex Mono',monospace;margin-bottom:4px;">Раунд ${ri+1}</div>${parts}</div>`;
-    }).join("");
-    showModal(`Ред. ${ss.name} · ${date}`,"",
-      [{label:"Сохранить",cls:"primary",fn:`saveEditHist('ss','${id}','${date}')`},{label:"Отмена",fn:"closeModal()"}]);
-    document.querySelector(".modal-text").innerHTML=rHTML;
-  }
-}
-function editHistSetField(type,id,date,i,field,val){
-  if(type==="ex"){const h=(D.history[id]||[]).find(h=>h.date===date);if(h&&h.sets[i])h.sets[i][field]=val;}
-}
-function editHistSSField(ssId,date,ri,exId,field,val){
-  const h=(D.ssHistory[ssId]||[]).find(h=>h.date===date);if(h&&h.rounds[ri])h.rounds[ri][exId][field]=val;
-}
-async function saveEditHist(type,id,date){
-  closeModal();sl();
-  if(type==="ex")await gsSet("hist2_"+id,D.history[id]);
-  else await gsSet("ssHist_"+id,D.ssHistory[id]);
-  showToast("история обновлена");renderWorkout();if(curPage==="export")renderExport();
-}
-
-// ── modals ────────────────────────────────────────────────────────────────────
-function showModal(title,text,btns){
-  const bHTML=btns.map(b=>`<button class="ba${b.cls?" "+b.cls:""}" onclick="${b.fn}">${b.label}</button>`).join("");
-  document.getElementById("modal-root").innerHTML=`<div class="modal-bg"><div class="modal"><div class="modal-title">${title}</div><div class="modal-text">${text}</div><div class="modal-btns">${bHTML}</div></div></div>`;
-}
-function closeModal(){document.getElementById("modal-root").innerHTML="";}
-
-function askDeleteEx(id){const ex=getEx(id);if(!ex)return;showModal("Удалить упражнение?",`«${ex.name}» удалится из всех пресетов и суперсетов. История сохранится.`,[{label:"Удалить",cls:"danger",fn:`deleteEx('${id}')`},{label:"Отмена",fn:"closeModal()"}]);}
-function deleteEx(id){
-  D.exercises=D.exercises.filter(e=>e.id!==id);
-  D.supersets.forEach(ss=>{ss.exIds=(ss.exIds||[]).filter(e=>e!==id);});
-  D.presets.forEach(pr=>{pr.items=(pr.items||[]).filter(i=>!(i.type==="ex"&&i.id===id));});
-  editEx=null;closeModal();sl();renderSettings();showToast("удалено, история сохранена");
-}
-function askDeleteSS(id){const ss=getSS(id);if(!ss)return;showModal("Удалить суперсет?",`«${ss.name}» удалится. История суперсета сохранится.`,[{label:"Удалить",cls:"danger",fn:`deleteSS('${id}')`},{label:"Отмена",fn:"closeModal()"}]);}
-function deleteSS(id){
-  D.supersets=D.supersets.filter(s=>s.id!==id);
-  D.presets.forEach(pr=>{pr.items=(pr.items||[]).filter(i=>!(i.type==="ss"&&i.id===id));});
-  editSS=null;closeModal();sl();renderSettings();showToast("суперсет удалён");
-}
-function askDeletePr(id){const pr=getPr(id);if(!pr)return;showModal("Удалить пресет?",`«${pr.name}» будет удалён. Упражнения и история останутся.`,[{label:"Удалить",cls:"danger",fn:`deletePr('${id}')`},{label:"Отмена",fn:"closeModal()"}]);}
-function deletePr(id){
-  D.presets=D.presets.filter(p=>p.id!==id);
-  if(curPreset===id)curPreset=D.presets[0]?.id||"";
-  editPreset=null;closeModal();sl();renderSettings();showToast("пресет удалён");
-}
-function askDelHist(type,id,date){
-  const allDates=[];
-  if(type==="ex")D.exercises.forEach(ex=>{if((D.history[ex.id]||[]).some(h=>h.date===date))allDates.push(1);});
-  D.supersets.forEach(ss=>{if((D.ssHistory[ss.id]||[]).some(h=>h.date===date))allDates.push(1);});
-  const multi=allDates.length>1;
-  if(multi)showModal("Удалить запись?",`Удалить только это или всю тренировку за ${date}?`,[
-    {label:"Всю тренировку",cls:"danger",fn:`delWholeDay('${date}')`},
-    {label:"Только это",fn:`delHistEntry('${type}','${id}','${date}')`},
-    {label:"Отмена",fn:"closeModal()"},
-  ]);
-  else showModal("Удалить запись?",`Запись за ${date}. Удалить?`,[
-    {label:"Удалить",cls:"danger",fn:`delHistEntry('${type}','${id}','${date}')`},{label:"Отмена",fn:"closeModal()"},
-  ]);
-}
-async function delWholeDay(date){
-  closeModal();
-  for(const ex of D.exercises){if(D.history[ex.id]){D.history[ex.id]=D.history[ex.id].filter(h=>h.date!==date);await gsSet("hist2_"+ex.id,D.history[ex.id]);}}
-  for(const ss of D.supersets){if(D.ssHistory[ss.id]){D.ssHistory[ss.id]=D.ssHistory[ss.id].filter(h=>h.date!==date);await gsSet("ssHist_"+ss.id,D.ssHistory[ss.id]);}}
-  sl();showToast("тренировка удалена");renderWorkout();
-}
-async function delHistEntry(type,id,date){
-  closeModal();
-  if(type==="ex"){if(!D.history[id])return;D.history[id]=D.history[id].filter(h=>h.date!==date);sl();await gsSet("hist2_"+id,D.history[id]);}
-  else{if(!D.ssHistory[id])return;D.ssHistory[id]=D.ssHistory[id].filter(h=>h.date!==date);sl();await gsSet("ssHist_"+id,D.ssHistory[id]);}
-  showToast("запись удалена");renderWorkout();
-}
-function saveMyDefaults(){
-  const snap={settings:JSON.parse(JSON.stringify(D.settings)),exercises:JSON.parse(JSON.stringify(D.exercises)),supersets:JSON.parse(JSON.stringify(D.supersets)),presets:JSON.parse(JSON.stringify(D.presets))};
-  try{localStorage.setItem("gym_v11_defaults",JSON.stringify(snap));}catch(e){}
-  showToast("настройки сохранены как мои по умолчанию");renderSettings();
-}
-function askResetToMine(){showModal("Сбросить к моим настройкам?","Упражнения, пресеты и настройки вернутся к сохранённой точке. История сохраняется.",[{label:"Сбросить",cls:"danger",fn:"doResetToMine()"},{label:"Отмена",fn:"closeModal()"}]);}
-function doResetToMine(){
-  try{
-    const snap=JSON.parse(localStorage.getItem("gym_v11_defaults")||"null");
-    if(!snap){showToast("нет сохранённых настроек");closeModal();return;}
-    const hist=D.history,ssHist=D.ssHistory;
-    D.settings=snap.settings;D.exercises=snap.exercises;D.supersets=snap.supersets;D.presets=snap.presets;
-    D.history=hist;D.ssHistory=ssHist;
-    curPreset=D.presets[0]?.id||"mon";
-    closeModal();sl();renderSettings();renderWorkout();showToast("сброшено к моим настройкам");
-  }catch(e){showToast("ошибка сброса");closeModal();}
-}
-function askReset(){showModal("Сбросить настройки?","Упражнения, суперсеты, пресеты и настройки → по умолчанию. История сохраняется.",[{label:"Сбросить",cls:"danger",fn:"doReset()"},{label:"Отмена",fn:"closeModal()"}]);}
-function doReset(){
-  const hist=D.history,ssHist=D.ssHistory;
-  D=freshD();D.history=hist;D.ssHistory=ssHist;
-  curPreset=D.presets[0]?.id||"mon";
-  closeModal();sl();renderSettings();renderWorkout();showToast("настройки сброшены");
-}
-
-// ── interactions ──────────────────────────────────────────────────────────────
-function switchPreset(id){curPreset=id;renderWorkout();}
-function goNewPreset(){showPage("settings");createPr();}
-
-function createPr(){
-  const id="cp_"+Date.now();
-  D.presets.push({id,name:"Новый пресет",items:[]});
-  sl();editPreset=id;showNewExForm=false;showNewSSForm=false;renderSettings();
-}
-function removePrItem(pid,idx){const pr=getPr(pid);if(!pr)return;pr.items.splice(idx,1);sl();renderSettings();}
-function addToPr(pid,type,id){const pr=getPr(pid);if(!pr)return;pr.items.push({type,id});sl();renderSettings();}
-
-function removeExFromSS(ssId,idx){const ss=getSS(ssId);if(!ss)return;ss.exIds.splice(idx,1);sl();renderSettings();}
-function addExToSS(ssId,exId){const ss=getSS(ssId);if(!ss)return;if(!ss.exIds.includes(exId))ss.exIds.push(exId);sl();renderSettings();}
-
-function readNewExForm(){
-  const name=(document.getElementById("nex-name")?.value||"").trim();
-  if(!name){showToast("введи название");return null;}
-  const defaultUnit=document.getElementById("nex-unit")?.value||"кг";
-  const hasBar=document.getElementById("nex-bar")?.checked||false;
-  const bodyweight=document.getElementById("nex-bw")?.checked||false;
-  const hasBwf=bodyweight&&document.getElementById("nex-bwf")?.checked;
-  const bwFactor=hasBwf?parseFloat(document.getElementById("nex-bwfactor")?.value)||0.5:null;
-  const kcalFactor=parseFloat(document.getElementById("nex-kcal")?.value)||0.10;
-  const id="ex_"+Date.now();
-  const ex={id,name,defaultUnit,hasBar,bodyweight,kcalFactor};
-  if(bwFactor)ex.bwFactor=bwFactor;
-  return ex;
-}
-function createExInPr(pid){const ex=readNewExForm();if(!ex)return;D.exercises.push(ex);addToPr(pid,"ex",ex.id);showNewExForm=false;sl();renderSettings();showToast("создано");}
-function createExGlobal(){const ex=readNewExForm();if(!ex)return;D.exercises.push(ex);showNewExForm=false;sl();renderSettings();showToast("создано");}
-
-function readNewSSForm(){
-  const name=(document.getElementById("nss-name")?.value||"").trim();
-  const checked=[...document.querySelectorAll(".ss-ex-chk:checked")].map(cb=>cb.value);
-  if(!name){showToast("введи название");return null;}
-  if(checked.length<2){showToast("выбери минимум 2 упражнения");return null;}
-  return{id:"ss_"+Date.now(),name,exIds:checked,kcalFactor:0.09};
-}
-function createSSInPr(pid){const ss=readNewSSForm();if(!ss)return;D.supersets.push(ss);addToPr(pid,"ss",ss.id);showNewSSForm=false;sl();renderSettings();showToast("суперсет создан");}
-function createSSGlobal(){const ss=readNewSSForm();if(!ss)return;D.supersets.push(ss);showNewSSForm=false;sl();renderSettings();showToast("суперсет создан");}
-
-function saveEx(exId){
-  const idx=D.exercises.findIndex(e=>e.id===exId);if(idx<0)return;
-  const name=(document.getElementById("eex-name")?.value||"").trim();if(!name){showToast("введи название");return;}
-  const defaultUnit=document.getElementById("eex-unit")?.value||"кг";
-  const hasBar=document.getElementById("eex-bar")?.checked||false;
-  const bodyweight=document.getElementById("eex-bw")?.checked||false;
-  const hasBwf=bodyweight&&document.getElementById("eex-bwf")?.checked;
-  const bwFactor=hasBwf?parseFloat(document.getElementById("eex-bwfactor")?.value)||0.5:null;
-  const kcalFactor=parseFloat(document.getElementById("eex-kcal")?.value)||0.10;
-  const updated={...D.exercises[idx],name,defaultUnit,hasBar,bodyweight,kcalFactor};
-  if(bwFactor)updated.bwFactor=bwFactor;else delete updated.bwFactor;
-  D.exercises[idx]=updated;
-  editEx=null;sl();renderSettings();showToast("сохранено");
-}
-
-function toggleUnit(exId){const cur=dispUnit(exId);D.unitPref[exId]=cur==="ф"?"kg":"lbs";sl();renderWorkout();}
-
+// ── действия на тренировке ──────────────────────────────────────────────────
+function switchPreset(id){curPreset=id;D.lastPreset=id;sl();renderWorkout();window.scrollTo(0,0);}
+function setVariant(pid,idx,id){getW(pid).variant[idx]=id;sl();renderWorkout();}
+function toggleUnit(exId){D.unitPref[exId]=isLbs(exId)?"kg":"lbs";sl();renderWorkout();}
 function updSet(pid,exId,i,field,val,fromLbs){
-  const s=getSets(pid,exId);if(!s[i])s[i]={};
-  s[i][field]=field==="weight"&&fromLbs?lbsToKg(parseFloat(val)||0):val;
-  sl();refreshVolEx(exId);
+  const s=getSets(pid,exId);if(!s[i])return;
+  s[i][field]=(field==="weight"&&fromLbs&&has(val))?lbsToKg(num(val)):val;
+  sl();
+  if(field==="band")renderWorkout();else refreshVol(exId);
 }
-function updAdj(pid,exId,i,val){updSet(pid,exId,i,"adj",val,false);}
-
+function refreshVol(exId){const el=document.getElementById("vol-"+exId);if(el)el.outerHTML=buildVol(exId,getSets(curPreset,exId),getW(curPreset).date);}
 function updSSSet(pid,ssId,ri,exId,field,val,fromLbs){
-  const rounds=getSSRounds(pid,ssId);if(!rounds[ri])return;
-  if(!rounds[ri][exId])rounds[ri][exId]={weight:"",reps:"",adj:""};
-  rounds[ri][exId][field]=field==="weight"&&fromLbs?lbsToKg(parseFloat(val)||0):val;
-  sl();refreshVolSS(ssId);
+  const r=getSSRounds(pid,ssId);if(!r[ri])return;
+  if(!r[ri][exId])r[ri][exId]=newSet(false);
+  r[ri][exId][field]=(field==="weight"&&fromLbs&&has(val))?lbsToKg(num(val)):val;
+  sl();const el=document.getElementById("vol-"+ssId);if(el)el.outerHTML=buildVolSS(ssId,r,getW(pid).date);
 }
-
-function refreshVolEx(exId){
-  const el=document.getElementById("vol-"+exId);if(!el)return;
-  el.outerHTML=buildVol(exId,getSets(curPreset,exId));
-}
-function refreshVolSS(ssId){
-  const el=document.getElementById("vol-"+ssId);if(!el)return;
-  el.outerHTML=buildVolSS(ssId,getSSRounds(curPreset,ssId));
-}
-
-function addSet(pid,exId){
-  const s=getSets(pid,exId);s.push({weight:"",reps:"",adj:""});sl();
-  const c=document.getElementById("sets-"+exId);
-  if(c)c.insertAdjacentHTML("beforeend",setRowHTML(pid,exId,s.length-1,s[s.length-1],null));
-}
-function addSSRound(pid,ssId){
-  const rounds=getSSRounds(pid,ssId);
-  const ss=getSS(ssId);const empty={};
-  (ss?.exIds||[]).forEach(id=>{empty[id]={weight:"",reps:"",adj:""};});
-  rounds.push(JSON.parse(JSON.stringify(empty)));
+function addSet(pid,exId,wu){
+  const s=getSets(pid,exId);
+  if(wu){const firstWork=s.findIndex(x=>!x.wu);const at=firstWork<0?s.length:firstWork;s.splice(at,0,newSet(true));}
+  else{const prev=[...s].reverse().find(x=>!x.wu);const ns=newSet(false);if(prev&&getEx(exId)?.usesBand)ns.band=prev.band||"";s.push(ns);}
   sl();renderWorkout();
 }
-function delSet(pid,exId,i){const s=getSets(pid,exId);if(s.length<=1)return;s.splice(i,1);sl();renderWorkout();}
-function delSSRound(pid,ssId,i){const r=getSSRounds(pid,ssId);if(r.length<=1)return;r.splice(i,1);sl();renderWorkout();}
-
-async function saveDay(){
-  const pr=getPr(curPreset);if(!pr)return;
-  const w=getW(curPreset);const date=w.date||today();
-  const exIds=(pr.items||[]).filter(i=>i.type==="ex").map(i=>i.id);
-  const ssIds=(pr.items||[]).filter(i=>i.type==="ss").map(i=>i.id);
-  const already=exIds.some(id=>(D.history[id]||[]).some(h=>h.date===date))
-    ||ssIds.some(id=>(D.ssHistory[id]||[]).some(h=>h.date===date));
-  if(already){showModal("Перезаписать?",`За ${date} уже есть данные. Перезаписать?`,[{label:"Перезаписать",cls:"danger",fn:"doSaveDay()"},{label:"Отмена",fn:"closeModal()"}]);return;}
-  await doSaveDay();
+function delSet(pid,exId,i){const s=getSets(pid,exId);if(s.length<=1){s[0]=newSet(false);}else s.splice(i,1);sl();renderWorkout();}
+function toggleWu(pid,exId,i){const s=getSets(pid,exId);if(!s[i])return;s[i].wu=!s[i].wu;sl();renderWorkout();}
+function restFor(pid,exId,wu){
+  if(wu)return 60;
+  const pr=getPr(pid);const it=(pr?.items||[]).find((x,k)=>x.type==="ex"&&itemExId(pid,k,x)===exId);
+  return it?effItem(it,exId).rest||90:90;
 }
-
-async function doSaveDay(){
-  closeModal();
-  const pr=getPr(curPreset);if(!pr)return;
-  const w=getW(curPreset);const date=w.date||today();
-
-  // save exercises
-  for(const item of (pr.items||[])){
-    if(item.type==="ex"){
-      const ex=getEx(item.id);if(!ex)continue;
-      if(!D.history[item.id])D.history[item.id]=[];
-      const hist=D.history[item.id];
-      const snap=getSets(curPreset,item.id).map(s=>({...s,baseSnap:baseW(item.id)}));
-      const entry={date,sets:JSON.parse(JSON.stringify(snap))};
-      const idx=hist.findIndex(h=>h.date===date);
-      if(idx>=0)hist[idx]=entry;else hist.push(entry);
-      if(hist.length>20)hist.splice(0,hist.length-20);
-    } else if(item.type==="ss"){
-      if(!D.ssHistory[item.id])D.ssHistory[item.id]=[];
-      const hist=D.ssHistory[item.id];
-      const rounds=getSSRounds(curPreset,item.id);
-      const snap=rounds.map(round=>{
-        const r={};
-        const ss=getSS(item.id);
-        (ss?.exIds||[]).forEach(exId=>{r[exId]={...round[exId],baseSnap:baseW(exId)};});
-        return r;
-      });
-      const entry={date,rounds:JSON.parse(JSON.stringify(snap))};
-      const idx=hist.findIndex(h=>h.date===date);
-      if(idx>=0)hist[idx]=entry;else hist.push(entry);
-      if(hist.length>20)hist.splice(0,hist.length-20);
-    }
+function doneSet(pid,exId,i){
+  unlockAudio();
+  const sets=getSets(pid,exId);const s=sets[i];if(!s)return;
+  if(s.done){s.done=false;sl();renderWorkout();return;}
+  // пустые поля → как в прошлый раз
+  const w=getW(pid);const ph=placeholders(exId,w.date);
+  let wn=0,wun=0,p=null;
+  for(let k=0;k<=i;k++){const x=sets[k];if(x.wu){if(k===i)p=ph.wu[wun];wun++;}else{if(k===i)p=ph.work[wn];wn++;}}
+  const ex=getEx(exId);
+  if(p){
+    if(!has(s.reps)&&has(p.reps))s.reps=String(num(p.reps));
+    if(!ex.bodyweight&&!isRepsOnly(ex)&&!has(s.weight)&&has(p.weight))s.weight=String(num(p.weight));
+    if(ex.bodyweight&&!ex.usesBand&&!has(s.adj)&&has(p.adj))s.adj=String(num(p.adj));
   }
+  if(!has(s.reps)){showToast("впиши повторы");return;}
+  s.done=true;
+  if(!w.started)w.started=Date.now();
   sl();
-
-  // sync to cloud
-  for(const item of (pr.items||[])){
-    if(item.type==="ex")await gsSet("hist2_"+item.id,D.history[item.id]);
-    else if(item.type==="ss")await gsSet("ssHist_"+item.id,D.ssHistory[item.id]);
-  }
-  await gsSet("workout_"+curPreset,w);
-  await gsSet("settings",D.settings);
-  await gsSet("presets",D.presets);
-  await gsSet("exercises",D.exercises);
-  await gsSet("supersets",D.supersets);
-
-  // build summary
-  let totalVol=0,totalKcal=0,lines=[];
-  (pr.items||[]).forEach(item=>{
-    if(item.type==="ex"){const vol=calcVol(item.id,getSets(curPreset,item.id));const kcal=calcKcalEx(item.id,getSets(curPreset,item.id));totalVol+=vol;totalKcal+=kcal;if(vol>0)lines.push(`${getEx(item.id)?.name}: ${Math.round(vol)} кг·повт`);}
-    else if(item.type==="ss"){const vol=calcVolSS(item.id,getSSRounds(curPreset,item.id));const kcal=calcKcalSS(item.id,getSSRounds(curPreset,item.id));totalVol+=vol;totalKcal+=kcal;if(vol>0)lines.push(`${getSS(item.id)?.name}: ~${Math.round(vol)} кг·повт`);}
-  });
-  const msg=lines.slice(0,5).join("\n")+(lines.length>5?"\n...":"");
-  showModal("Молодец! Хорошая тренировка 💪",`Объём: ${Math.round(totalVol)} кг·повт\n~${Math.round(totalKcal)} ккал\n\n${msg}`,[{label:"Закрыть",fn:"closeModal()"}]);
+  startRest(restFor(pid,exId,s.wu),ex.name);
   renderWorkout();
 }
-
-function clearDay(){
-  const pr=getPr(curPreset);if(!pr)return;
-  const w=getW(curPreset);w.sets={};w.ssSets={};sl();renderWorkout();
+function doneSS(pid,ssId,ri,exId){
+  unlockAudio();
+  const r=getSSRounds(pid,ssId);const s=r[ri]&&r[ri][exId];if(!s)return;
+  s.done=!s.done;const w=getW(pid);if(s.done&&!w.started)w.started=Date.now();
+  sl();if(s.done)startRest(90,getEx(exId)?.name||"");renderWorkout();
 }
+function addSSRound(pid,ssId){const r=getSSRounds(pid,ssId);const ss=getSS(ssId);const o={};(ss?.exIds||[]).forEach(id=>o[id]=newSet(false));r.push(o);sl();renderWorkout();}
+function delSSRound(pid,ssId,i){const r=getSSRounds(pid,ssId);if(r.length<=1)return;r.splice(i,1);sl();renderWorkout();}
 
-function exportAll(){
-  let rows=["дата,тип,упражнение/суперсет,раунд/подход,вес(кг),повт/сек,объём,ккал"];
+function collectEntries(pid){
+  const pr=getPr(pid);const w=getW(pid);const out=[];
+  (pr?.items||[]).forEach((item,idx)=>{
+    if(item.type==="ex"){
+      const exId=itemExId(pid,idx,item);
+      if(out.some(o=>o.type==="ex"&&o.id===exId))return;
+      const filled=(w.sets[exId]||[]).filter(s=>num(s.reps)>0);
+      if(filled.length)out.push({type:"ex",id:exId,sets:filled.map(s=>({weight:s.weight,reps:s.reps,adj:s.adj,band:s.band||"",wu:!!s.wu,baseSnap:baseW(exId)}))});
+    }else if(item.type==="ss"){
+      const ss=getSS(item.id);const rounds=(w.ssSets[item.id]||[]).filter(r=>Object.values(r).some(s=>num(s.reps)>0));
+      if(rounds.length)out.push({type:"ss",id:item.id,rounds:rounds.map(r=>{const o={};(ss?.exIds||[]).forEach(id=>{const s=r[id]||{};o[id]={weight:s.weight||"",reps:s.reps||"",adj:s.adj||"",baseSnap:baseW(id)};});return o;})});
+    }
+  });
+  return out;
+}
+function saveDay(){
+  const w=getW(curPreset);const date=w.date||today();
+  const entries=collectEntries(curPreset);
+  if(!entries.length){showToast("нет заполненных подходов");return;}
+  const already=entries.some(e=>(e.type==="ex"?getHist(e.id):getSSHist(e.id)).some(h=>h.date===date));
+  if(already){showModal("Перезаписать?",`За ${date} уже есть записи этих упражнений. Заменить их?`,[{label:"Перезаписать",cls:"danger",fn:"doSaveDay()"},{label:"Отмена",fn:"closeModal()"}]);return;}
+  doSaveDay();
+}
+function upsertHist(arr,entry){const i=arr.findIndex(h=>h.date===entry.date);if(i>=0)arr[i]=entry;else arr.push(entry);arr.sort((a,b)=>a.date<b.date?-1:a.date>b.date?1:0);}
+function doSaveDay(){
+  closeModal();
+  const w=getW(curPreset);const date=w.date||today();
+  const entries=collectEntries(curPreset);
+  let vol=0,sets=0,lines=[];
+  entries.forEach(e=>{
+    if(e.type==="ex"){
+      if(!D.history[e.id])D.history[e.id]=[];
+      upsertHist(D.history[e.id],{date,sets:e.sets});
+      const v=calcVol(e.id,e.sets);vol+=v;const n=e.sets.filter(isWork).length;sets+=n;
+      lines.push(`${getEx(e.id)?.name}: ${n} подх.`);
+    }else{
+      if(!D.ssHistory[e.id])D.ssHistory[e.id]=[];
+      upsertHist(D.ssHistory[e.id],{date,rounds:e.rounds});vol+=calcVolSS(e.id,e.rounds);
+      lines.push(`${getSS(e.id)?.name}: ${e.rounds.length} раунд.`);
+    }
+  });
+  if(has(w.note))D.dayNotes[date]=w.note;
+  const mins=w.started?Math.round((Date.now()-w.started)/60000):null;
+  D.workouts[curPreset]={date:today(),sets:{},ssSets:{},variant:w.variant||{},started:null,note:""};
+  stopRest();sl();
+  showModal("Готово, записано 💪",`${date}${mins!==null?" · "+mins+" мин":""}\nРабочих подходов: ${sets} · объём: ${Math.round(vol)}\n\n${lines.join("\n")}`,[{label:"Закрыть",fn:"closeModal()"}]);
+  renderWorkout();
+}
+function askClearDay(){showModal("Очистить тренировку?","Все введённые сейчас подходы удалятся. Сохранённая история не пострадает.",[{label:"Очистить",cls:"danger",fn:"clearDay()"},{label:"Отмена",fn:"closeModal()"}]);}
+function clearDay(){closeModal();const w=getW(curPreset);D.workouts[curPreset]={date:today(),sets:{},ssSets:{},variant:w.variant||{},started:null,note:""};stopRest();sl();renderWorkout();}
+
+// ── таймер отдыха ───────────────────────────────────────────────────────────
+let TM={end:0,total:0,label:"",iv:null,endShown:0};
+let AC=null,WL=null;
+function unlockAudio(){try{if(!AC)AC=new(window.AudioContext||window.webkitAudioContext)();if(AC.state==="suspended")AC.resume();}catch(e){}}
+function beep(){
+  try{if(!AC)return;const t=AC.currentTime;
+    [0,0.28,0.56].forEach(d=>{const o=AC.createOscillator(),g=AC.createGain();o.type="sine";o.frequency.value=880;o.connect(g);g.connect(AC.destination);
+      g.gain.setValueAtTime(0.0001,t+d);g.gain.exponentialRampToValueAtTime(0.5,t+d+0.02);g.gain.exponentialRampToValueAtTime(0.0001,t+d+0.2);o.start(t+d);o.stop(t+d+0.22);});
+  }catch(e){}
+  try{navigator.vibrate&&navigator.vibrate([250,120,250]);}catch(e){}
+}
+async function wakeOn(){try{if("wakeLock" in navigator&&!WL){WL=await navigator.wakeLock.request("screen");WL.addEventListener("release",()=>{WL=null;});}}catch(e){}}
+function wakeOff(){try{WL&&WL.release();}catch(e){}WL=null;}
+function startRest(sec,label){
+  TM.end=Date.now()+sec*1000;TM.total=sec;TM.label=label||"";TM.endShown=0;
+  if(!TM.iv)TM.iv=setInterval(tickRest,250);
+  wakeOn();tickRest();
+}
+function addRest(s){if(!TM.end)return;TM.end+=s*1000;TM.total+=s;TM.endShown=0;tickRest();}
+function stopRest(){TM.end=0;TM.endShown=0;if(TM.iv){clearInterval(TM.iv);TM.iv=null;}document.getElementById("tbar").style.display="none";document.getElementById("tbox").classList.remove("end");wakeOff();}
+function tickRest(){
+  const bar=document.getElementById("tbar"),box=document.getElementById("tbox"),txt=document.getElementById("ttxt"),fill=document.getElementById("tfill");
+  if(!TM.end||curPage!=="workout"){bar.style.display="none";if(!TM.end)return;}
+  else bar.style.display="block";
+  const left=Math.ceil((TM.end-Date.now())/1000);
+  if(left>0){
+    box.classList.remove("end");
+    txt.innerHTML=`отдых ${fmtRest(left)} <small>· ${esc(TM.label)}</small>`;
+    fill.style.width=Math.max(0,Math.min(100,100*(1-left/TM.total)))+"%";
+  }else{
+    if(!TM.endShown){TM.endShown=Date.now();beep();box.classList.add("end");txt.textContent="Отдых закончился — подход!";fill.style.width="100%";}
+    if(Date.now()-TM.endShown>6000)stopRest();
+  }
+}
+document.addEventListener("visibilitychange",()=>{if(document.visibilityState==="visible"){if(TM.end)wakeOn();tickRest();updateHeader();}});
+function updateHeader(){
+  const w=D.workouts[curPreset];const el=document.getElementById("htime");
+  if(w&&w.started){const m=Math.round((Date.now()-w.started)/60000);el.textContent="⏱ "+m+" мин";}
+  else el.textContent="";
+}
+setInterval(updateHeader,20000);
+
+// ── настройки ───────────────────────────────────────────────────────────────
+function renderSettings(){
+  const s=D.settings;
+  let html=`<div class="ss-sec"><div class="st">Мои данные</div>
+    <div class="srow"><div class="slbl">Вес тела, кг</div><input class="sinp" type="number" inputmode="decimal" step="0.5" value="${s.bodyWeight||74}" onchange="D.settings.bodyWeight=num(this.value)||74;sl();showToast('сохранено')"></div>
+    <div class="srow"><div class="slbl">Рост, см</div><input class="sinp" type="number" inputmode="numeric" value="${s.bodyHeight||192}" onchange="D.settings.bodyHeight=num(this.value)||192;sl();showToast('сохранено')"></div>
+    <div class="srow"><div><div class="slbl">Резинки</div><div class="ssub">через запятую, от слабой к сильной</div></div><input class="sinp wide" value="${esc((s.bands||[]).join(", "))}" onchange="D.settings.bands=this.value.split(',').map(x=>x.trim()).filter(Boolean);if(!D.settings.bands.length)D.settings.bands=['красная'];sl();showToast('сохранено')"></div>
+  </div>`;
+  const barExes=D.exercises.filter(e=>e.hasBar);
+  if(barExes.length){
+    html+=`<div class="ss-sec"><div class="st">Вес грифа</div>`;
+    barExes.forEach(ex=>{html+=`<div class="srow"><div class="slbl">${esc(ex.name)}</div><input class="sinp" type="number" inputmode="decimal" step="0.5" value="${(s.barWeights||{})[ex.id]??""}" placeholder="кг" onchange="D.settings.barWeights['${ex.id}']=num(this.value);sl();showToast('сохранено')"></div>`;});
+    html+=`</div>`;
+  }
+  // пресеты
+  html+=`<div class="ss-sec"><div class="st">Тренировки (пресеты)</div>`;
+  D.presets.forEach((pr,pi)=>{
+    if(editPreset===pr.id){
+      const itemsHTML=(pr.items||[]).map((it,idx)=>{
+        const lbl=it.type==="ex"?(getEx(it.id)?.name||it.id):"суперсет: "+(getSS(it.id)?.name||it.id);
+        const alts=(it.alts||[]).map(a=>getEx(a)?.name||a).join(", ");
+        const f=it.type==="ex"?`<div class="pitem-f">
+          <input class="pin" type="number" inputmode="numeric" value="${it.sets??""}" placeholder="подх" onchange="setItem('${pr.id}',${idx},'sets',this.value)"> ×
+          <input class="pin" type="number" inputmode="numeric" value="${it.repMin??""}" placeholder="от" onchange="setItem('${pr.id}',${idx},'repMin',this.value)">–
+          <input class="pin" type="number" inputmode="numeric" value="${it.repMax??""}" placeholder="до" onchange="setItem('${pr.id}',${idx},'repMax',this.value)">
+          отдых <input class="pin" type="number" inputmode="numeric" value="${it.rest??""}" placeholder="сек" onchange="setItem('${pr.id}',${idx},'rest',this.value)">с
+          группа <input class="pin" style="width:34px" value="${esc(it.group||"")}" placeholder="—" onchange="setItem('${pr.id}',${idx},'group',this.value)">
+        </div>${alts?`<div class="note" style="margin:4px 0 0">варианты: ${esc(alts)}</div>`:""}`:"";
+        return`<div class="pitem"><div class="pitem-top"><span class="ecl">${esc(lbl)}</span><span style="display:flex;gap:4px"><button class="mv" onclick="movePrItem('${pr.id}',${idx},-1)">↑</button><button class="mv" onclick="movePrItem('${pr.id}',${idx},1)">↓</button><button class="ba sm ghost" onclick="removePrItem('${pr.id}',${idx})">убрать</button></span></div>${f}</div>`;
+      }).join("");
+      const used=(pr.items||[]).filter(i=>i.type==="ex").map(i=>i.id);
+      const availEx=D.exercises.filter(e=>!used.includes(e.id));
+      const usedSS=(pr.items||[]).filter(i=>i.type==="ss").map(i=>i.id);
+      const availSS=D.supersets.filter(s=>!usedSS.includes(s.id));
+      html+=`<div class="editor">
+        <input class="einp" value="${esc(pr.name)}" oninput="getPr('${pr.id}').name=this.value;sl()">
+        <div class="note">группа: одна буква у соседних упражнений = суперсет (A, B…), «K» = круг</div>
+        ${itemsHTML}
+        <div style="margin-top:10px">
+          ${availEx.length?`<div class="note">добавить упражнение:</div><select class="esel" onchange="if(this.value)addToPr('${pr.id}','ex',this.value)"><option value="">— выбрать —</option>${availEx.map(e=>`<option value="${e.id}">${esc(e.name)}</option>`).join("")}</select>`:""}
+          ${availSS.length?`<div class="note">добавить старый суперсет:</div><select class="esel" onchange="if(this.value)addToPr('${pr.id}','ss',this.value)"><option value="">— выбрать —</option>${availSS.map(s=>`<option value="${s.id}">${esc(s.name)}</option>`).join("")}</select>`:""}
+        </div>
+        ${showNewExForm===pr.id?`<div class="editor" style="background:var(--bg3)">${exFormHTML(null,`createEx('${pr.id}')`)}</div>`:`<button class="ba sm ghost" onclick="showNewExForm='${pr.id}';renderSettings()">+ новое упражнение</button>`}
+        <div class="br" style="margin-top:12px"><button class="ba primary" onclick="editPreset=null;showNewExForm=false;renderSettings()">Готово</button><button class="ba danger" onclick="askDeletePr('${pr.id}')">Удалить</button></div>
+      </div>`;
+    }else{
+      html+=`<div class="srow"><div><div class="slbl">${esc(pr.name)}</div><div class="ssub">${(pr.items||[]).length} упр.</div></div><span style="display:flex;gap:4px"><button class="mv" onclick="movePreset(${pi},-1)">↑</button><button class="ba" onclick="editPreset='${pr.id}';showNewExForm=false;renderSettings()">изменить</button></span></div>`;
+    }
+  });
+  html+=`<div class="br" style="margin-top:12px"><button class="ba" onclick="createPr()">+ новая тренировка</button>${D.oldPresets&&D.oldPresets.length?`<button class="ba ghost" onclick="restoreOldPresets()">вернуть старые пресеты (${D.oldPresets.length})</button>`:""}</div></div>`;
+  // упражнения
+  html+=`<div class="ss-sec"><div class="st">Упражнения</div>`;
   D.exercises.forEach(ex=>{
-    (D.history[ex.id]||[]).forEach(h=>{
-      h.sets.forEach((s,i)=>{
-        const base=parseFloat(s.baseSnap)||baseW(ex.id);const adj=parseFloat(s.adj)||0;const w=parseFloat(s.weight)||0;const r=parseFloat(s.reps)||0;
-        const total=ex.bodyweight?base+adj:base+w;const vol=calcVol(ex.id,[{...s,baseSnap:base}]);
-        rows.push([h.date,"упражнение",`"${ex.name}"`,i+1,total||0,r,Math.round(vol),Math.round(calcKcalEx(ex.id,[{...s,baseSnap:base}]))].join(","));
-      });
-    });
+    if(editEx===ex.id){html+=`<div class="editor">${exFormHTML(ex,`saveEx('${ex.id}')`)}</div>`;return;}
+    const meta=[ex.defaultUnit||"кг",ex.usesBand?"резинка":ex.bodyweight?"вес тела"+(ex.bwFactor?" ×"+ex.bwFactor:""):ex.hasBar?"гриф":"",ex.inc?"шаг "+ex.inc:""].filter(Boolean).join(" · ");
+    const hl=getHist(ex.id).length;
+    html+=`<div class="srow"><div><div class="slbl">${esc(ex.name)}</div><div class="ssub">${meta}${hl?` · ${hl} зап.`:""}</div></div><button class="ba" onclick="editEx='${ex.id}';renderSettings()">изм.</button></div>`;
   });
-  D.supersets.forEach(ss=>{
-    (D.ssHistory[ss.id]||[]).forEach(h=>{
-      h.rounds.forEach((round,ri)=>{
-        (ss.exIds||[]).forEach(exId=>{
-          const ex=getEx(exId);if(!ex)return;const s=round[exId]||{};
-          const base=parseFloat(s.baseSnap)||baseW(exId);const w=parseFloat(s.weight)||0;const r=parseFloat(s.reps)||0;
-          const total=ex.bodyweight?base+(parseFloat(s.adj)||0):base+w;
-          rows.push([h.date,"суперсет",`"${ss.name} — ${ex.name}"`,ri+1,total||0,r,Math.round(effW(exId,s)*r),Math.round(effW(exId,s)*r*(ex.kcalFactor||0.1))].join(","));
-        });
-      });
-    });
-  });
-  dlCSV(rows.join("\n"),"gym_history.csv");
+  html+=`<div style="margin-top:10px">${showNewExForm==="global"?`<div class="editor">${exFormHTML(null,"createEx(null)")}</div>`:`<button class="ba" onclick="showNewExForm='global';renderSettings()">+ создать упражнение</button>`}</div></div>`;
+  // старые суперсеты
+  if(D.supersets.length){
+    html+=`<div class="ss-sec"><div class="st">Старые суперсеты</div>`;
+    D.supersets.forEach(ss=>{html+=`<div class="srow"><div><div class="slbl">${esc(ss.name)}</div><div class="ssub">${(ss.exIds||[]).map(id=>getEx(id)?.name||id).join(" + ")} · ${getSSHist(ss.id).length} зап.</div></div><button class="ba danger sm" onclick="askDeleteSS('${ss.id}')">удалить</button></div>`;});
+    html+=`<div class="note">Новые суперсеты делаются буквой группы в тренировке — так у каждого упражнения своя история.</div></div>`;
+  }
+  const hasMine=!!localStorage.getItem(LS_DEF);
+  html+=`<div class="ss-sec"><div class="st">Сброс</div>
+    <div class="srow"><div><div class="slbl">Запомнить мои настройки</div><div class="ssub">упражнения и тренировки станут точкой отката</div></div><button class="ba" onclick="saveMyDefaults()">Запомнить</button></div>
+    ${hasMine?`<div class="srow"><div><div class="slbl">Вернуть мои настройки</div><div class="ssub">история сохранится</div></div><button class="ba danger" onclick="askResetToMine()">Вернуть</button></div>`:""}
+    <div class="srow"><div><div class="slbl">Программа по умолчанию</div><div class="ssub">вернуть 4 тренировки блока 1. История и упражнения сохранятся.</div></div><button class="ba danger" onclick="askResetProgram()">Сброс</button></div>
+  </div>`;
+  document.getElementById("pg-settings").innerHTML=html;
 }
-function exportEx(id){
-  const ex=getEx(id);if(!ex)return;
-  let rows=["дата,подход,вес(кг),повт/сек,объём,ккал"];
-  (D.history[id]||[]).forEach(h=>{
-    h.sets.forEach((s,i)=>{
-      const base=parseFloat(s.baseSnap)||baseW(id);const adj=parseFloat(s.adj)||0;const w=parseFloat(s.weight)||0;const r=parseFloat(s.reps)||0;
-      const total=ex.bodyweight?base+adj:base+w;const vol=calcVol(id,[{...s,baseSnap:base}]);
-      rows.push([h.date,i+1,total||0,r,Math.round(vol),Math.round(calcKcalEx(id,[{...s,baseSnap:base}]))].join(","));
-    });
-  });
-  dlCSV(rows.join("\n"),ex.name.replace(/\s+/g,"_")+".csv");
+function exFormHTML(ex,onSave){
+  const e=ex||{defaultUnit:"кг"};const du=e.defaultUnit||"кг";
+  return`<input class="einp" id="ef-name" value="${esc(e.name||"")}" placeholder="Название">
+    <select class="esel" id="ef-unit">${["кг","ф","повт","сек"].map(u=>`<option value="${u}"${du===u?" selected":""}>${{"кг":"кг","ф":"фунты","повт":"только повторения","сек":"секунды"}[u]}</option>`).join("")}</select>
+    <div class="flags">
+      <label><input type="checkbox" id="ef-bar" ${e.hasBar?"checked":""}> гриф</label>
+      <label><input type="checkbox" id="ef-bw" ${e.bodyweight?"checked":""}> вес тела</label>
+      <label><input type="checkbox" id="ef-band" ${e.usesBand?"checked":""}> резинка</label>
+    </div>
+    <div class="flags" style="align-items:center">
+      <label>доля веса тела <input id="ef-bwf" type="number" inputmode="decimal" step="0.05" value="${e.bwFactor||""}" placeholder="1" class="pin"></label>
+      <label>шаг веса, кг <input id="ef-inc" type="number" inputmode="decimal" step="0.5" value="${e.inc||""}" placeholder="2.5" class="pin"></label>
+    </div>
+    <textarea class="tarea" id="ef-note" placeholder="заметка (видна на карточке)" style="margin-bottom:8px">${esc(e.note||"")}</textarea>
+    <div class="note">история сохраняется при изменениях</div>
+    <div class="br"><button class="ba primary" onclick="${onSave}">Сохранить</button><button class="ba" onclick="editEx=null;showNewExForm=false;renderSettings()">Отмена</button>${ex?`<button class="ba danger" onclick="askDeleteEx('${ex.id}')">Удалить</button>`:""}</div>`;
 }
-function exportSS(id){
-  const ss=getSS(id);if(!ss)return;
-  let rows=["дата,раунд,упражнение,вес(кг),повт"];
-  (D.ssHistory[id]||[]).forEach(h=>{
-    h.rounds.forEach((round,ri)=>{
-      (ss.exIds||[]).forEach(exId=>{const ex=getEx(exId);if(!ex)return;const s=round[exId]||{};
-        const base=parseFloat(s.baseSnap)||baseW(exId);const w=parseFloat(s.weight)||0;const r=parseFloat(s.reps)||0;
-        rows.push([h.date,ri+1,`"${ex.name}"`,ex.bodyweight?base+(parseFloat(s.adj)||0):base+w,r].join(","));
-      });
-    });
-  });
-  dlCSV(rows.join("\n"),ss.name.replace(/\s+/g,"_")+".csv");
+function readExForm(base){
+  const name=(document.getElementById("ef-name")?.value||"").trim();if(!name){showToast("введи название");return null;}
+  const e=Object.assign({},base||{id:"ex_"+Date.now()});
+  e.name=name;e.defaultUnit=document.getElementById("ef-unit").value;
+  e.hasBar=document.getElementById("ef-bar").checked;e.bodyweight=document.getElementById("ef-bw").checked;
+  e.usesBand=document.getElementById("ef-band").checked;if(e.usesBand)e.bodyweight=true;
+  const f=num(document.getElementById("ef-bwf").value);if(e.bodyweight&&f>0&&f<1)e.bwFactor=f;else delete e.bwFactor;
+  const inc=num(document.getElementById("ef-inc").value);if(inc>0)e.inc=inc;else delete e.inc;
+  e.note=document.getElementById("ef-note").value;
+  return e;
 }
-function dlCSV(c,f){const b=new Blob(["\uFEFF"+c],{type:"text/csv;charset=utf-8;"});const u=URL.createObjectURL(b);const a=document.createElement("a");a.href=u;a.download=f;a.click();URL.revokeObjectURL(u);}
+function createEx(pid){const e=readExForm(null);if(!e)return;D.exercises.push(e);if(pid)addToPr(pid,"ex",e.id);showNewExForm=false;sl();renderSettings();showToast("создано");}
+function saveEx(id){const i=D.exercises.findIndex(e=>e.id===id);if(i<0)return;const e=readExForm(D.exercises[i]);if(!e)return;D.exercises[i]=e;editEx=null;sl();renderSettings();showToast("сохранено");}
+function setItem(pid,idx,field,val){
+  const it=getPr(pid)?.items?.[idx];if(!it)return;
+  if(field==="group"){const g=val.trim().toUpperCase().replace("К","K");if(g)it.group=g;else delete it.group;}
+  else{const n=num(val);if(has(val)&&n>0)it[field]=n;else delete it[field];}
+  sl();
+}
+function movePrItem(pid,idx,d){const it=getPr(pid)?.items;if(!it)return;const j=idx+d;if(j<0||j>=it.length)return;[it[idx],it[j]]=[it[j],it[idx]];sl();renderSettings();}
+function movePreset(i,d){const j=i+d;if(j<0||j>=D.presets.length)return;[D.presets[i],D.presets[j]]=[D.presets[j],D.presets[i]];sl();renderSettings();}
+function removePrItem(pid,idx){const pr=getPr(pid);if(!pr)return;pr.items.splice(idx,1);sl();renderSettings();}
+function addToPr(pid,type,id){const pr=getPr(pid);if(!pr)return;const it={type,id};if(type==="ex"){it.sets=3;it.repMin=8;it.repMax=12;it.rest=90;}pr.items.push(it);sl();renderSettings();}
+function createPr(){const id="cp_"+Date.now();D.presets.push({id,name:"Новая тренировка",items:[]});editPreset=id;sl();renderSettings();}
+function restoreOldPresets(){(D.oldPresets||[]).forEach(p=>{if(!getPr(p.id))D.presets.push(p);});D.oldPresets=null;sl();renderSettings();showToast("старые пресеты возвращены");}
+function askDeletePr(id){const pr=getPr(id);if(!pr)return;showModal("Удалить тренировку?",`«${esc(pr.name)}» удалится. Упражнения и история останутся.`,[{label:"Удалить",cls:"danger",fn:`deletePr('${id}')`},{label:"Отмена",fn:"closeModal()"}]);}
+function deletePr(id){D.presets=D.presets.filter(p=>p.id!==id);if(curPreset===id)curPreset=D.presets[0]?.id||"";editPreset=null;closeModal();sl();renderSettings();}
+function askDeleteEx(id){const ex=getEx(id);if(!ex)return;showModal("Удалить упражнение?",`«${esc(ex.name)}» уберётся из всех тренировок. История сохранится в памяти.`,[{label:"Удалить",cls:"danger",fn:`deleteEx('${id}')`},{label:"Отмена",fn:"closeModal()"}]);}
+function deleteEx(id){D.exercises=D.exercises.filter(e=>e.id!==id);D.supersets.forEach(s=>s.exIds=(s.exIds||[]).filter(x=>x!==id));D.presets.forEach(p=>p.items=(p.items||[]).filter(i=>!(i.type==="ex"&&i.id===id)));editEx=null;closeModal();sl();renderSettings();}
+function askDeleteSS(id){const ss=getSS(id);if(!ss)return;showModal("Удалить суперсет?",`«${esc(ss.name)}» удалится из списка. Его история останется в резервной копии.`,[{label:"Удалить",cls:"danger",fn:`deleteSS('${id}')`},{label:"Отмена",fn:"closeModal()"}]);}
+function deleteSS(id){D.supersets=D.supersets.filter(s=>s.id!==id);D.presets.forEach(p=>p.items=(p.items||[]).filter(i=>!(i.type==="ss"&&i.id===id)));closeModal();sl();renderSettings();}
+function saveMyDefaults(){try{localStorage.setItem(LS_DEF,JSON.stringify({settings:D.settings,exercises:D.exercises,supersets:D.supersets,presets:D.presets}));}catch(e){}showToast("запомнено");renderSettings();}
+function askResetToMine(){showModal("Вернуть мои настройки?","Упражнения, тренировки и настройки вернутся к запомненным. История сохранится.",[{label:"Вернуть",cls:"danger",fn:"doResetToMine()"},{label:"Отмена",fn:"closeModal()"}]);}
+function doResetToMine(){try{const s=JSON.parse(localStorage.getItem(LS_DEF)||"null");if(!s)return;const lb=D.settings.lastBackup;D.settings=s.settings;D.settings.lastBackup=lb;D.exercises=s.exercises;D.supersets=s.supersets;D.presets=s.presets;D=migrate(D);curPreset=D.presets[0]?.id||"";closeModal();sl();renderSettings();showToast("вернул");}catch(e){closeModal();}}
+function askResetProgram(){showModal("Вернуть программу?","Тренировки станут как в блоке 1 (A / B / лёгкая / дом). Твои текущие тренировки заменятся, история и упражнения сохранятся.",[{label:"Вернуть",cls:"danger",fn:"doResetProgram()"},{label:"Отмена",fn:"closeModal()"}]);}
+function doResetProgram(){D.presets=clone(PROGRAM);curPreset=pickStartPreset();closeModal();sl();renderSettings();showToast("программа восстановлена");}
 
+// ── данные: резервная копия, экспорт, история ───────────────────────────────
+function countEntries(d){return Object.values(d.history||{}).reduce((a,h)=>a+(h?.length||0),0)+Object.values(d.ssHistory||{}).reduce((a,h)=>a+(h?.length||0),0);}
+function allDates(){const s=new Set();Object.values(D.history).forEach(h=>h.forEach(e=>{if((e.sets||[]).some(x=>num(x.reps)>0))s.add(e.date);}));Object.values(D.ssHistory).forEach(h=>h.forEach(e=>s.add(e.date)));return[...s].sort().reverse();}
+function renderData(){
+  const lb=D.settings.lastBackup;
+  const days=lb?Math.floor((Date.now()-lb)/864e5):null;
+  const standalone=window.navigator.standalone===true||window.matchMedia("(display-mode: standalone)").matches;
+  const dates=allDates();
+  let html=`<div class="ss-sec"><div class="st">Резервная копия</div>
+    <div class="expnote">Все данные хранятся только в памяти этого телефона. Копия — один файл: сохрани его в «Файлы» или iCloud.<br>
+    <b>Последняя копия:</b> ${lb?(days===0?"сегодня":days+" дн. назад"):"<span class='warnline'>ещё не делалась</span>"} · <b>записей:</b> ${countEntries(D)} · <b>тренировок:</b> ${dates.length}<br>
+    <b>Режим:</b> ${standalone?"<span class='okline'>приложение с экрана «Домой»</span>":"<span class='warnline'>вкладка браузера — после долгого перерыва Safari может стереть данные, копия обязательна</span>"}${STORAGE_PERSIST===true?" · <span class='okline'>хранилище постоянное</span>":""}</div>
+    <button class="expbtn primary" onclick="doBackup()">💾 Сохранить резервную копию</button>
+    <button class="expbtn" onclick="document.getElementById('restore-inp').click()">📂 Восстановить из копии</button>
+  </div>
+  <div class="ss-sec"><div class="st">История по датам</div>
+    <select class="esel" onchange="renderExpPreview(this.value)"><option value="">— выбери дату —</option>${dates.map(d=>`<option value="${d}">${d}</option>`).join("")}</select>
+    <div id="exp-preview"></div>
+  </div>
+  <div class="ss-sec"><div class="st">Экспорт</div>
+    <button class="expbtn" onclick="exportCSV()">📥 Вся история в CSV (для таблиц и для меня)</button>
+  </div>
+  <div class="ss-sec"><div class="st">Старая синхронизация</div>
+    <div class="expnote">Если на телефоне вдруг не хватает старых записей — можно один раз подтянуть их из Google-таблицы. Недостающие даты добавятся, существующие не изменятся.</div>
+    <button class="expbtn" onclick="importGoogle()">☁️ Подтянуть из Google-таблицы</button>
+  </div>`;
+  document.getElementById("pg-data").innerHTML=html;
+}
+function renderExpPreview(date){
+  const el=document.getElementById("exp-preview");if(!date){el.innerHTML="";return;}
+  let html=`<div class="exp-preview"><div style="font-size:13px;font-weight:500;margin-bottom:10px;">${date}</div>`;
+  D.exercises.forEach(ex=>{const h=getHist(ex.id).find(h=>h.date===date);if(!h||!h.sets.some(s=>num(s.reps)>0))return;
+    html+=`<div style="margin-bottom:10px;"><div style="font-size:12px;font-weight:500;">${esc(ex.name)} <span style="font-size:11px;color:var(--text3);font-weight:400;">${fmtVol(calcVol(ex.id,h.sets),ex)}</span></div>
+      <div class="hs">${h.sets.filter(s=>num(s.reps)>0).map(s=>fmtSet(ex.id,s)).join(" · ")||"—"}</div>
+      <button class="ba sm ghost" style="margin-top:4px" onclick="openEditHist('ex','${ex.id}','${date}')">редактировать</button></div>`;});
+  D.supersets.forEach(ss=>{const h=getSSHist(ss.id).find(h=>h.date===date);if(!h)return;
+    html+=`<div style="margin-bottom:10px;"><div style="font-size:12px;font-weight:500;">${esc(ss.name)}</div><div class="hs">${h.rounds.map((r,i)=>`${i+1}: `+(ss.exIds||[]).map(id=>fmtSet(id,r[id]||{})).join(" + ")).join("  ")}</div></div>`;});
+  if(D.dayNotes[date])html+=`<div class="info mynote">📝 ${esc(D.dayNotes[date])}</div>`;
+  html+=`<button class="ba sm danger" style="margin-top:6px" onclick="askDelDay('${date}')">удалить всю тренировку</button></div>`;
+  el.innerHTML=html;
+}
+async function shareOrDownload(blob,name){
+  const file=new File([blob],name,{type:blob.type});
+  try{if(navigator.canShare&&navigator.canShare({files:[file]})){await navigator.share({files:[file],title:name});return true;}}
+  catch(e){if(e&&e.name==="AbortError")return false;}
+  const u=URL.createObjectURL(blob);const a=document.createElement("a");a.href=u;a.download=name;document.body.appendChild(a);a.click();a.remove();setTimeout(()=>URL.revokeObjectURL(u),3000);
+  return true;
+}
+async function doBackup(){
+  const blob=new Blob([JSON.stringify(D)],{type:"application/json"});
+  const ok=await shareOrDownload(blob,"gym_backup_"+today()+".json");
+  if(ok){D.settings.lastBackup=Date.now();sl();showToast("копия готова");if(curPage==="data")renderData();else renderWorkout();}
+}
+function onRestoreFile(inp){
+  const f=inp.files&&inp.files[0];if(!f)return;
+  const r=new FileReader();
+  r.onload=()=>{
+    try{const d=JSON.parse(r.result);if(!d||!Array.isArray(d.exercises)||!d.history)throw 0;
+      PENDING_RESTORE=d;
+      showModal("Восстановить из копии?",`Файл: ${esc(f.name)}\nЗаписей в копии: ${countEntries(d)} (сейчас на телефоне: ${countEntries(D)})\n\nТекущие данные будут заменены копией. На всякий случай текущее состояние тоже запомнится.`,[{label:"Восстановить",cls:"danger",fn:"doRestore()"},{label:"Отмена",fn:"PENDING_RESTORE=null;closeModal()"}]);
+    }catch(e){showToast("это не файл резервной копии");}
+  };
+  r.readAsText(f);inp.value="";
+}
+function doRestore(){
+  if(!PENDING_RESTORE)return;
+  try{localStorage.setItem("gym_v12_before_restore",JSON.stringify(D));}catch(e){}
+  D=migrate(PENDING_RESTORE);PENDING_RESTORE=null;D.settings.lastBackup=Date.now();
+  curPreset=pickStartPreset();sl();closeModal();renderAll();showToast("восстановлено");
+}
+function exportCSV(){
+  const rows=["дата,тип,упражнение,подход,разминка,вес(кг),резинка,повт/сек,объём"];
+  D.exercises.forEach(ex=>getHist(ex.id).forEach(h=>{let n=0;h.sets.forEach(s=>{if(!(num(s.reps)>0))return;n++;
+    const w=isRepsOnly(ex)&&!ex.bodyweight?"":+effW(ex.id,s).toFixed(2);
+    rows.push([h.date,"упражнение",`"${ex.name}"`,n,s.wu?1:0,w,s.band?`"${s.band}"`:"",num(s.reps),s.wu?0:Math.round(calcVol(ex.id,[s]))].join(","));});}));
+  D.supersets.forEach(ss=>getSSHist(ss.id).forEach(h=>h.rounds.forEach((r,ri)=>(ss.exIds||[]).forEach(id=>{const ex=getEx(id);if(!ex)return;const s=r[id]||{};if(!(num(s.reps)>0))return;
+    rows.push([h.date,"суперсет",`"${ss.name} — ${ex.name}"`,ri+1,0,+effW(id,s).toFixed(2),"",num(s.reps),Math.round(effW(id,s)*num(s.reps))].join(","));}))));
+  shareOrDownload(new Blob(["﻿"+rows.join("\n")],{type:"text/csv"}),"gym_history.csv");
+}
+async function importGoogle(){
+  showToast("загрузка из Google…");
+  const get=async k=>{try{const r=await fetch(GS+"?action=get&key="+encodeURIComponent(k));const j=await r.json();return j.value?JSON.parse(j.value):null;}catch(e){return undefined;}};
+  const exs=await get("exercises");
+  if(exs===undefined){showModal("Нет связи","Не удалось достучаться до Google-таблицы. Попробуй позже или с другим интернетом.",[{label:"Ок",fn:"closeModal()"}]);return;}
+  const sss=(await get("supersets"))||[];
+  const exList=[...(exs||[])];D.exercises.forEach(e=>{if(!exList.some(x=>x.id===e.id))exList.push(e);});
+  const ssList=[...sss];D.supersets.forEach(s=>{if(!ssList.some(x=>x.id===s.id))ssList.push(s);});
+  const [hs,sh]=await Promise.all([Promise.all(exList.map(e=>get("hist2_"+e.id))),Promise.all(ssList.map(s=>get("ssHist_"+s.id)))]);
+  let added=0;
+  exList.forEach((e,i)=>{const h=hs[i];if(!Array.isArray(h)||!h.length)return;
+    if(!getEx(e.id)){const c=clone(e);delete c.kcalFactor;D.exercises.push(c);}
+    const arr=D.history[e.id]||(D.history[e.id]=[]);h.forEach(en=>{if(en&&en.date&&!arr.some(x=>x.date===en.date)&&(en.sets||[]).some(s=>num(s.reps)>0)){arr.push(en);added++;}});});
+  ssList.forEach((s,i)=>{const h=sh[i];if(!Array.isArray(h)||!h.length)return;
+    if(!getSS(s.id)){const c=clone(s);delete c.kcalFactor;D.supersets.push(c);}
+    const arr=D.ssHistory[s.id]||(D.ssHistory[s.id]=[]);h.forEach(en=>{if(en&&en.date&&!arr.some(x=>x.date===en.date)){arr.push(en);added++;}});});
+  D=migrate(D);sl();renderAll();
+  showModal("Готово",added?`Добавлено записей: ${added}.`:"Всё уже было на телефоне — ничего добавлять не пришлось.",[{label:"Ок",fn:"closeModal()"}]);
+}
+
+// ── редактирование истории ──────────────────────────────────────────────────
+let EDIT_BUF=null;
+function openEditHist(type,id,date){
+  if(type==="ex"){
+    const ex=getEx(id);const h=getHist(id).find(h=>h.date===date);if(!ex||!h)return;
+    EDIT_BUF={type,id,date,sets:clone(h.sets)};
+    const rows=EDIT_BUF.sets.map((s,i)=>{
+      let f1="";
+      if(ex.usesBand)f1=`<select onchange="EDIT_BUF.sets[${i}].band=this.value"><option value="">без</option>${(D.settings.bands||[]).concat(s.band&&!(D.settings.bands||[]).includes(s.band)?[s.band]:[]).map(b=>`<option${s.band===b?" selected":""}>${esc(b)}</option>`).join("")}</select>`;
+      if(ex.bodyweight)f1+=`<input type="number" step="0.5" placeholder="±кг" value="${esc(s.adj??"")}" oninput="EDIT_BUF.sets[${i}].adj=this.value">`;
+      else if(!isRepsOnly(ex))f1=`<input type="number" step="0.5" placeholder="кг" value="${esc(s.weight??"")}" oninput="EDIT_BUF.sets[${i}].weight=this.value">`;
+      return`<div class="mrow"><span style="width:18px;color:var(--text3);font-family:var(--mono)">${i+1}</span>${f1}<input type="number" step="1" placeholder="повт" value="${esc(s.reps??"")}" oninput="EDIT_BUF.sets[${i}].reps=this.value"><label><input type="checkbox"${s.wu?" checked":""} onchange="EDIT_BUF.sets[${i}].wu=this.checked">разм.</label></div>`;
+    }).join("");
+    const note=ex.hasBar?`<div class="note">вес без грифа (гриф на момент записи: ${h.sets[0]?.baseSnap??baseW(id)} кг)</div>`:"";
+    showModal(`${esc(ex.name)} · ${date}`,"",[{label:"Сохранить",cls:"primary",fn:"saveEditHist()"},{label:"Отмена",fn:"EDIT_BUF=null;closeModal()"}]);
+    document.querySelector(".modal-text").innerHTML=note+rows+`<div class="note">пустые повторы = подход удалится</div>`;
+  }else{
+    const ss=getSS(id);const h=getSSHist(id).find(h=>h.date===date);if(!ss||!h)return;
+    EDIT_BUF={type,id,date,rounds:clone(h.rounds)};
+    const rows=EDIT_BUF.rounds.map((r,ri)=>(ss.exIds||[]).map(eid=>{const s=r[eid]||{};const ex=getEx(eid);
+      return`<div class="mrow"><span style="font-size:11px;color:var(--text3);width:110px">${ri+1}. ${esc(ex?.name||eid)}</span><input type="number" step="0.5" placeholder="вес" value="${esc((ex?.bodyweight?s.adj:s.weight)??"")}" oninput="EDIT_BUF.rounds[${ri}]['${eid}'].${ex?.bodyweight?"adj":"weight"}=this.value"><input type="number" step="1" placeholder="повт" value="${esc(s.reps??"")}" oninput="EDIT_BUF.rounds[${ri}]['${eid}'].reps=this.value"></div>`;}).join("")).join("");
+    showModal(`${esc(ss.name)} · ${date}`,"",[{label:"Сохранить",cls:"primary",fn:"saveEditHist()"},{label:"Отмена",fn:"EDIT_BUF=null;closeModal()"}]);
+    document.querySelector(".modal-text").innerHTML=rows;
+  }
+}
+function saveEditHist(){
+  if(!EDIT_BUF)return;const b=EDIT_BUF;
+  if(b.type==="ex"){const h=getHist(b.id).find(h=>h.date===b.date);if(h){h.sets=b.sets.filter(s=>num(s.reps)>0);if(!h.sets.length)D.history[b.id]=getHist(b.id).filter(x=>x!==h);}}
+  else{const h=getSSHist(b.id).find(h=>h.date===b.date);if(h)h.rounds=b.rounds;}
+  EDIT_BUF=null;closeModal();sl();showToast("история обновлена");renderAll();
+}
+function askDelHist(type,id,date){
+  showModal("Удалить запись?",`${date}: удалить только это упражнение или всю тренировку за день?`,[
+    {label:"Только это",cls:"danger",fn:`delHistEntry('${type}','${id}','${date}')`},
+    {label:"Весь день",cls:"danger",fn:`delWholeDay('${date}')`},
+    {label:"Отмена",fn:"closeModal()"}]);
+}
+function askDelDay(date){showModal("Удалить тренировку?",`Все записи за ${date} удалятся.`,[{label:"Удалить",cls:"danger",fn:`delWholeDay('${date}')`},{label:"Отмена",fn:"closeModal()"}]);}
+function delHistEntry(type,id,date){closeModal();if(type==="ex")D.history[id]=getHist(id).filter(h=>h.date!==date);else D.ssHistory[id]=getSSHist(id).filter(h=>h.date!==date);sl();showToast("удалено");renderAll();}
+function delWholeDay(date){closeModal();Object.keys(D.history).forEach(k=>D.history[k]=D.history[k].filter(h=>h.date!==date));Object.keys(D.ssHistory).forEach(k=>D.ssHistory[k]=D.ssHistory[k].filter(h=>h.date!==date));delete D.dayNotes[date];sl();showToast("тренировка удалена");renderAll();}
+
+// ── общее ───────────────────────────────────────────────────────────────────
+function showModal(title,text,btns){
+  const b=btns.map(x=>`<button class="ba${x.cls?" "+x.cls:""}" onclick="${x.fn}">${x.label}</button>`).join("");
+  document.getElementById("modal-root").innerHTML=`<div class="modal-bg"><div class="modal"><div class="modal-title">${title}</div><div class="modal-text">${text}</div><div class="modal-btns">${b}</div></div></div>`;
+}
+function closeModal(){document.getElementById("modal-root").innerHTML="";}
+function showToast(msg){const t=document.getElementById("toast");t.textContent=msg;t.classList.add("show");clearTimeout(t._h);t._h=setTimeout(()=>t.classList.remove("show"),2200);}
 function showPage(name){
   curPage=name;
-  if(name!=="settings"){editPreset=null;editEx=null;editSS=null;showNewExForm=false;showNewSSForm=false;}
+  if(name!=="settings"){editPreset=null;editEx=null;showNewExForm=false;}
   document.querySelectorAll(".page").forEach(p=>p.classList.remove("active"));
-  document.querySelectorAll(".nb").forEach((b,i)=>b.classList.toggle("active",["workout","settings","export"][i]===name));
+  document.querySelectorAll(".nb").forEach((b,i)=>b.classList.toggle("active",["workout","settings","data"][i]===name));
   document.getElementById("pg-"+name).classList.add("active");
   document.getElementById("bbar").style.display=name==="workout"?"flex":"none";
   if(name==="settings")renderSettings();
-  if(name==="export")renderExport();
+  if(name==="data")renderData();
   if(name==="workout")renderWorkout();
+  tickRest();
+  window.scrollTo(0,0);
 }
-function showToast(msg){const t=document.getElementById("toast");t.textContent=msg;t.classList.add("show");setTimeout(()=>t.classList.remove("show"),2200);}
-
-async function loadCloud(){
-  const settings=await gsGet("settings");if(settings)D.settings=settings;
-  const presets=await gsGet("presets");if(presets)D.presets=presets;
-  const exercises=await gsGet("exercises");if(exercises)D.exercises=exercises;
-  const supersets=await gsGet("supersets");if(supersets)D.supersets=supersets;
-  for(const ex of D.exercises){const h=await gsGet("hist2_"+ex.id);if(h)D.history[ex.id]=h;}
-  for(const ss of D.supersets){const h=await gsGet("ssHist_"+ss.id);if(h)D.ssHistory[ss.id]=h;}
-  for(const pr of D.presets){const ww=await gsGet("workout_"+pr.id);if(ww)D.workouts[pr.id]=ww;}
-  if(!D.ssHistory)D.ssHistory={};
-  curPreset=D.presets[0]?.id||"mon";
-  sl();renderWorkout();renderSettings();renderExport();
-}
-
-renderWorkout();renderSettings();renderExport();
-ssync("busy","загрузка...");
-loadCloud();
+function renderAll(){if(curPage==="settings")renderSettings();else if(curPage==="data")renderData();renderWorkout();}
+async function askPersist(){try{if(navigator.storage&&navigator.storage.persist){STORAGE_PERSIST=(await navigator.storage.persisted())||(await navigator.storage.persist());}}catch(e){}}
+document.addEventListener("touchend",unlockAudio,{once:true});
+askPersist();
+renderWorkout();
 </script>
 </body>
 </html>
